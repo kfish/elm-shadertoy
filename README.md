@@ -14,7 +14,29 @@ following image to try out the **[live demo][demo]**:
 
 [demo]: http://kfish.github.io/elm-shadertoy/
 
-## Coding with Shadertoy
+## Importing Shadertoy fragment shaders
+
+Shaders in elm are included verbatim in a [glsl| ... ] block. Use the following types and
+preamble to define a fragment shader named `foo`:
+
+```glsl
+foo : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }
+foo = [glsl|
+
+precision mediump float;
+uniform vec3 iResolution;
+uniform float iGlobalTime;
+
+varying vec2 elm_FragCoord;
+
+<<<SHADER CODE GOES HERE>>>
+
+|]
+```
+
+Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`.
+
+### Coding with Shadertoy
 
 Shadertoy defines various inputs to fragment shaders. elm-shadertoy provides
 compatibility for the following:
@@ -30,9 +52,6 @@ elm-shadertoy additionally defines 'elm_FragCoord'.
 ```glsl
 varying vec2      elm_FragCoord;         // texture-space fragment coordinate
 ```
-
-Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`.
-
 
 The following Shadertoy inputs are not yet supported by elm-shadertoy:
 
