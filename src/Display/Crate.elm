@@ -7,11 +7,13 @@ import Graphics.WebGL (..)
 
 import Model
 
-crate : Texture -> (Int,Int) -> Mat4 -> Entity
-crate texture (w,h) view =
+crate : Texture -> (Int,Int) -> Time -> Mat4 -> Entity
+crate texture (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds t
     in
-        entity vertexShader fragmentShader mesh { crate=texture, iResolution=resolution, view=view }
+        entity vertexShader fragmentShader mesh
+            { iResolution=resolution, iGlobalTime=s, view=view }
 
 -- The mesh for a crate
 type Vertex = { position:Vec3, coord:Vec3 }
@@ -51,16 +53,15 @@ void main () {
 
 |]
 
-fragmentShader : Shader {} { u | crate:Texture, iResolution:Vec3 } { vcoord:Vec2 }
+fragmentShader : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { vcoord:Vec2 }
 fragmentShader = [glsl|
 
 precision mediump float;
 
+//uniform sampler2D crate;
 uniform vec3 iResolution;
-//uniform float iGlobalTime
-float iGlobalTime = 7.35;
+uniform float iGlobalTime;
 
-uniform sampler2D crate;
 varying vec2 vcoord;
 
 const float dMax = 28.0;
