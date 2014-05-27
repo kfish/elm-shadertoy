@@ -16,6 +16,9 @@ following image to try out the **[live demo][demo]**:
 
 ## Build Locally
 
+After installing [the Elm Platform](https://github.com/elm-lang/elm-platform),
+run the following sequence of commands:
+
 ```bash
 git clone https://github.com/evancz/first-person-elm.git
 cd first-person-elm
