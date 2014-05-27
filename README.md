@@ -14,6 +14,36 @@ following image to try out the **[live demo][demo]**:
 
 [demo]: http://kfish.github.io/elm-shadertoy/
 
+## Coding with Shadertoy
+
+Shadertoy defines various inputs to fragment shaders. elm-shadertoy provides
+compatibility for the following:
+
+
+```glsl
+uniform vec3      iResolution;           // viewport resolution (in pixels)
+uniform float     iGlobalTime;           // shader playback time in seconds
+```
+
+elm-shadertoy additionally defines 'elm_FragCoord'.
+
+```glsl
+varying vec2      elm_FragCoord;         // texture-space fragment coordinate
+```
+
+Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`.
+
+
+The following Shadertoy inputs are not yet supported by elm-shadertoy:
+
+```
+uniform float     iChannelTime[4];       // channel playback time (in seconds)
+uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)
+uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click
+uniform samplerXX iChannel0..3;          // input channel. XX=2D/Cube
+uniform vec4      iDate;                 // (year, month, day, time in seconds)
+```
+
 ## Build Locally
 
 After installing [the Elm Platform](https://github.com/elm-lang/elm-platform),
