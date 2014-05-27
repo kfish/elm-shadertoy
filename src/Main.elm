@@ -1,6 +1,7 @@
 module Main where
 
 import Graphics.WebGL (..)
+import Math.Matrix4 (..)
 import Keyboard
 import Mouse
 import Window
@@ -24,9 +25,12 @@ person : Signal Model.Person
 person = foldp Update.step Model.defaultPerson inputs
 
 main : Signal Element
-main =
+main = world Display.crateEntities
+
+world : ((Int,Int) -> Time -> Mat4 -> [Entity]) -> Signal Element
+world entities =
   let t = foldp (+) 0 (fps 15)
-  in  lift4 Display.scene Window.dimensions t isLocked person
+  in  lift5 Display.scene (constant entities) Window.dimensions t isLocked person
 
 -- Ability to request and exit. Click screen to request lock. Press escape to
 -- give up the lock. This code can all be removed if you want to do this
