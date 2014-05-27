@@ -5,13 +5,14 @@ import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
-import Shaders.FogMountains (fogMountains)
+-- import Shaders.FogMountains (fogMountains)
+import Shaders.SimplePlasma (simplePlasma)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
 
 crate : (Int,Int) -> Time -> Mat4 -> Entity
-crate = cube worldVertex fogMountains
+crate = cube worldVertex simplePlasma
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
