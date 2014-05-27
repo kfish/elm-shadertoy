@@ -8,7 +8,11 @@ import Graphics.WebGL (..)
 import Model
 
 crate : (Int,Int) -> Time -> Mat4 -> Entity
-crate (w,h) t view =
+crate = cube worldVertex fogMountains
+
+-- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
+--    -> (Int,Int) -> Time -> Mat4 -> Entity
+cube vertexShader fragmentShader (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds t
     in
@@ -39,22 +43,23 @@ face =
       [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
 
 -- Shaders
-vertexShader : Shader Vertex { u | view:Mat4 } { vcoord:Vec2 }
-vertexShader = [glsl|
+worldVertex : Shader Vertex { u | view:Mat4 } { elm_FragCoord:Vec2 }
+worldVertex = [glsl|
 
 attribute vec3 position;
 attribute vec3 coord;
 uniform mat4 view;
-varying vec2 vcoord;
+varying vec2 elm_FragCoord;
 void main () {
   gl_Position = view * vec4(position, 1.0);
-  vcoord = coord.xy;
+  elm_FragCoord = coord.xy;
 }
 
 |]
 
-fragmentShader : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { vcoord:Vec2 }
-fragmentShader = [glsl|
+-- https://www.shadertoy.com/view/XdsGD7
+fogMountains : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }
+fogMountains = [glsl|
 
 precision mediump float;
 
@@ -62,7 +67,7 @@ precision mediump float;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 
-varying vec2 vcoord;
+varying vec2 elm_FragCoord;
 
 const float dMax = 28.0;
 
@@ -238,7 +243,7 @@ vec3 render(vec3 ro, vec3 rd)
 
 void main () {
   //vec2 pos = 2.0 * ( gl_FragCoord.xy / iResolution.xy ) - 1.0; // bound screen coords to [0, 1]
-  vec2 pos = 2.0 * ( vcoord.xy ) - 1.0; // bound screen coords to [0, 1]
+  vec2 pos = 2.0 * ( elm_FragCoord.xy ) - 1.0; // bound screen coords to [0, 1]
   pos.x *= iResolution.x / iResolution.y;
 
   // camera
