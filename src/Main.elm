@@ -25,9 +25,8 @@ person = foldp Update.step Model.defaultPerson inputs
 
 main : Signal Element
 main =
-  let texture = loadTexture "resources/woodCrate.jpg"
-      t = foldp (+) 0 (fps 15)
-  in  lift5 Display.scene Window.dimensions t isLocked texture person
+  let t = foldp (+) 0 (fps 15)
+  in  lift4 Display.scene Window.dimensions t isLocked person
 
 -- Ability to request and exit. Click screen to request lock. Press escape to
 -- give up the lock. This code can all be removed if you want to do this

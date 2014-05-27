@@ -7,8 +7,8 @@ import Graphics.WebGL (..)
 
 import Model
 
-crate : Texture -> (Int,Int) -> Time -> Mat4 -> Entity
-crate texture (w,h) t view =
+crate : (Int,Int) -> Time -> Mat4 -> Entity
+crate (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds t
     in
