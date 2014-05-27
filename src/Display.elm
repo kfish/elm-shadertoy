@@ -18,7 +18,7 @@ view (w,h) person =
 scene : (Int,Int) -> Bool -> Response Texture -> Model.Person -> Element
 scene (w,h) isLocked texture person =
     layers [ color (rgb 135 206 235) (spacer w h)
-           , webgl (w,h) (entities texture (view (w,h) person))
+           , webgl (w,h) (entities texture (w,h) (view (w,h) person))
            , container w 140 (midLeftAt (absolute 40) (relative 0.5)) . plainText <|
                "This uses stuff that is only available in Chrome and Firefox!\n\nWASD keys to move, space bar to jump.\n\n" ++
                if isLocked
@@ -26,13 +26,13 @@ scene (w,h) isLocked texture person =
                   else "Click to go full screen and move your head with the mouse."
            ]
 
-entities : Response Texture -> Mat4 -> [Entity]
-entities response view =
+entities : Response Texture -> (Int,Int) -> Mat4 -> [Entity]
+entities response resolution view =
     let crates = case response of
                    Success texture ->
-                       [ crate texture view
-                       , crate texture (translate3  10 0  10 view)
-                       , crate texture (translate3 -10 0 -10 view)
+                       [ crate texture resolution view
+                       , crate texture resolution (translate3  10 0  10 view)
+                       , crate texture resolution (translate3 -10 0 -10 view)
                        ]
                    _ -> []
     in  
