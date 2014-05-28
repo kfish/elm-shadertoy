@@ -36,7 +36,7 @@ varying vec2 elm_FragCoord;
 
 Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`.
 
-### Coding with Shadertoy
+### What is supported
 
 Shadertoy defines various inputs to fragment shaders. elm-shadertoy provides
 compatibility for the following:
@@ -53,6 +53,8 @@ elm-shadertoy additionally defines 'elm_FragCoord'.
 varying vec2      elm_FragCoord;         // texture-space fragment coordinate
 ```
 
+## What is NOT (YET) supported
+
 The following Shadertoy inputs are not yet supported by elm-shadertoy:
 
 ```
@@ -62,6 +64,12 @@ uniform vec4      iMouse;                // mouse pixel coords. xy: current (if 
 uniform samplerXX iChannel0..3;          // input channel. XX=2D/Cube
 uniform vec4      iDate;                 // (year, month, day, time in seconds)
 ```
+
+These are tracked in issues #1, #2, #3.
+
+Additionally, noteed/language-glsl#4 prevents use of the GLSL preprocessor
+(#define, #ifdef etc.), so you need to manually preprocess (replace constants
+by variables, use comments to select behavior instead of #ifdef).
 
 ## Build Locally
 
