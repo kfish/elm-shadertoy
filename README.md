@@ -97,8 +97,8 @@ After installing [the Elm Platform](https://github.com/elm-lang/elm-platform),
 run the following sequence of commands:
 
 ```bash
-git clone https://github.com/evancz/first-person-elm.git
-cd first-person-elm
+git clone https://github.com/kfish/elm-shadertoy.git
+cd elm-shadertoy
 elm-get install
 elm --make --only-js --src-dir=src Main.elm
 elm-server
