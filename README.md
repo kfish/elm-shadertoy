@@ -1,8 +1,23 @@
 # Shadertoy for Elm
 
-[Shadertoy](http://shadertoy.com/) is ... elite.
+[Shadertoy](http://shadertoy.com/) is a community of shader developers, sharing code
+with online demos.
 
-You write your shaders in GLSL, and game logic and physics in Elm.
+[Elm](http://elm-lang.org/) is a very concise language with Web GL support.
+
+THe purpose of this project is to make it easy to incorporate shaders from Shadertoy
+in Elm projects.
+
+The significance is that the work of these two outstanding developer communities can
+be multiplied: Elm developers can learn advanced shader techniques, and shader
+developers can easily build larger interactive systems.
+
+## How it works
+
+You can define vertex meshes, game logic and physics very clearly in Elm, then
+write your shaders directly in GLSL, The Elm compiler translates the Elm code to
+Javascript and checks the GLSL for parse errors. On the client web browser, the
+GLSL is interpreted by the system OpenGL system, such as the GPU driver.
 
 The Elm code here is forked from 
 Evan Czaplicki's [first-person-elm](https://github.com/evancz/first-person-elm) demo.
