@@ -8,7 +8,7 @@ import Graphics.WebGL (..)
 
 import Model
 import Display.World (ground)
-import Display.Crate (fireCube, plasmaCube, voronoiCube)
+import Display.Crate (fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 
 import Shaders.WorldVertex (Vertex, worldVertex)
 import Shaders.Fire (fire)
@@ -39,6 +39,7 @@ crateEntities resolution t view =
             [ plasmaCube  resolution t view
             , voronoiCube resolution t (translate3  10 0  10 view)
             , fireCube    resolution t (translate3 -10 0 -10 view)
+            , fogMountainsCube    resolution t (translate3 10 0 -10 view)
             ]
     in  
         ground view :: cubes
