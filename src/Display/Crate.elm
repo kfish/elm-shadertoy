@@ -5,15 +5,16 @@ import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
+import Shaders.Fire (fire)
 -- import Shaders.FogMountains (fogMountains)
 -- import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
+-- import Shaders.VoronoiDistances (voronoiDistances)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
 
 crate : (Int,Int) -> Time -> Mat4 -> Entity
-crate = cube worldVertex voronoiDistances
+crate = cube worldVertex fire
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
