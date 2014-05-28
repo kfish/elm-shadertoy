@@ -5,7 +5,7 @@ with online demos.
 
 [Elm](http://elm-lang.org/) is a very concise language with Web GL support.
 
-THe purpose of this project is to make it easy to incorporate shaders from Shadertoy
+The purpose of this project is to make it easy to incorporate shaders from Shadertoy
 in Elm projects.
 
 The significance is that the work of these two outstanding developer communities can
@@ -15,7 +15,7 @@ developers can easily build larger interactive systems.
 ## How it works
 
 You can define vertex meshes, game logic and physics very clearly in Elm, then
-write your shaders directly in GLSL, The Elm compiler translates the Elm code to
+write your shaders directly in GLSL. The Elm compiler translates the Elm code to
 Javascript and checks the GLSL for parse errors. On the client web browser, the
 GLSL is interpreted by the system OpenGL system, such as the GPU driver.
 
@@ -28,7 +28,7 @@ following image to try out the **[live demo][demo]**:
 
 ## Importing Shadertoy fragment shaders
 
-Shaders in elm are included verbatim in a [glsl| ... ] block.
+Shaders in Elm are included verbatim in a `[glsl| ... ]` block.
 
 Use the following types and preamble to define a fragment shader named `foo`:
 
@@ -111,10 +111,11 @@ And then open [http://localhost:8000](http://localhost:8000) to see it in action
 The Elm code here is forked from 
 Evan Czaplicki's [first-person-elm](https://github.com/evancz/first-person-elm) demo.
 
-This demo uses the following shaders:
+Although the broader purpose of this project is to make it easy to use any shader from Shadertoy,
+this demo in particular includes the following shaders:
 
-  * [Fog Mountains](src/Shaders/FogMountains.elm) by ESpitz
-  * [Simple Plasma](src/Shaders/SimplePlasma.elm) by Kastor
-  * [Voronoi distances](src/Shaders/VoronoiDistances.elm) by iq
-  * [Fire](src/shaders/Fire.elm) by 301
+  * [Fire](https://www.shadertoy.com/view/Xsl3zN) by 301
+  * [Fog Mountains](https://www.shadertoy.com/view/XdsGD7) by ESpitz
+  * [Simple Plasma](https://www.shadertoy.com/view/ldBGRR) by Kastor
+  * [Voronoi distances](https://www.shadertoy.com/view/ldl3W8) by iq
 
