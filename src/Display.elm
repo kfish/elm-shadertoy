@@ -8,7 +8,12 @@ import Graphics.WebGL (..)
 
 import Model
 import Display.World (ground)
-import Display.Crate (crate)
+import Display.Crate (fireCube, plasmaCube, voronoiCube)
+
+import Shaders.WorldVertex (Vertex, worldVertex)
+import Shaders.Fire (fire)
+import Shaders.SimplePlasma (simplePlasma)
+import Shaders.VoronoiDistances (voronoiDistances)
 
 view : (Int,Int) -> Model.Person -> Mat4
 view (w,h) person =
@@ -30,10 +35,10 @@ scene entities (w,h) t isLocked person =
 
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
 crateEntities resolution t view =
-    let crates = 
-            [ crate resolution t view
-            , crate resolution t (translate3  10 0  10 view)
-            , crate resolution t (translate3 -10 0 -10 view)
+    let cubes = 
+            [ plasmaCube  resolution t view
+            , voronoiCube resolution t (translate3  10 0  10 view)
+            , fireCube    resolution t (translate3 -10 0 -10 view)
             ]
     in  
-        ground view :: crates
+        ground view :: cubes

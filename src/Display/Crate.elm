@@ -1,4 +1,4 @@
-module Display.Crate (crate) where
+module Display.Crate (fireCube, plasmaCube, voronoiCube, cube) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
@@ -7,14 +7,20 @@ import Graphics.WebGL (..)
 
 import Shaders.Fire (fire)
 -- import Shaders.FogMountains (fogMountains)
--- import Shaders.SimplePlasma (simplePlasma)
--- import Shaders.VoronoiDistances (voronoiDistances)
+import Shaders.SimplePlasma (simplePlasma)
+import Shaders.VoronoiDistances (voronoiDistances)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
 
-crate : (Int,Int) -> Time -> Mat4 -> Entity
-crate = cube worldVertex fire
+fireCube : (Int,Int) -> Time -> Mat4 -> Entity
+fireCube = cube worldVertex fire
+
+plasmaCube : (Int,Int) -> Time -> Mat4 -> Entity
+plasmaCube = cube worldVertex simplePlasma
+
+voronoiCube : (Int,Int) -> Time -> Mat4 -> Entity
+voronoiCube = cube worldVertex voronoiDistances
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
