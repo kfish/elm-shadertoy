@@ -16,8 +16,9 @@ following image to try out the **[live demo][demo]**:
 
 ## Importing Shadertoy fragment shaders
 
-Shaders in elm are included verbatim in a [glsl| ... ] block. Use the following types and
-preamble to define a fragment shader named `foo`:
+Shaders in elm are included verbatim in a [glsl| ... ] block.
+
+Use the following types and preamble to define a fragment shader named `foo`:
 
 ```glsl
 foo : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }
@@ -34,9 +35,7 @@ varying vec2 elm_FragCoord;
 |]
 ```
 
-Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`.
-
-### What is supported
+### Inputs
 
 Shadertoy defines various inputs to fragment shaders. elm-shadertoy provides
 compatibility for the following:
@@ -53,7 +52,12 @@ elm-shadertoy additionally defines 'elm_FragCoord'.
 varying vec2      elm_FragCoord;         // texture-space fragment coordinate
 ```
 
-## What is NOT (YET) supported
+Replace all occurrences of `gl_FragCoord.xy / iResolution.xy` with `elm_FragCoord.xy`. This
+ensures that pixels are calculated according to their location on 3D surface, rather than
+their location on your 2D screen.
+
+
+### What is NOT (YET) supported
 
 The following Shadertoy inputs are not yet supported by elm-shadertoy:
 
@@ -65,11 +69,15 @@ uniform samplerXX iChannel0..3;          // input channel. XX=2D/Cube
 uniform vec4      iDate;                 // (year, month, day, time in seconds)
 ```
 
-These are tracked in issues #1, #2, #3.
+These are tracked in issues in this project (elm-shadertoy):
+  1. [Support Shadertoy channel inputs](https://github.com/kfish/elm-shadertoy/issues/1)
+  2. [Support Shadertoy mouse input](https://github.com/kfish/elm-shadertoy/issues/2)
+  3. [Support Shadertoy date input](https://github.com/kfish/elm-shadertoy/issues/3)
 
-Additionally, noteed/language-glsl#4 prevents use of the GLSL preprocessor
-(#define, #ifdef etc.), so you need to manually preprocess (replace constants
-by variables, use comments to select behavior instead of #ifdef).
+Additionally, there is an issue in the Haskell language-glsl package regarding the
+[GLSL preprocessor: support for #define, #ifdef etc.](https://github.com/noteed/language-glsl/issues/4),
+so you need to manually preprocess (replace constants by variables,
+use comments to select behavior instead of #ifdef).
 
 ## Build Locally
 
