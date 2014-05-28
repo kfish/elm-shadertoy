@@ -19,9 +19,6 @@ write your shaders directly in GLSL, The Elm compiler translates the Elm code to
 Javascript and checks the GLSL for parse errors. On the client web browser, the
 GLSL is interpreted by the system OpenGL system, such as the GPU driver.
 
-The Elm code here is forked from 
-Evan Czaplicki's [first-person-elm](https://github.com/evancz/first-person-elm) demo.
-
 Make sure you have the latest version of Chrome or Firefox and then click the
 following image to try out the **[live demo][demo]**:
 
@@ -108,3 +105,16 @@ elm-server
 ```
 
 And then open [http://localhost:8000](http://localhost:8000) to see it in action!
+
+## Credits
+
+The Elm code here is forked from 
+Evan Czaplicki's [first-person-elm](https://github.com/evancz/first-person-elm) demo.
+
+This demo uses the following shaders:
+
+  * [Fog Mountains](src/Shaders/FogMountains.elm) by ESpitz
+  * [Simple Plasma](src/Shaders/SimplePlasma.elm) by Kastor
+  * [Voronoi distances](src/Shaders/VoronoiDistances.elm) by iq
+  * [Fire](src/shaders/Fire.elm) by 301
+
