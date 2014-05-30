@@ -27,7 +27,7 @@ scene entities (w,h) t isLocked person =
            , asText (inSeconds t)
            , webgl (w,h) (entities (w,h) t (view (w,h) person))
            , container w 140 (midLeftAt (absolute 40) (relative 0.5)) . plainText <|
-               "This uses stuff that is only available in Chrome and Firefox!\n\nWASD keys to move, space bar to jump.\n\n" ++
+               "This uses stuff that is only available in Chrome and Firefox!\n\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++
                if isLocked
                   then "Press <escape> to exit full screen."
                   else "Click to go full screen and move your head with the mouse."

@@ -18,7 +18,8 @@ port isLocked : Signal Bool
 inputs : Signal Model.Inputs
 inputs =
   let dt = lift (\t -> t/500) (fps 60)
-  in  merge (sampleOn dt <| lift3 Model.TimeDelta Keyboard.space Keyboard.wasd dt)
+      dirKeys = merge Keyboard.arrows Keyboard.wasd
+  in  merge (sampleOn dt <| lift3 Model.TimeDelta Keyboard.space dirKeys dt)
             (Model.Mouse <~ movement)
 
 person : Signal Model.Person
