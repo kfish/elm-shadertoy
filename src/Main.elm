@@ -29,7 +29,7 @@ main = world Display.crateEntities
 
 world : ((Int,Int) -> Time -> Mat4 -> [Entity]) -> Signal Element
 world entities =
-  let t = foldp (+) 0 (fps 15)
+  let t = foldp (+) 0 (fps 60)
   in  lift5 Display.scene (constant entities) Window.dimensions t isLocked person
 
 -- Ability to request and exit. Click screen to request lock. Press escape to
