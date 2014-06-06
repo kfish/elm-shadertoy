@@ -24,13 +24,9 @@ scene : ((Int,Int) -> Time -> Mat4 -> [Entity])
     -> (Int,Int) -> Time -> Bool -> Model.Person -> Element
 scene entities (w,h) t isLocked person =
     layers [ color (rgb 135 206 235) (spacer w h)
-           , asText (inSeconds t)
            , webgl (w,h) (entities (w,h) t (view (w,h) person))
-           , container w 140 (midLeftAt (absolute 40) (relative 0.5)) . plainText <|
-               "This uses stuff that is only available in Chrome and Firefox!\n\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++
-               if isLocked
-                  then "Press <escape> to exit full screen."
-                  else "Click to go full screen and move your head with the mouse."
+           , container w 140 (midLeftAt (absolute 40) (relative 0.5))
+                 (if isLocked then exitMsg else enterMsg)
            ]
 
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
@@ -43,3 +39,15 @@ crateEntities resolution t view =
             ]
     in  
         ground view :: cubes
+
+enterMsg : Element
+enterMsg = message "Click to go full screen and move your head with the mouse."
+
+exitMsg : Element
+exitMsg = message "Press <escape> to exit full screen."
+
+message : String -> Element
+message msg =
+    plainText <|
+    "This uses stuff that is only available in Chrome and Firefox!\n" ++
+    "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
