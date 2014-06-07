@@ -36,13 +36,12 @@ zip3 xs ys zs =
     _ -> []
 
 rotY n = makeRotate (2*pi/n) (vec3 0 1 0)
-rotZ n = makeRotate (2*pi/n) (vec3 0 0 1)
+rotZ n = makeRotate (-2*pi/n) (vec3 0 0 1)
 
 rotBoth : Float -> Vertex -> Vertex
 rotBoth n x = { position = transform (rotY n) x.position, coord = transform (rotZ n) x.coord }
 
 seven : Vertex -> [Vertex]
--- seven = unfold 7 (both (transform (rot 8)))
 seven = unfold 7 (rotBoth 8)
 
 eights x = let x7 = seven x in (x::x7, x7++[x])
@@ -53,28 +52,25 @@ diamondMesh =
   let
       -- Vertices
       table0 = { position = vec3 0 0 0, coord = vec3 0 0 0 }
-      tableV = { position = vec3 0.57 0 0, coord = vec3 0.57 0 0 }
+      tableV = { position = vec3 0.57 0 0, coord = vec3 0 0.57 0 }
       (tableVS0, tableVS1) = eights tableV
 
       facetY = -0.2
-      -- facet0 = both (transform (rot -16)) { position = vec3 0.8 facetY 0, coord = vec3 0.8 0 0.2 }
-      facet0 = rotBoth -16 { position = vec3 0.8 facetY 0, coord = vec3 0.8 0.2 0 }
+      facet0 = rotBoth -16 { position = vec3 0.8 facetY 0, coord = vec3 0.2 0.8 0 }
       (facetVS0, facetVS1) = eights facet0
 
       girdleY = -0.5
-      girdleT0 = { position = vec3 1 girdleY 0, coord = vec3 0.9 0.3 0 }
+      girdleT0 = { position = vec3 1 girdleY 0, coord = vec3 0.3 0.9 0 }
       (girdleTS0, girdleTS1) = eights girdleT0
-      -- girdleF0 = both (transform (rot 16)) girdleT0
       girdleF0 = rotBoth 16 girdleT0
       girdleFS = girdleF0 :: seven girdleF0
 
       pavilionY = -1.3
-      pavilionT0 = { position = vec3 0.2 pavilionY 0, coord = vec3 1.3 0.4 0 }
-      -- pavilionF0 = both (transform (rot -16)) pavilionT0
+      pavilionT0 = { position = vec3 0.2 pavilionY 0, coord = vec3 0.4 1.3 0 }
       pavilionF0 = rotBoth -16 pavilionT0
       (pavilionVS0, pavilionVS1) = eights pavilionF0
 
-      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0 0.41 0 }
+      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0.41 0 0 }
 
       -- Triangles
       mkTable v1 v2 = (table0, v1, v2)
