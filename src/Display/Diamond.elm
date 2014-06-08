@@ -1,10 +1,11 @@
-module Display.Diamond (fogMountainsDiamond, diamond) where
+module Display.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
+import Shaders.Clouds (clouds)
 import Shaders.Fire (fire)
 import Shaders.FogMountains (fogMountains)
 --import Shaders.SimplePlasma (simplePlasma)
@@ -12,6 +13,9 @@ import Shaders.FogMountains (fogMountains)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
+
+cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+cloudsDiamond = diamond worldVertex clouds
 
 fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
 fogMountainsDiamond = diamond worldVertex fogMountains
