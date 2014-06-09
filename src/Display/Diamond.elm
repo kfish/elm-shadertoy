@@ -76,7 +76,7 @@ diamondMesh =
       pavilionF0 = rotBoth -16 pavilionT0
       (pavilionVS0, pavilionVS1) = eights pavilionF0
 
-      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0.41 (yMul*(0.0-yOffset)) 0 }
+      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0.41 (yMul*(0.87-yOffset)) 0 }
 
       -- Triangles
       mkTable v1 v2 = (table0, v1, v2)
