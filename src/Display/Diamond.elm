@@ -54,27 +54,29 @@ eights x = let x7 = seven x in (x::x7, x7++[x])
 diamondMesh : [Triangle Vertex]
 diamondMesh =
   let
+      yOffset = 1.21
+      yMul = -4.2
       -- Vertices
-      table0 = { position = vec3 0 0 0, coord = vec3 0 0 0 }
-      tableV = { position = vec3 0.57 0 0, coord = vec3 0 0.57 0 }
+      table0 = { position = vec3 0 0 0, coord = vec3 0 (yMul*(0.0-yOffset)) 0 }
+      tableV = { position = vec3 0.57 0 0, coord = vec3 0 (yMul*(0.57-yOffset)) 0 }
       (tableVS0, tableVS1) = eights tableV
 
       facetY = -0.2
-      facet0 = rotBoth -16 { position = vec3 0.8 facetY 0, coord = vec3 0.2 0.8 0 }
+      facet0 = rotBoth -16 { position = vec3 0.8 facetY 0, coord = vec3 0.2 (yMul*(0.8-yOffset)) 0 }
       (facetVS0, facetVS1) = eights facet0
 
       girdleY = -0.5
-      girdleT0 = { position = vec3 1 girdleY 0, coord = vec3 0.3 0.9 0 }
+      girdleT0 = { position = vec3 1 girdleY 0, coord = vec3 0.3 (yMul*(0.9-yOffset)) 0 }
       (girdleTS0, girdleTS1) = eights girdleT0
       girdleF0 = rotBoth 16 girdleT0
       girdleFS = girdleF0 :: seven girdleF0
 
       pavilionY = -1.3
-      pavilionT0 = { position = vec3 0.2 pavilionY 0, coord = vec3 0.4 1.3 0 }
+      pavilionT0 = { position = vec3 0.2 pavilionY 0, coord = vec3 0.4 (yMul*(1.3-yOffset)) 0 }
       pavilionF0 = rotBoth -16 pavilionT0
       (pavilionVS0, pavilionVS1) = eights pavilionF0
 
-      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0.41 0 0 }
+      cutlet = { position = vec3 0 -1.6 0, coord = vec3 0.41 (yMul*(0.0-yOffset)) 0 }
 
       -- Triangles
       mkTable v1 v2 = (table0, v1, v2)

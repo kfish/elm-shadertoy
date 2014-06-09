@@ -102,7 +102,7 @@ void main(void)
     
     // camera
     //vec3 ro = 4.0*normalize(vec3(cos(2.75-3.0*mo.x), 0.7+(mo.y+1.0), sin(2.75-3.0*mo.x)));
-    vec3 ro = 4.0*normalize(vec3(cos(2.75-3.0), 0.7, sin(2.75-3.0)));
+    vec3 ro = 4.0*normalize(vec3(cos(2.75-1.3), 0.7, sin(2.75-2.0)));
     vec3 ta = vec3(0.0, 1.0, 0.0);
     vec3 ww = normalize( ta - ro);
     vec3 uu = normalize(cross( vec3(0.0,1.0,0.0), ww ));
@@ -117,7 +117,7 @@ void main(void)
     col *= 0.95;
     col = mix( col, res.xyz, res.w );
     col += 0.1*vec3(1.0,0.4,0.2)*pow( sun, 3.0 );
-        
+
     gl_FragColor = vec4( col, 1.0 );
 }
 
