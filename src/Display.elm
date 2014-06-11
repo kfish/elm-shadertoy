@@ -34,8 +34,8 @@ scene entities (w,h) t isLocked person =
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
 crateEntities resolution t view =
     let cubes = 
-            [ fogMountainsDiamond  resolution t (translate3 0 1.5 0 view)
-            , voronoiDistancesVolSurface  resolution t (translate3 5 0.5 1 view)
+            [ cloudsDiamond  resolution t (translate3 13 1.5 15 view)
+            , voronoiDistancesVolSurface  resolution t (translate3 -6 0.5 -10 view)
             -- , voronoiCube resolution t (translate3  10 0  10 view)
             , fireCube    resolution t (translate3 -10 0 -10 view)
             , fogMountainsCube resolution t (translate3 10 1.5 -10 view)
