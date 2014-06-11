@@ -22,8 +22,9 @@ flatten v =
 
 turn : (Int,Int) -> Model.Person -> Model.Person
 turn (dx,dy) person =
-    let h' = person.horizontalAngle + toFloat dx / 500
-        v' = person.verticalAngle   - toFloat dy / 500
+    let yo x = toFloat (clamp -10 10 x) / 500
+        h' = person.horizontalAngle + yo dx
+        v' = person.verticalAngle   - yo dy
     in
         { person | horizontalAngle <- h'
                  , verticalAngle <- clamp (degrees -45) (degrees 45) v'
