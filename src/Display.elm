@@ -1,4 +1,4 @@
-module Display (scene, crateEntities) where
+module Display (scene, ourEntities) where
 
 import Http (..)
 import Math.Vector2 (Vec2)
@@ -10,6 +10,7 @@ import Model
 import Display.World (ground)
 import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
+import Display.Obj (teapotSig)
 
 import Shaders.WorldVertex (Vertex, worldVertex)
 import Shaders.Fire (fire)
@@ -29,6 +30,13 @@ scene entities (w,h) t isLocked person =
            , container w 140 (midLeftAt (absolute 40) (relative 0.5))
                  (if isLocked then exitMsg else enterMsg)
            ]
+
+ourEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
+-- ourEntities = constant crateEntities
+ourEntities = teapotEntities
+
+teapotEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
+teapotEntities = teapotSig
 
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
 crateEntities resolution t view =

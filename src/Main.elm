@@ -26,12 +26,12 @@ person : Signal Model.Person
 person = foldp Update.step Model.defaultPerson inputs
 
 main : Signal Element
-main = world Display.crateEntities
+main = world Display.ourEntities
 
-world : ((Int,Int) -> Time -> Mat4 -> [Entity]) -> Signal Element
+world : Signal ((Int,Int) -> Time -> Mat4 -> [Entity]) -> Signal Element
 world entities =
   let t = foldp (+) 0 (fps 60)
-  in  lift5 Display.scene (constant entities) Window.dimensions t isLocked person
+  in  lift5 Display.scene entities Window.dimensions t isLocked person
 
 -- Ability to request and exit. Click screen to request lock. Press escape to
 -- give up the lock. This code can all be removed if you want to do this
