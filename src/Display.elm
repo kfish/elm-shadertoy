@@ -31,12 +31,50 @@ scene entities (w,h) t isLocked person =
                  (if isLocked then exitMsg else enterMsg)
            ]
 
+garp : [(Int,Int) -> Time -> Mat4 -> Entity]
+     -> ((Int,Int) -> Time -> Mat4 -> [Entity])
+garp fs00 =
+    let
+        glub (w,h) t view fs0 = case fs0 of
+            []      -> []
+            (f::fs) -> f (w,h) t view :: glub (w,h) t view fs
+    in
+        \(w,h) t view -> glub (w,h) t view fs00
+
+-- mlup : [(a -> b)] -> (a -> [b])
+mlup = \x -> map (\f -> f x)
+
+morg : [Signal (a -> b)] -> Signal [(a -> b)]
+morg = combine
+
+-- puk : Signal [(a -> b)] -> Signal (a -> [b])
+puk = lift mlup
+
+-- bloop : [Signal (a -> b)] -> Signal (a -> [b])
+bloop ss = puk (morg ss)
+
+
+mlup3 : [(Int,Int) -> Time -> Mat4 -> Entity]
+    -> ((Int,Int) -> Time -> Mat4 -> [Entity])
+mlup3 fs = \wh t view -> map (\f -> f wh t view) fs
+
+puk3 = lift mlup3
+
+
+-- IMPLEMENT VOOM!
+voom : [Signal ((Int,Int) -> Time -> Mat4 -> Entity)]
+     -> Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
+voom ss = puk3 (combine ss)
+-- voom = foldr (lift2 garp) (constant [])
+
+-- DOWN TO HERE
+
 ourEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
 -- ourEntities = constant crateEntities
-ourEntities = teapotEntities
+ourEntities = voom [teapotSig]
 
-teapotEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
-teapotEntities = teapotSig
+-- teapotEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
+-- teapotEntities = teapotSig
 
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
 crateEntities resolution t view =

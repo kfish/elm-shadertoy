@@ -120,8 +120,8 @@ inFileSig = let
 meshSig = lift mesh inFileSig
 
 
-teapot : [Triangle VertVTN] -> (Int, Int) -> Time -> Mat4 -> [Entity]
-teapot mesh (w,h) t view = [entity vertexShader fragmentShader mesh { view = view }]
+teapot : [Triangle VertVTN] -> (Int, Int) -> Time -> Mat4 -> Entity
+teapot mesh (w,h) t view = entity vertexShader fragmentShader mesh { view = view }
 
 teapotSig = lift teapot meshSig
 
