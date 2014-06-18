@@ -31,50 +31,42 @@ scene entities (w,h) t isLocked person =
                  (if isLocked then exitMsg else enterMsg)
            ]
 
-garp : [(Int,Int) -> Time -> Mat4 -> Entity]
-     -> ((Int,Int) -> Time -> Mat4 -> [Entity])
-garp fs00 =
-    let
-        glub (w,h) t view fs0 = case fs0 of
-            []      -> []
-            (f::fs) -> f (w,h) t view :: glub (w,h) t view fs
-    in
-        \(w,h) t view -> glub (w,h) t view fs00
-
--- mlup : [(a -> b)] -> (a -> [b])
-mlup = \x -> map (\f -> f x)
-
-morg : [Signal (a -> b)] -> Signal [(a -> b)]
-morg = combine
-
--- puk : Signal [(a -> b)] -> Signal (a -> [b])
-puk = lift mlup
-
 -- bloop : [Signal (a -> b)] -> Signal (a -> [b])
-bloop ss = puk (morg ss)
-
+bloop = lift (\x -> map (\f -> f x)) . combine
 
 mlup3 : [(Int,Int) -> Time -> Mat4 -> Entity]
     -> ((Int,Int) -> Time -> Mat4 -> [Entity])
 mlup3 fs = \wh t view -> map (\f -> f wh t view) fs
 
-puk3 = lift mlup3
-
-
--- IMPLEMENT VOOM!
 voom : [Signal ((Int,Int) -> Time -> Mat4 -> Entity)]
      -> Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
-voom ss = puk3 (combine ss)
--- voom = foldr (lift2 garp) (constant [])
-
--- DOWN TO HERE
+voom = lift mlup3 . combine
 
 ourEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
 -- ourEntities = constant crateEntities
-ourEntities = voom [teapotSig]
+-- ourEntities = voom [constant crateEntities]
+ourEntities = voom [groundSig, teapotSig,
+    cloudsDiamondSig, voronoiCubesSig, fireCubeSig, fogMountainsCubeSig ]
+
+-- ourEntities = voom [groundSig, cloudsDiamondSig]
 
 -- teapotEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
 -- teapotEntities = teapotSig
+
+groundSig : Signal ((Int,Int) -> Time -> Mat4 -> Entity)
+groundSig = constant (\wh t view -> ground view)
+
+place obj x y z = constant (\wh t view -> obj wh t (translate3 x y z view))
+
+-- cloudsDiamondSig = place cloudsDiamond 5 1.5 1
+cloudsDiamondSig = place cloudsDiamond 0 1.5 0
+
+voronoiCubesSig = place voronoiCube 10 0 10
+
+fireCubeSig = place fireCube -10 0 -10
+
+fogMountainsCubeSig = place fogMountainsCube 10 1.5 -10
+
 
 crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
 crateEntities resolution t view =
