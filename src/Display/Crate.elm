@@ -13,30 +13,32 @@ import Shaders.VoronoiDistances (voronoiDistances)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
+import Perception (..)
 
-cloudsCube : (Int,Int) -> Time -> Mat4 -> Entity
+cloudsCube : Perception -> Entity
 cloudsCube = cube worldVertex clouds
 
-fireCube : (Int,Int) -> Time -> Mat4 -> Entity
+fireCube : Perception -> Entity
 fireCube = cube worldVertex fire
 
-fogMountainsCube : (Int,Int) -> Time -> Mat4 -> Entity
+fogMountainsCube : Perception -> Entity
 fogMountainsCube = cube worldVertex fogMountains
 
-plasmaCube : (Int,Int) -> Time -> Mat4 -> Entity
+plasmaCube : Perception -> Entity
 plasmaCube = cube worldVertex simplePlasma
 
-voronoiCube : (Int,Int) -> Time -> Mat4 -> Entity
+voronoiCube : Perception -> Entity
 voronoiCube = cube worldVertex voronoiDistances
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> (Int,Int) -> Time -> Mat4 -> Entity
-cube vertexShader fragmentShader (w,h) t view =
-    let resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds t
+--    -> Perception -> Entity
+cube vertexShader fragmentShader p =
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds p.globalTime
     in
         entity vertexShader fragmentShader mesh
-            { iResolution=resolution, iGlobalTime=s, view=view }
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }
 
 -- The mesh for a crate
 mesh : [Triangle Vertex]

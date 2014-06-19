@@ -7,6 +7,7 @@ import Mouse
 import Window
 
 import Model
+import Perception (..)
 import Update
 import Display
 
@@ -28,7 +29,7 @@ person = foldp Update.step Model.defaultPerson inputs
 main : Signal Element
 main = world Display.ourEntities
 
-world : Signal ((Int,Int) -> Time -> Mat4 -> [Entity]) -> Signal Element
+world : Signal (Perception -> [Entity]) -> Signal Element
 world entities =
   let t = foldp (+) 0 (fps 60)
   in  lift5 Display.scene entities Window.dimensions t isLocked person

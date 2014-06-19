@@ -9,6 +9,8 @@ import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
+import Perception (..)
+
 type VertV = {position: Vec3}
 type VertVT = {position : Vec3, texCoord : Vec3}
 type VertVN = {position : Vec3, normal : Vec3}
@@ -120,8 +122,8 @@ inFileSig = let
 meshSig = lift mesh inFileSig
 
 
-teapot : [Triangle VertVTN] -> (Int, Int) -> Time -> Mat4 -> Entity
-teapot mesh (w,h) t view = entity vertexShader fragmentShader mesh { view = view }
+teapot : [Triangle VertVTN] -> Perception -> Entity
+teapot mesh p = entity vertexShader fragmentShader mesh { view = p.viewMatrix }
 
 teapotSig = lift teapot meshSig
 

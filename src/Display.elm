@@ -7,6 +7,8 @@ import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
 import Model
+import Perception (..)
+
 import Display.World (ground)
 import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
@@ -22,63 +24,44 @@ view (w,h) person =
     mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)
         (makeLookAt person.position (person.position `add` Model.direction person) j)
 
-scene : ((Int,Int) -> Time -> Mat4 -> [Entity])
+scene : (Perception -> [Entity])
     -> (Int,Int) -> Time -> Bool -> Model.Person -> Element
 scene entities (w,h) t isLocked person =
+  let
+    p = { viewMatrix = view (w,h) person, globalTime = t, resolution = (w,h) }
+  in
     layers [ color (rgb 135 206 235) (spacer w h)
-           , webgl (w,h) (entities (w,h) t (view (w,h) person))
+           , webgl (w,h) (entities p)
            , container w 140 (midLeftAt (absolute 40) (relative 0.5))
                  (if isLocked then exitMsg else enterMsg)
            ]
 
--- bloop : [Signal (a -> b)] -> Signal (a -> [b])
-bloop = lift (\x -> map (\f -> f x)) . combine
+mapApply : [(a -> b)] -> a -> [b]
+mapApply fs x = map (\f -> f x) fs
 
-mlup3 : [(Int,Int) -> Time -> Mat4 -> Entity]
-    -> ((Int,Int) -> Time -> Mat4 -> [Entity])
-mlup3 fs = \wh t view -> map (\f -> f wh t view) fs
+gather : [Signal (a -> b)] -> Signal (a -> [b])
+gather = lift mapApply . combine
 
-voom : [Signal ((Int,Int) -> Time -> Mat4 -> Entity)]
-     -> Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
-voom = lift mlup3 . combine
+ourEntities : Signal (Perception -> [Entity])
+ourEntities = gather [
+    groundSig, teapotSig,
+    cloudsDiamondSig, voronoiCubesSig,
+    fireCubeSig, fogMountainsCubeSig ]
 
-ourEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
--- ourEntities = constant crateEntities
--- ourEntities = voom [constant crateEntities]
-ourEntities = voom [groundSig, teapotSig,
-    cloudsDiamondSig, voronoiCubesSig, fireCubeSig, fogMountainsCubeSig ]
+groundSig : Signal (Perception -> Entity)
+groundSig = constant (\p -> ground p.viewMatrix)
 
--- ourEntities = voom [groundSig, cloudsDiamondSig]
+place : (Perception -> Entity) -> Float -> Float -> Float -> Perception -> Entity
+place obj x y z p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
 
--- teapotEntities : Signal ((Int,Int) -> Time -> Mat4 -> [Entity])
--- teapotEntities = teapotSig
+cloudsDiamondSig : Signal (Perception -> Entity)
+cloudsDiamondSig = constant <| place cloudsDiamond 5 1.5 1
 
-groundSig : Signal ((Int,Int) -> Time -> Mat4 -> Entity)
-groundSig = constant (\wh t view -> ground view)
+voronoiCubesSig = constant <| place voronoiCube 10 0 10
 
-place obj x y z = constant (\wh t view -> obj wh t (translate3 x y z view))
+fireCubeSig = constant <| place fireCube -10 0 -10
 
--- cloudsDiamondSig = place cloudsDiamond 5 1.5 1
-cloudsDiamondSig = place cloudsDiamond 0 1.5 0
-
-voronoiCubesSig = place voronoiCube 10 0 10
-
-fireCubeSig = place fireCube -10 0 -10
-
-fogMountainsCubeSig = place fogMountainsCube 10 1.5 -10
-
-
-crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
-crateEntities resolution t view =
-    let cubes = 
-            [ fogMountainsDiamond  resolution t (translate3 0 1.5 0 view)
-            , cloudsDiamond  resolution t (translate3 5 1.5 1 view)
-            , voronoiCube resolution t (translate3  10 0  10 view)
-            , fireCube    resolution t (translate3 -10 0 -10 view)
-            , fogMountainsCube resolution t (translate3 10 1.5 -10 view)
-            ]
-    in  
-        ground view :: cubes
+fogMountainsCubeSig = constant <| place fogMountainsCube 10 1.5 -10
 
 enterMsg : Element
 enterMsg = message "Click to go full screen and move your head with the mouse."
@@ -88,6 +71,6 @@ exitMsg = message "Press <escape> to exit full screen."
 
 message : String -> Element
 message msg =
-    plainText <|
+   plainText <|
     "This uses stuff that is only available in Chrome and Firefox!\n" ++
     "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg

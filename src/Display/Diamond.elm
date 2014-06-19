@@ -13,21 +13,28 @@ import Shaders.FogMountains (fogMountains)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
+import Perception (..)
 
-cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+-- cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+cloudsDiamond : Perception -> Entity
 cloudsDiamond = diamond worldVertex clouds
 
-fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+-- fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+fogMountainsDiamond : Perception -> Entity
 fogMountainsDiamond = diamond worldVertex fogMountains
+
+-- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 
 -- diamond : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
-diamond vertexShader fragmentShader (w,h) t view =
-    let resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds t
+-- diamond : Shader attributes (ShadertoyUniforms {}) varyings -> Shader {} (ShadertoyUniforms {})  varyings -> Perception -> Entity
+diamond vertexShader fragmentShader p =
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds p.globalTime
     in
         entity vertexShader fragmentShader diamondMesh
-            { iResolution=resolution, iGlobalTime=s, view=view }
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }
 
 unfold : Int -> (a -> a) -> a -> [a]
 unfold n f x = if n==0 then [] else
