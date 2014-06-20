@@ -44,24 +44,26 @@ gather = lift mapApply . combine
 
 ourEntities : Signal (Perception -> [Entity])
 ourEntities = gather [
-    groundSig, teapotSig,
+    groundSig, t2,
     cloudsDiamondSig, voronoiCubesSig,
     fireCubeSig, fogMountainsCubeSig ]
+
+t2 = place 0 3 0 <~ teapotSig
 
 groundSig : Signal (Perception -> Entity)
 groundSig = constant (\p -> ground p.viewMatrix)
 
-place : (Perception -> Entity) -> Float -> Float -> Float -> Perception -> Entity
-place obj x y z p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
+place : Float -> Float -> Float -> (Perception -> Entity) -> Perception -> Entity
+place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
 
 cloudsDiamondSig : Signal (Perception -> Entity)
-cloudsDiamondSig = constant <| place cloudsDiamond 5 1.5 1
+cloudsDiamondSig = constant <| place 5 1.5 1 cloudsDiamond
 
-voronoiCubesSig = constant <| place voronoiCube 10 0 10
+voronoiCubesSig = constant <| place 10 0 10 voronoiCube
 
-fireCubeSig = constant <| place fireCube -10 0 -10
+fireCubeSig = constant <| place -10 0 -10 fireCube
 
-fogMountainsCubeSig = constant <| place fogMountainsCube 10 1.5 -10
+fogMountainsCubeSig = constant <| place 10 1.5 -10 fogMountainsCube
 
 enterMsg : Element
 enterMsg = message "Click to go full screen and move your head with the mouse."
