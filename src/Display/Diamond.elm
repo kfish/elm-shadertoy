@@ -13,7 +13,7 @@ import Shaders.FogMountains (fogMountains)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
-import Perception (..)
+import Engine (..)
 
 -- cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
 cloudsDiamond : Perception -> Entity

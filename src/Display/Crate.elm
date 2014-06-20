@@ -13,7 +13,7 @@ import Shaders.VoronoiDistances (voronoiDistances)
 import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
-import Perception (..)
+import Engine (..)
 
 cloudsCube : Perception -> Entity
 cloudsCube = cube worldVertex clouds

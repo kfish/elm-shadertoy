@@ -7,7 +7,7 @@ import Mouse
 import Window
 
 import Model
-import Perception (..)
+import Engine (..)
 import Update
 import Display
 

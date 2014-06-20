@@ -7,7 +7,7 @@ import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
 import Model
-import Perception (..)
+import Engine (..)
 
 import Display.World (ground)
 import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
