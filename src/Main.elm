@@ -17,6 +17,18 @@ import Demo
 port movement : Signal (Int,Int)
 port isLocked : Signal Bool
 
+-- Ability to request and exit. Click screen to request lock. Press escape to
+-- give up the lock. This code can all be removed if you want to do this
+-- differently.
+
+port requestPointerLock : Signal ()
+port requestPointerLock =
+    dropWhen (lift2 (&&) Keyboard.shift isLocked) () Mouse.clicks
+
+port exitPointerLock : Signal ()
+port exitPointerLock =
+    always () <~ keepIf (any (\x -> x == 27)) [] Keyboard.keysDown
+
 -- Set up 3D world
 inputs : Signal Model.Inputs
 inputs =
@@ -34,16 +46,27 @@ main = world Demo.demoEntities
 world : Signal (Perception -> [Entity]) -> Signal Element
 world entities =
   let t = foldp (+) 0 (fps 60)
-  in  lift5 Display.scene entities Window.dimensions t isLocked person
+      wh = Window.dimensions
+  in 
+      lift3 lockMessage wh isLocked
+            (lift4 Display.scene entities wh t person)
 
--- Ability to request and exit. Click screen to request lock. Press escape to
--- give up the lock. This code can all be removed if you want to do this
--- differently.
+lockMessage : (Int,Int) -> Bool -> Element -> Element
+lockMessage (w,h) isLocked e =
+    layers [ e
+           , container w 140 (midLeftAt (absolute 40) (relative 0.5))
+                 (if isLocked then exitMsg else enterMsg)
+           ]
 
-port requestPointerLock : Signal ()
-port requestPointerLock =
-    dropWhen (lift2 (&&) Keyboard.shift isLocked) () Mouse.clicks
+enterMsg : Element
+enterMsg = message "Click to go full screen and move your head with the mouse."
 
-port exitPointerLock : Signal ()
-port exitPointerLock =
-    always () <~ keepIf (any (\x -> x == 27)) [] Keyboard.keysDown
+exitMsg : Element
+exitMsg = message "Press <escape> to exit full screen."
+
+message : String -> Element
+message msg =
+   plainText <|
+    "This uses stuff that is only available in Chrome and Firefox!\n" ++
+    "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
+
