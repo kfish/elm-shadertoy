@@ -36,11 +36,17 @@ scene entities (w,h) t isLocked person =
                  (if isLocked then exitMsg else enterMsg)
            ]
 
-mapApply : [(a -> b)] -> a -> [b]
-mapApply fs x = map (\f -> f x) fs
+enterMsg : Element
+enterMsg = message "Click to go full screen and move your head with the mouse."
 
-gather : [Signal (a -> b)] -> Signal (a -> [b])
-gather = lift mapApply . combine
+exitMsg : Element
+exitMsg = message "Press <escape> to exit full screen."
+
+message : String -> Element
+message msg =
+   plainText <|
+    "This uses stuff that is only available in Chrome and Firefox!\n" ++
+    "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
 
 ourEntities : Signal (Perception -> [Entity])
 ourEntities = gather [
@@ -53,9 +59,6 @@ t2 = place 0 3 0 <~ teapotSig
 groundSig : Signal (Perception -> Entity)
 groundSig = constant (\p -> ground p.viewMatrix)
 
-place : Float -> Float -> Float -> (Perception -> Entity) -> Perception -> Entity
-place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
-
 cloudsDiamondSig : Signal (Perception -> Entity)
 cloudsDiamondSig = constant <| place 5 1.5 1 cloudsDiamond
 
@@ -65,14 +68,3 @@ fireCubeSig = constant <| place -10 0 -10 fireCube
 
 fogMountainsCubeSig = constant <| place 10 1.5 -10 fogMountainsCube
 
-enterMsg : Element
-enterMsg = message "Click to go full screen and move your head with the mouse."
-
-exitMsg : Element
-exitMsg = message "Press <escape> to exit full screen."
-
-message : String -> Element
-message msg =
-   plainText <|
-    "This uses stuff that is only available in Chrome and Firefox!\n" ++
-    "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
