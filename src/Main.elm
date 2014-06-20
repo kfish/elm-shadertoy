@@ -9,7 +9,6 @@ import Window
 import Model
 import Engine (..)
 import Update
-import Display
 
 import Demo
 
@@ -49,7 +48,7 @@ world entities =
       wh = Window.dimensions
   in 
       lift3 lockMessage wh isLocked
-            (lift4 Display.scene entities wh t person)
+            (lift4 scene entities wh t person)
 
 lockMessage : (Int,Int) -> Bool -> Element -> Element
 lockMessage (w,h) isLocked e =
