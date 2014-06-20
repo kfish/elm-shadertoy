@@ -11,6 +11,8 @@ import Engine (..)
 import Update
 import Display
 
+import Demo
+
 -- Pointer Lock information
 port movement : Signal (Int,Int)
 port isLocked : Signal Bool
@@ -27,7 +29,7 @@ person : Signal Model.Person
 person = foldp Update.step Model.defaultPerson inputs
 
 main : Signal Element
-main = world Display.ourEntities
+main = world Demo.demoEntities
 
 world : Signal (Perception -> [Entity]) -> Signal Element
 world entities =

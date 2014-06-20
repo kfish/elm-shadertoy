@@ -1,4 +1,4 @@
-module Display (scene, ourEntities) where
+module Display (scene) where
 
 import Http (..)
 import Math.Vector2 (Vec2)
@@ -8,11 +8,6 @@ import Graphics.WebGL (..)
 
 import Model
 import Engine (..)
-
-import Display.World (ground)
-import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
-import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Display.Obj (teapotSig)
 
 import Shaders.WorldVertex (Vertex, worldVertex)
 import Shaders.Fire (fire)
@@ -47,24 +42,4 @@ message msg =
    plainText <|
     "This uses stuff that is only available in Chrome and Firefox!\n" ++
     "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
-
-ourEntities : Signal (Perception -> [Entity])
-ourEntities = gather [
-    groundSig, t2,
-    cloudsDiamondSig, voronoiCubesSig,
-    fireCubeSig, fogMountainsCubeSig ]
-
-t2 = place 0 3 0 <~ teapotSig
-
-groundSig : Signal (Perception -> Entity)
-groundSig = constant (\p -> ground p.viewMatrix)
-
-cloudsDiamondSig : Signal (Perception -> Entity)
-cloudsDiamondSig = constant <| place 5 1.5 1 cloudsDiamond
-
-voronoiCubesSig = constant <| place 10 0 10 voronoiCube
-
-fireCubeSig = constant <| place -10 0 -10 fireCube
-
-fogMountainsCubeSig = constant <| place 10 1.5 -10 fogMountainsCube
 
