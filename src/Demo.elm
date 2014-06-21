@@ -7,7 +7,7 @@ import Engine (..)
 import Things.Ground (ground)
 import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Things.Obj (teapotSig)
+import Things.Obj (teapot)
 
 
 demoThings : Signal (Perception -> [Entity])
@@ -16,7 +16,7 @@ demoThings = gather [
     cloudsDiamondSig, voronoiCubesSig,
     fireCubeSig, fogMountainsCubeSig ]
 
-t2 = place 0 3 0 <~ teapotSig
+t2 = place 0 3 0 <~ teapot
 
 groundSig : Signal (Perception -> Entity)
 groundSig = constant (\p -> ground p.viewMatrix)

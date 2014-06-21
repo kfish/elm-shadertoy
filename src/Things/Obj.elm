@@ -1,4 +1,4 @@
-module Things.Obj (teapotSig) where
+module Things.Obj (teapot) where
 
 import String
 import Array
@@ -115,17 +115,16 @@ fromResponse r = case r of
   Http.Success s -> s
   _ -> ""
 
-inFileSig = let
+inFileSig infile = let
     resp = Http.sendGet <| constant "resources/wt_teapot.obj"
   in lift fromResponse resp
  
-meshSig = lift mesh inFileSig
+loadMesh infile = lift mesh (inFileSig infile)
 
+objThing : [Triangle VertVTN] -> Perception -> Entity
+objThing mesh p = entity vertexShader fragmentShader mesh { view = p.viewMatrix }
 
-teapot : [Triangle VertVTN] -> Perception -> Entity
-teapot mesh p = entity vertexShader fragmentShader mesh { view = p.viewMatrix }
-
-teapotSig = lift teapot meshSig
+teapot = objThing <~ loadMesh "resources/wt_teapot.obj"
 
 --Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
   
