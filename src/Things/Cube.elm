@@ -15,20 +15,20 @@ import Shaders.WorldVertex (Vertex, worldVertex)
 import Model
 import Engine (..)
 
-cloudsCube : Perception -> Entity
-cloudsCube = cube worldVertex clouds
+cloudsCube : Signal Thing
+cloudsCube = constant <| cube worldVertex clouds
 
-fireCube : Perception -> Entity
-fireCube = cube worldVertex fire
+fireCube : Signal Thing
+fireCube = constant <| cube worldVertex fire
 
-fogMountainsCube : Perception -> Entity
-fogMountainsCube = cube worldVertex fogMountains
+fogMountainsCube : Signal Thing
+fogMountainsCube = constant <| cube worldVertex fogMountains
 
-plasmaCube : Perception -> Entity
-plasmaCube = cube worldVertex simplePlasma
+plasmaCube : Signal Thing
+plasmaCube = constant <| cube worldVertex simplePlasma
 
-voronoiCube : Perception -> Entity
-voronoiCube = cube worldVertex voronoiDistances
+voronoiCube : Signal Thing
+voronoiCube = constant <| cube worldVertex voronoiDistances
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity

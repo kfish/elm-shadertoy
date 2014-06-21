@@ -16,12 +16,12 @@ import Model
 import Engine (..)
 
 -- cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
-cloudsDiamond : Perception -> Entity
-cloudsDiamond = diamond worldVertex clouds
+cloudsDiamond : Signal Thing
+cloudsDiamond = constant <| diamond worldVertex clouds
 
 -- fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
-fogMountainsDiamond : Perception -> Entity
-fogMountainsDiamond = diamond worldVertex fogMountains
+fogMountainsDiamond : Signal Thing
+fogMountainsDiamond = constant <| diamond worldVertex fogMountains
 
 -- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 

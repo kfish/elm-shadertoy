@@ -12,6 +12,9 @@ type Perception = {
     viewMatrix : Mat4
 }
 
+type Thing = (Perception -> Entity)
+type Things = (Perception -> [Entity])
+
 mapApply : [(a -> b)] -> a -> [b]
 mapApply fs x = map (\f -> f x) fs
 

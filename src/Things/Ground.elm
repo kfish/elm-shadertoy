@@ -4,10 +4,15 @@ import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
+import Engine (..)
+
 type Vertex = { position:Vec3, color:Vec3 }
 
-ground : Mat4 -> Entity
-ground view =
+ground : Signal Thing
+ground = constant <| \p -> groundEntity p.viewMatrix
+
+groundEntity : Mat4 -> Entity
+groundEntity view =
     entity vertexShader fragmentShader groundMesh { view=view }
 
 
