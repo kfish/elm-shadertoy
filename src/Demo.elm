@@ -4,7 +4,7 @@ import Graphics.WebGL (..)
 
 import Engine (..)
 
-import Display.World (ground)
+import Display.Ground (ground)
 import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Display.Obj (teapotSig)

@@ -1,4 +1,4 @@
-module Display.World (ground) where
+module Display.Ground (ground) where
 
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
