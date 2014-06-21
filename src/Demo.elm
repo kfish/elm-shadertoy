@@ -7,7 +7,7 @@ import Engine (..)
 import Things.Ground (ground)
 import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Things.Obj (teapot)
+import Things.Teapot (teapot)
 
 
 demoThings : Signal (Perception -> [Entity])

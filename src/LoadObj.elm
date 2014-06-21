@@ -1,4 +1,4 @@
-module Things.Obj (teapot) where
+module LoadObj (loadObj) where
 
 import String
 import Array
@@ -108,7 +108,6 @@ parseObj inFile =
     
   in faces
 
---Test mesh
 mesh inFile = map (\(a,b,c) -> (toVTN a, toVTN b, toVTN c)) <| parseObj inFile
 
 fromResponse r = case r of 
@@ -124,7 +123,7 @@ loadMesh infile = lift mesh (inFileSig infile)
 objThing : [Triangle VertVTN] -> Perception -> Entity
 objThing mesh p = entity vertexShader fragmentShader mesh { view = p.viewMatrix }
 
-teapot = objThing <~ loadMesh "resources/wt_teapot.obj"
+loadObj infile = objThing <~ loadMesh infile
 
 --Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
   
