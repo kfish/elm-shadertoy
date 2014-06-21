@@ -1,4 +1,4 @@
-module Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
+module Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)

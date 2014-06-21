@@ -40,7 +40,7 @@ person : Signal Model.Person
 person = foldp Update.step Model.defaultPerson inputs
 
 main : Signal Element
-main = world Demo.demoEntities
+main = world Demo.demoThings
 
 world : Signal (Perception -> [Entity]) -> Signal Element
 world entities =

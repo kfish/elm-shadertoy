@@ -1,4 +1,4 @@
-module Display.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
+module Things.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)

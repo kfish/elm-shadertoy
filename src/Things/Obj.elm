@@ -1,4 +1,4 @@
-module Display.Obj (teapotSig) where
+module Things.Obj (teapotSig) where
 
 import String
 import Array

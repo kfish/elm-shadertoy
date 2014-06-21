@@ -1,17 +1,17 @@
-module Demo (demoEntities) where
+module Demo (demoThings) where
 
 import Graphics.WebGL (..)
 
 import Engine (..)
 
-import Display.Ground (ground)
-import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
-import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Display.Obj (teapotSig)
+import Things.Ground (ground)
+import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
+import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
+import Things.Obj (teapotSig)
 
 
-demoEntities : Signal (Perception -> [Entity])
-demoEntities = gather [
+demoThings : Signal (Perception -> [Entity])
+demoThings = gather [
     groundSig, t2,
     cloudsDiamondSig, voronoiCubesSig,
     fireCubeSig, fogMountainsCubeSig ]

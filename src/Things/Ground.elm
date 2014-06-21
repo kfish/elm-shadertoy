@@ -1,4 +1,4 @@
-module Display.Ground (ground) where
+module Things.Ground (ground) where
 
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
