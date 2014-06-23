@@ -1,4 +1,4 @@
-module Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
+module Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
@@ -14,6 +14,9 @@ import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
 import Engine (..)
+
+cloudsCubeThing : Thing
+cloudsCubeThing = cube worldVertex clouds
 
 cloudsCube : Signal Thing
 cloudsCube = constant <| cube worldVertex clouds

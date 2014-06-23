@@ -15,9 +15,19 @@ import Shaders.WorldVertex (Vertex, worldVertex)
 import Model
 import Engine (..)
 
+import Things.Cube (cloudsCube)
+import Debug (log)
+
 -- cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
 cloudsDiamond : Signal Thing
-cloudsDiamond = constant <| diamond worldVertex clouds
+-- cloudsDiamond = constant <| diamond worldVertex clouds
+cloudsDiamond = 
+  let 
+    isOdd x = log (show x) ((floor x `mod` 2) == 0)
+    ifelse cond x y = if cond then x else y
+  in
+    lift3 ifelse (isOdd <~ foldp (+) 0 (fps 1)) cloudsCube
+        (constant <| diamond worldVertex clouds)
 
 -- fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
 fogMountainsDiamond : Signal Thing

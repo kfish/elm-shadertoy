@@ -3,7 +3,7 @@ module Demo (demoThings) where
 import Engine (..)
 
 import Things.Ground (ground)
-import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
+import Things.Cube (cloudsCubeThing, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Things.Teapot (teapot)
 
