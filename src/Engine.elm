@@ -21,8 +21,12 @@ mapApply fs x = map (\f -> f x) fs
 gather : [Signal (a -> b)] -> Signal (a -> [b])
 gather = lift mapApply . combine
 
+tview : (Mat4 -> Mat4) -> (Perception -> Entity) -> Perception -> Entity
+tview f obj p = obj { p | viewMatrix <- f p.viewMatrix }
+
 place : Float -> Float -> Float -> (Perception -> Entity) -> Perception -> Entity
-place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
+-- place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
+place x y z = tview (translate3 x y z)
 
 look : (Int,Int) -> Model.Person -> Mat4
 look (w,h) person =

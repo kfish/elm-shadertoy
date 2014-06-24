@@ -1,4 +1,4 @@
-module Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
+module Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube, cube) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
@@ -15,8 +15,8 @@ import Shaders.WorldVertex (Vertex, worldVertex)
 import Model
 import Engine (..)
 
-cloudsCubeThing : Thing
-cloudsCubeThing = cube worldVertex clouds
+import Char (..)
+import Keyboard (isDown)
 
 cloudsCube : Signal Thing
 cloudsCube = constant <| cube worldVertex clouds
@@ -32,6 +32,9 @@ plasmaCube = constant <| cube worldVertex simplePlasma
 
 voronoiCube : Signal Thing
 voronoiCube = constant <| cube worldVertex voronoiDistances
+
+xvCube : Signal (Bool, Thing)
+xvCube = lift2 (,) (isDown (toCode 'x')) voronoiCube
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity
