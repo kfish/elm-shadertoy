@@ -36,19 +36,28 @@ demoThings =
         boid0 : Signal Boid
         boid0 = randomBoid plasmaCube
 
+        boids0 : Signal [Boid]
+        boids0 = randomBoids 10 plasmaCube
+
         dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 
         boid : Signal Boid
-        boid = folds dflBoid moveBoid boid0 (fps 60)
+        boid = folds dflBoid stepBoid boid0 (fps 60)
+
+        boids : Signal [Boid]
+        boids = folds [] moveBoids boids0 (fps 60)
 
     in
-        gather [
+{-
+        gather ([
             ground,
             -- place   0   3   0 <~ teapot,
             place   5 1.5   1 <~ cd,
             lift2 (\x e -> tview (rotate (x/1000) (vec3 3 1 5)) . place  10   0  10 <| e) sinFoo (lift snd xvCube),
             -- place -10   0 -10 <~ fireCube,
             lift2 (\y e -> place 0 y 0 e) s fireCube,
-            place  10 1.5 -10 <~ fogMountainsCube,
-            boidThing <~ boid
+            place  10 1.5 -10 <~ fogMountainsCube
+            -- boidThing <~ boid
             ]
+-}
+        lift mapApply (map boidThing <~ boids)

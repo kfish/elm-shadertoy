@@ -2,8 +2,8 @@ module Behavior.Boids where
 
 import Random (..)
 
-import Math.Vector3 (..)
 import Math.Vector3 as V3
+import Math.Vector3 (Vec3, vec3)
 import Math.Matrix4 (..)
 
 import Engine (..)
@@ -43,13 +43,53 @@ randomUnitVec3 = randomVec3 1
 
 randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
-    let pos = (add (vec3 7 8 4)) <~ randomVec3 4.0
+    let pos = (V3.add (vec3 7 8 4)) <~ randomVec3 4.0
     in
-        newBoid <~ pos ~ randomUnitVec3 ~ thing
+        newBoid <~ pos ~ randomVec3 1.0 ~ thing
 
 boidThing : Boid -> Thing
 boidThing b = tview (translate b.position) b.thing
 
-moveBoid : Time -> Boid -> Boid
-moveBoid dt b = { b | position <- b.position `add` (V3.scale (dt / second) b.velocity) }
+stepBoid : Time -> Boid -> Boid
+stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
+rule1 : Vec3 -> Boid -> Vec3 
+rule1 center b = V3.scale (1/10) <| center `V3.sub` b.position
+
+rule2 : [Vec3] -> Boid -> Vec3
+rule2 poss b =
+    let f pos = let d = V3.distanceSquared pos b.position
+                in if (d < 60.0) then b.position `V3.sub` pos else vec3 0 0 0
+    in V3.scale (1/2) <| foldl1 V3.add (map f poss)
+
+rule3 : Vec3 -> Boid -> Vec3
+rule3 avgvel b = V3.scale (1/2) <| avgvel `V3.sub` b.velocity
+
+bounds : Boid -> Vec3
+bounds b =
+    let bound x low high = if (x < low) then 1 else (if x > high then -1 else 0)
+        (x,y,z) = V3.toTuple b.position
+    in vec3 (bound x -20 20) (bound y 0 30) (bound z -20 20)
+
+randomBoids : Int -> Signal Thing -> Signal [Boid]
+randomBoids n0 thing =
+    let f n = if (n==0) then [] else randomBoid thing :: f (n-1)
+    in combine <| f n0
+
+moveBoids : Time -> [Boid] -> [Boid]
+moveBoids dt boids =
+    let
+        nboids = length boids
+        positions = map .position boids
+        velocities = map .velocity boids
+        center = V3.scale (1.0/(toFloat nboids)) (foldl1 V3.add positions)
+        avgvel = V3.scale (1.0/(toFloat nboids)) (foldl1 V3.add velocities)
+        r1s = map (rule1 center) boids
+        r2s = map (rule2 positions) boids
+        r3s = map (rule3 avgvel) boids
+        box = map bounds boids
+        applyRules b r1 r2 r3 r4 = { b |
+            velocity <- b.velocity `V3.add` (V3.scale (dt / second)
+                (r1 `V3.add` r2 `V3.add` r3 `V3.add` r4)) }
+        bs = zipWith5 applyRules boids r1s r2s r3s box
+    in map (stepBoid dt) bs
