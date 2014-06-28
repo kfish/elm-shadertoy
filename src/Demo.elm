@@ -38,7 +38,7 @@ demoThings =
         boid0 = randomBoid plasmaCube
 
         boids0 : Signal [Boid]
-        boids0 = randomBoids 10 fireBFly
+        boids0 = randomBoids 100 fireBFly
 
         dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 

@@ -1,5 +1,6 @@
 module Things.BFly (fireBFly) where
 
+import Random (float)
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
@@ -15,12 +16,12 @@ import Debug (log)
 type Vertex = { position:Vec3, coord:Vec3, wing:Vec3 }
 
 fireBFly : Signal Thing
-fireBFly = constant <| bfly bflyVertex fire
+fireBFly = bfly bflyVertex fire <~ ((\x -> x * pi*2) <~ float (constant 7))
 
-bfly vertexShader fragmentShader p =
+bfly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = inSeconds (p.globalTime + flapStart)
         flap = 0.3 + (sin (s*3) + 1)/2
         flapL = makeRotate (-flap * pi/4) (vec3 0 0 1)
         flapR = makeRotate (flap * pi/4) (vec3 0 0 1)
@@ -30,10 +31,10 @@ bfly vertexShader fragmentShader p =
 
 mesh : [Triangle Vertex]
 mesh =
-    let bHead  = Vertex (vec3 0 0 1) (vec3 0.5 0 0) (vec3 0 0 0)
-        bTail  = Vertex (vec3 0 0 0) (vec3 0.5 1 0) (vec3 0 0 0)
-        bLeft  = Vertex (vec3 -0.7 0 0.5) (vec3 0 0.5 0) (vec3 -1 0 0)
-        bRight = Vertex (vec3 0.7 0 0.5)  (vec3 1 0.5 0) (vec3 1 0 0)
+    let bHead  = Vertex (vec3 0 0 0.5) (vec3 0.5 0 0) (vec3 0 0 0)
+        bTail  = Vertex (vec3 0 0 -0.5) (vec3 0.5 1 0) (vec3 0 0 0)
+        bLeft  = Vertex (vec3 -1.7 0 -0.1) (vec3 0 0.5 0) (vec3 -1 0 0)
+        bRight = Vertex (vec3 1.7 0 -0.1)  (vec3 1 0.5 0) (vec3 1 0 0)
     in
         [ (bHead, bTail, bLeft), (bHead, bTail, bRight) ]
 

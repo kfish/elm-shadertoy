@@ -48,28 +48,37 @@ randomBoid thing =
         newBoid <~ pos ~ randomVec3 1.0 ~ thing
 
 boidThing : Boid -> Thing
-boidThing b = tview (translate b.position) b.thing
+boidThing b =
+    let dir = V3.normalize b.velocity
+        z_axis = vec3 0 0 1
+        rot_angle = 0 - acos (V3.dot dir z_axis)
+        rot_axis = V3.normalize (V3.cross dir z_axis)
+    in
+        tview (translate b.position) . tview (rotate rot_angle rot_axis) <| b.thing
 
 stepBoid : Time -> Boid -> Boid
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
 rule1 : Vec3 -> Boid -> Vec3 
-rule1 center b = V3.scale (1/10) <| center `V3.sub` b.position
+rule1 center b = V3.scale (1/2) <| center `V3.sub` b.position
 
 rule2 : [Vec3] -> Boid -> Vec3
 rule2 poss b =
     let f pos = let d = V3.distanceSquared pos b.position
-                in if (d < 60.0) then b.position `V3.sub` pos else vec3 0 0 0
+                in if (d < 10.0) then b.position `V3.sub` pos else vec3 0 0 0
     in V3.scale (1/2) <| foldl1 V3.add (map f poss)
 
 rule3 : Vec3 -> Boid -> Vec3
-rule3 avgvel b = V3.scale (1/2) <| avgvel `V3.sub` b.velocity
+rule3 avgvel b = V3.scale (1/5) <| avgvel `V3.sub` b.velocity
 
 bounds : Boid -> Vec3
 bounds b =
     let bound x low high = if (x < low) then 1 else (if x > high then -1 else 0)
         (x,y,z) = V3.toTuple b.position
     in vec3 (bound x -20 20) (bound y 0 30) (bound z -20 20)
+
+boundVelocity : Vec3 -> Vec3
+boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
 
 randomBoids : Int -> Signal Thing -> Signal [Boid]
 randomBoids n0 thing =
@@ -89,7 +98,7 @@ moveBoids dt boids =
         r3s = map (rule3 avgvel) boids
         box = map bounds boids
         applyRules b r1 r2 r3 r4 = { b |
-            velocity <- b.velocity `V3.add` (V3.scale (dt / second)
-                (r1 `V3.add` r2 `V3.add` r3 `V3.add` r4)) }
+            velocity <- boundVelocity (b.velocity `V3.add` (V3.scale (dt / second)
+                (r1 `V3.add` r2 `V3.add` r3 `V3.add` r4))) }
         bs = zipWith5 applyRules boids r1s r2s r3s box
     in map (stepBoid dt) bs
