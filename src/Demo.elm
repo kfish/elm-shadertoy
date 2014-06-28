@@ -6,6 +6,7 @@ import Math.Matrix4 (..)
 import Engine (..)
 
 import Things.Ground (ground)
+import Things.BFly (fireBFly)
 import Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Things.Teapot (teapot)
@@ -24,12 +25,12 @@ folds dfl step state input =
 demoThings : Signal Things
 demoThings =
     let
-        isOdd x = log (show x) ((floor x `mod` 2) == 0)
+        isOdd x = (floor x `mod` 2) == 0
         ifelse cond x y = if cond then x else y
         switchy = isOdd <~ foldp (+) 0 (fps 1)
         cd = lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
 
-        sinLog x = log (show x) (sin (x/1000))
+        sinLog x = sin (x/1000)
         sinFoo = foldp (+) 0 (fps 60)
         s = sinLog <~ sinFoo
 
@@ -37,7 +38,7 @@ demoThings =
         boid0 = randomBoid plasmaCube
 
         boids0 : Signal [Boid]
-        boids0 = randomBoids 10 plasmaCube
+        boids0 = randomBoids 10 fireBFly
 
         dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 
