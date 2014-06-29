@@ -17,14 +17,6 @@ type Boid =
 newBoid : Vec3 -> Vec3 -> Thing -> Boid
 newBoid pos vel thing = orientBoid (Boid pos vel (vec3 0 0 0) thing)
 
-orient : { r | thing:Thing, position:Vec3, orientation:Vec3 } -> Thing
-orient o =
-    let z_axis = vec3 0 0 1
-        rot_angle = 0 - acos (V3.dot o.orientation z_axis)
-        rot_axis = V3.normalize (V3.cross o.orientation z_axis)
-    in
-        tview (translate o.position) . tview (rotate rot_angle rot_axis) <| o.thing
-
 orientBoid : Boid -> Boid
 orientBoid b =
     let v = V3.toRecord b.velocity

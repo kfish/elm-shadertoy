@@ -7,7 +7,7 @@ import Engine (..)
 
 import Things.Ground (ground)
 import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
-import Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
+import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Things.Teapot (teapot)
 import Shaders.VoronoiDistances (voronoiDistances)
@@ -40,11 +40,6 @@ demoThings =
 
         boids0 : Signal [Boid]
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
-
-        dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
-
-        boid : Signal Boid
-        boid = folds dflBoid stepBoid boid0 (fps 60)
 
         boids : Signal [Thing]
         boids = map orient <~ folds [] moveBoids boids0 (fps 60)
