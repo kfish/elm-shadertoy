@@ -41,35 +41,44 @@ randomVec3 r =
 randomUnitVec3 : Signal Vec3
 randomUnitVec3 = randomVec3 1
 
+orient : { r | thing:Thing, position:Vec3, velocity:Vec3 } -> Thing
+orient o =
+    let
+        v = V3.toRecord o.velocity
+        dir = V3.normalize (vec3 v.x (v.y/10) v.z)
+        z_axis = vec3 0 0 1
+        rot_angle = 0 - acos (V3.dot dir z_axis)
+        rot_axis = V3.normalize (V3.cross dir z_axis)
+    in
+        tview (translate o.position) . tview (rotate rot_angle rot_axis) <| o.thing
+
 randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
     let pos = (V3.add (vec3 7 8 4)) <~ randomVec3 4.0
     in
         newBoid <~ pos ~ randomVec3 1.0 ~ thing
 
-boidThing : Boid -> Thing
-boidThing b =
-    let dir = V3.normalize b.velocity
-        z_axis = vec3 0 0 1
-        rot_angle = 0 - acos (V3.dot dir z_axis)
-        rot_axis = V3.normalize (V3.cross dir z_axis)
-    in
-        tview (translate b.position) . tview (rotate rot_angle rot_axis) <| b.thing
 
 stepBoid : Time -> Boid -> Boid
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
-rule1 : Vec3 -> Boid -> Vec3 
-rule1 center b = V3.scale (1/2) <| center `V3.sub` b.position
+rule1 : Int -> Vec3 -> Boid -> Vec3 
+rule1 n sumPos b =
+    let perceived_scale = 1.0 / (toFloat (n-1))
+        perceived_center = V3.scale perceived_scale (sumPos `V3.sub` b.position)
+    in V3.scale (1/25) <| perceived_center `V3.sub` b.position
 
 rule2 : [Vec3] -> Boid -> Vec3
 rule2 poss b =
     let f pos = let d = V3.distanceSquared pos b.position
-                in if (d < 10.0) then b.position `V3.sub` pos else vec3 0 0 0
+                in if (d > 0 && d < 10.0) then b.position `V3.sub` pos else vec3 0 0 0
     in V3.scale (1/2) <| foldl1 V3.add (map f poss)
 
-rule3 : Vec3 -> Boid -> Vec3
-rule3 avgvel b = V3.scale (1/5) <| avgvel `V3.sub` b.velocity
+rule3 : Int -> Vec3 -> Boid -> Vec3
+rule3 n sumVel b =
+    let perceived_scale = 1.0 / (toFloat (n-1))
+        perceived_vel = V3.scale perceived_scale (sumVel `V3.sub` b.velocity)
+    in V3.scale (1/10) <| perceived_vel `V3.sub` b.velocity
 
 bounds : Boid -> Vec3
 bounds b =
@@ -84,6 +93,7 @@ randomBoids : Int -> Signal Thing -> Signal [Boid]
 randomBoids n0 thing =
     let f n = if (n==0) then [] else randomBoid thing :: f (n-1)
     in combine <| f n0
+    
 
 moveBoids : Time -> [Boid] -> [Boid]
 moveBoids dt boids =
@@ -91,11 +101,11 @@ moveBoids dt boids =
         nboids = length boids
         positions = map .position boids
         velocities = map .velocity boids
-        center = V3.scale (1.0/(toFloat nboids)) (foldl1 V3.add positions)
-        avgvel = V3.scale (1.0/(toFloat nboids)) (foldl1 V3.add velocities)
-        r1s = map (rule1 center) boids
+        sumPos = foldl1 V3.add positions
+        sumVel = foldl1 V3.add velocities
+        r1s = map (rule1 nboids sumPos) boids
         r2s = map (rule2 positions) boids
-        r3s = map (rule3 avgvel) boids
+        r3s = map (rule3 nboids sumVel) boids
         box = map bounds boids
         applyRules b r1 r2 r3 r4 = { b |
             velocity <- boundVelocity (b.velocity `V3.add` (V3.scale (dt / second)

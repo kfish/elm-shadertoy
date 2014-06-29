@@ -1,12 +1,13 @@
-module Things.BFly (fireBFly) where
+module Things.BFly (fireBFly, voronoiBFly) where
 
-import Random (float)
+import Random (float, floatList)
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
 import Shaders.Fire (fire)
+import Shaders.VoronoiDistances (voronoiDistances)
 
 import Model
 import Engine (..)
@@ -16,13 +17,20 @@ import Debug (log)
 type Vertex = { position:Vec3, coord:Vec3, wing:Vec3 }
 
 fireBFly : Signal Thing
-fireBFly = bfly bflyVertex fire <~ ((\x -> x * pi*2) <~ float (constant 7))
+fireBFly = bfly bflyVertex fire <~ ((\x -> x * second * pi*2) <~ float (constant 7))
+
+voronoiBFlys : Int -> Signal [Thing]
+voronoiBFlys n = map (bfly bflyVertex voronoiDistances . (\x -> x * second * pi * 2)) <~ floatList (constant n)
+
+voronoiBFly : Signal Thing
+voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (constant 7))
 
 bfly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
+        -- s = log (show flapStart) <| inSeconds (p.globalTime + flapStart)
         s = inSeconds (p.globalTime + flapStart)
-        flap = 0.3 + (sin (s*3) + 1)/2
+        flap = 0.3 + (sin (s*8) + 1)/2
         flapL = makeRotate (-flap * pi/4) (vec3 0 0 1)
         flapR = makeRotate (flap * pi/4) (vec3 0 0 1)
     in

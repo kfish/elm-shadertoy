@@ -6,7 +6,7 @@ import Math.Matrix4 (..)
 import Engine (..)
 
 import Things.Ground (ground)
-import Things.BFly (fireBFly)
+import Things.BFly (fireBFly, voronoiBFly)
 import Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Things.Teapot (teapot)
@@ -38,7 +38,7 @@ demoThings =
         boid0 = randomBoid plasmaCube
 
         boids0 : Signal [Boid]
-        boids0 = randomBoids 100 fireBFly
+        boids0 = randomBoids 100 voronoiBFly
 
         dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 
@@ -61,4 +61,4 @@ demoThings =
             -- boidThing <~ boid
             ]
 -}
-        lift mapApply (map boidThing <~ boids)
+        lift mapApply (map orient <~ boids)
