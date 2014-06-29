@@ -1,4 +1,4 @@
-module Things.BFly (fireBFly, voronoiBFly) where
+module Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys) where
 
 import Random (float, floatList)
 import Math.Vector2 (Vec2)
@@ -21,6 +21,9 @@ fireBFly = bfly bflyVertex fire <~ ((\x -> x * second * pi*2) <~ float (constant
 
 voronoiBFlys : Int -> Signal [Thing]
 voronoiBFlys n = map (bfly bflyVertex voronoiDistances . (\x -> x * second * pi * 2)) <~ floatList (constant n)
+
+-- bflys : Int -> Shader {} a -> Signal [Thing]
+bflys n fragmentShader = map (bfly bflyVertex fragmentShader . (\x -> x * second * pi * 2)) <~ floatList (constant n)
 
 voronoiBFly : Signal Thing
 voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (constant 7))

@@ -6,10 +6,11 @@ import Math.Matrix4 (..)
 import Engine (..)
 
 import Things.Ground (ground)
-import Things.BFly (fireBFly, voronoiBFly)
+import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
 import Things.Cube (cloudsCubeThing, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
 import Things.Teapot (teapot)
+import Shaders.VoronoiDistances (voronoiDistances)
 
 import Behavior.Boids (..)
 
@@ -38,7 +39,7 @@ demoThings =
         boid0 = randomBoid plasmaCube
 
         boids0 : Signal [Boid]
-        boids0 = randomBoids 100 voronoiBFly
+        boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
         dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 

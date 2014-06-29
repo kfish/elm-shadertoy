@@ -41,6 +41,21 @@ randomVec3 r =
 randomUnitVec3 : Signal Vec3
 randomUnitVec3 = randomVec3 1
 
+{- Generate n random vectors with given length
+   http://mathworld.wolfram.com/SpherePointPicking.html
+-}
+randomVec3s : Int -> Float -> Signal [Vec3]
+randomVec3s n r =
+    let fromUV [u,v] =
+            let theta = 2 * pi * u
+                phi = acos (2 * v - 1)
+            in fromSpherical r theta phi
+        pairs xs0 = case xs0 of
+            []         -> []
+            [x]        -> []
+            x1::x2::xs -> [x1,x2] :: pairs xs
+    in map fromUV . pairs <~ floatList (constant (2*n))
+
 orient : { r | thing:Thing, position:Vec3, velocity:Vec3 } -> Thing
 orient o =
     let
@@ -52,15 +67,20 @@ orient o =
     in
         tview (translate o.position) . tview (rotate rot_angle rot_axis) <| o.thing
 
+stepBoid : Time -> Boid -> Boid
+stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
+
 randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
     let pos = (V3.add (vec3 7 8 4)) <~ randomVec3 4.0
     in
         newBoid <~ pos ~ randomVec3 1.0 ~ thing
 
-
-stepBoid : Time -> Boid -> Boid
-stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
+randomBoids : Int -> Signal [Thing] -> Signal [Boid]
+randomBoids n things =
+    let poss = map (V3.add (vec3 7 8 4)) <~ randomVec3s n 4.0
+    in
+        zipWith3 newBoid <~ poss ~ randomVec3s n 1.0 ~ things
 
 rule1 : Int -> Vec3 -> Boid -> Vec3 
 rule1 n sumPos b =
@@ -89,10 +109,12 @@ bounds b =
 boundVelocity : Vec3 -> Vec3
 boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
 
+{-
 randomBoids : Int -> Signal Thing -> Signal [Boid]
 randomBoids n0 thing =
     let f n = if (n==0) then [] else randomBoid thing :: f (n-1)
     in combine <| f n0
+-}
     
 
 moveBoids : Time -> [Boid] -> [Boid]
