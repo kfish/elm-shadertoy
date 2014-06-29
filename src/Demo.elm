@@ -46,12 +46,11 @@ demoThings =
         boid : Signal Boid
         boid = folds dflBoid stepBoid boid0 (fps 60)
 
-        boids : Signal [Boid]
-        boids = folds [] moveBoids boids0 (fps 60)
+        boids : Signal [Thing]
+        boids = map orient <~ folds [] moveBoids boids0 (fps 60)
 
-    in
-{-
-        gather ([
+        individuals : Signal [Thing]
+        individuals = combine [
             ground,
             -- place   0   3   0 <~ teapot,
             place   5 1.5   1 <~ cd,
@@ -59,7 +58,6 @@ demoThings =
             -- place -10   0 -10 <~ fireCube,
             lift2 (\y e -> place 0 y 0 e) s fireCube,
             place  10 1.5 -10 <~ fogMountainsCube
-            -- boidThing <~ boid
             ]
--}
-        lift mapApply (map orient <~ boids)
+    in
+        lift mapApply <| lift2 (++) individuals boids
