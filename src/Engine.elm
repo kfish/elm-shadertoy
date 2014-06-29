@@ -28,6 +28,15 @@ place : Float -> Float -> Float -> (Perception -> Entity) -> Perception -> Entit
 -- place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
 place x y z = tview (translate3 x y z)
 
+orient : { r | thing:Thing, position:Vec3, orientation:Vec3 } -> Thing
+orient o =
+    let z_axis = vec3 0 0 1
+        rot_angle = 0 - acos (dot o.orientation z_axis)
+        rot_axis = normalize (cross o.orientation z_axis)
+    in
+        tview (translate o.position) . tview (rotate rot_angle rot_axis) <| o.thing
+
+
 look : (Int,Int) -> Model.Person -> Mat4
 look (w,h) person =
     mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)

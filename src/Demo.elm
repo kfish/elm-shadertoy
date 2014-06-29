@@ -41,7 +41,7 @@ demoThings =
         boids0 : Signal [Boid]
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
-        dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
+        dflBoid = Boid (vec3 0 0 0) (vec3 0 0 0) (vec3 0 0 0) cloudsCubeThing
 
         boid : Signal Boid
         boid = folds dflBoid stepBoid boid0 (fps 60)
