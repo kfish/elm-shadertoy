@@ -61,6 +61,10 @@ seven = unfold 7 (rotMercator 8)
 
 eights x = let x7 = seven x in (x::x7, x7++[x])
 
+unfoldMercator : Int -> Vertex -> [Vertex]
+unfoldMercator n = unfold (n-1) (rotMercator (toFloat n))
+
+verticesMercator n x = let xs = unfoldMercator n x in (x::xs, xs++[x])
 
 sphereMesh : [Triangle Vertex]
 sphereMesh =
@@ -73,16 +77,16 @@ sphereMesh =
 
       nband q1 q2 = 
           let
-              (band10, band11) = eights (nlat q1)
-              (band20, band21) = eights (nlat q2)
+              (band10, band11) = verticesMercator 20 (nlat q1)
+              (band20, band21) = verticesMercator 20 (nlat q2)
               band1U = zip3 band10 band11 band20
               band1L = zip3 band20 band11 band21
           in band1U ++ band1L
 
       sband q1 q2 = 
           let
-              (band10, band11) = eights (slat q1)
-              (band20, band21) = eights (slat q2)
+              (band10, band11) = verticesMercator 20 (slat q1)
+              (band20, band21) = verticesMercator 20 (slat q2)
               band1U = zip3 band10 band11 band20
               band1L = zip3 band20 band11 band21
           in band1U ++ band1L
