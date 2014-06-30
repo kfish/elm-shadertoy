@@ -1,5 +1,6 @@
-module Things.Sphere (cloudsSphere, fogMountainsSphere, sphere) where
+module Things.Sphere (spheres, cloudsSphere, fogMountainsSphere, sphere) where
 
+import Random (floatList)
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
@@ -14,6 +15,9 @@ import Shaders.WorldVertex (Vertex, worldVertex)
 
 import Model
 import Engine (..)
+
+spheres n fragmentShader = map (always (sphere worldVertex fragmentShader))
+    <~ floatList (constant n)
 
 -- cloudsSphere : (Int,Int) -> Time -> Mat4 -> Entity
 cloudsSphere : Signal Thing

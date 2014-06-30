@@ -9,10 +9,12 @@ import Things.Ground (ground)
 import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
 import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Things.Sphere (cloudsSphere, fogMountainsSphere)
+import Things.Sphere (spheres, cloudsSphere, fogMountainsSphere)
 import Things.Teapot (teapot)
+import Shaders.FogMountains (fogMountains)
 import Shaders.VoronoiDistances (voronoiDistances)
 
+import Physics.Drop (..)
 import Behavior.Boids (..)
 
 import Debug (log)
@@ -45,6 +47,12 @@ demoThings =
         boids : Signal [Thing]
         boids = map orient <~ folds [] moveBoids boids0 (fps 60)
 
+        balls0 : Signal [Boid]
+        balls0 = randomDrops 100 (spheres 100 fogMountains)
+
+        balls : Signal [Thing]
+        balls = map orient <~ folds [] moveDrops balls0 (fps 60)
+
         individuals : Signal [Thing]
         individuals = combine [
             ground,
@@ -57,4 +65,4 @@ demoThings =
             place  10 1.5 -10 <~ fogMountainsCube
             ]
     in
-        lift mapApply <| lift2 (++) individuals boids
+        lift mapApply <| lift2 (++) individuals (lift2 (++) boids balls)
