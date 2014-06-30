@@ -68,16 +68,8 @@ sphereMesh =
       npole = { position = vec3 0 1 0, coord = vec3 0 0 0 }
       spole = { position = vec3 0 -1 0, coord = vec3 0 1 0 }
 
-      nlat q = let x = sqrt (1-q*q) in { position = vec3 x q 0, coord = vec3 0 ((1-q)/2) 0 }
-      slat q = let x = sqrt (1-q*q) in { position = vec3 x (-q) 0, coord = vec3 0 ((1+q)/2) 0 }
-
-      mkTop pole v1 v2 = (pole, v1, v2)
-      ntop q =
-          let (band10, band11) = eights (nlat q)
-          in zipWith (mkTop npole) band10 band11
-      stop q =
-          let (band10, band11) = eights (slat q)
-          in zipWith (mkTop spole) band10 band11
+      nlat q = let x = sqrt (1-q*q) in { position = vec3 x (-q) 0, coord = vec3 0 ((1-q)/2) 0 }
+      slat q = let x = sqrt (1-q*q) in { position = vec3 x q 0, coord = vec3 0 ((1+q)/2) 0 }
 
       nband q1 q2 = 
           let
@@ -95,11 +87,9 @@ sphereMesh =
               band1L = zip3 band20 band11 band21
           in band1U ++ band1L
 
-      nband1 = nband (3/4) (1/2)
-      nband2 = nband (1/2) (1/4)
-      nband3 = nband (1/4) 0
-      sband1 = sband (3/4) (1/2)
-      sband2 = sband (1/2) (1/4)
-      sband3 = sband (1/4) 0
+      qs0 n = map (\x -> x/n) [0..n]
+      qs = map (sin . (\x -> x*pi/2)) (qs0 30)
+      nbands = concat (zipWith nband qs (drop 1 qs))
+      sbands = concat (zipWith sband qs (drop 1 qs))
   in
-      ntop (3/4) ++ nband1 ++ nband2 ++ nband3 ++ sband1 ++ sband2 ++ sband3 ++ stop (3/4)
+      nbands ++ sbands

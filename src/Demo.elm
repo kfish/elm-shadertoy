@@ -9,7 +9,7 @@ import Things.Ground (ground)
 import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
 import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Things.Sphere (cloudsSphere)
+import Things.Sphere (cloudsSphere, fogMountainsSphere)
 import Things.Teapot (teapot)
 import Shaders.VoronoiDistances (voronoiDistances)
 
@@ -49,11 +49,11 @@ demoThings =
         individuals = combine [
             ground,
             -- place   0   3   0 <~ teapot,
-            place   0   3   0 <~ cloudsSphere,
+            place   0   1   0 <~ fogMountainsSphere,
             place   5 1.5   1 <~ cd,
             lift2 (\x e -> tview (rotate (x/1000) (vec3 3 1 5)) . place  10   0  10 <| e) sinFoo (lift snd xvCube),
             -- place -10   0 -10 <~ fireCube,
-            lift2 (\y e -> place 0 y 0 e) s fireCube,
+            -- lift2 (\y e -> place 0 y 0 e) s fireCube,
             place  10 1.5 -10 <~ fogMountainsCube
             ]
     in
