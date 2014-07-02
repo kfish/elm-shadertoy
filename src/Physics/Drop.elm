@@ -29,13 +29,13 @@ randomDrop : Signal Thing -> Signal Drop
 randomDrop thing =
     let pos = (V3.add (vec3 0 30 0)) <~ randomVec3 4.0
     in
-        newDrop <~ pos ~ randomVec3 1.0 ~ thing
+        newDrop <~ pos ~ randomVec3 8.0 ~ thing
 
 randomDrops : Int -> Signal [Thing] -> Signal [Drop]
 randomDrops n things =
     let poss = map (V3.add (vec3 0 30 0)) <~ randomVec3s n 4.0
     in
-        zipWith3 newDrop <~ poss ~ randomVec3s n 1.0 ~ things
+        zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
 
 {-
 rule1 : Int -> Vec3 -> Drop -> Vec3 
@@ -59,10 +59,10 @@ rule3 n sumVel b =
 
 bounds : Drop -> Drop
 bounds b =
-    let bound vx x low high =
-            if (vx < 0 && x < low)
-                then (-vx)
-                else (if (vx > 0 && x > high) then (-vx) else vx)
+    let bound vs s low high = let dampVs = -vs * 0.99 in
+            if | vs < 0 && s < low  -> dampVs
+               | vs > 0 && s > high -> dampVs
+               | otherwise          -> vs
         (x,y,z) = V3.toTuple b.position
         (vx,vy,vz) = V3.toTuple b.velocity
     in { b | velocity <- vec3 (bound vx x -20 20) (bound vy y 1 100) (bound vz z -20 20) }
@@ -72,14 +72,6 @@ gravity d = vec3 0 -9.8 0
 
 boundVelocity : Vec3 -> Vec3
 boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
-
-{-
-randomDrops : Int -> Signal Thing -> Signal [Drop]
-randomDrops n0 thing =
-    let f n = if (n==0) then [] else randomDrop thing :: f (n-1)
-    in combine <| f n0
--}
-    
 
 moveDrops : Time -> [Drop] -> [Drop]
 moveDrops dt boids =
@@ -91,6 +83,6 @@ moveDrops dt boids =
         sumVel = foldl1 V3.add velocities
         gs = map gravity boids
         applyRules b g = { b |
-            velocity <- boundVelocity (b.velocity `V3.add` (V3.scale (dt / second) g)) }
+            velocity <- (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = zipWith applyRules boids gs
     in map (orientDrop . stepDrop dt . bounds) bs
