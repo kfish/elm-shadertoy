@@ -12,10 +12,11 @@ type Drop =
     , velocity : Vec3
     , orientation : Vec3
     , thing : Thing
+    , radius : Float
     }
 
 newDrop : Vec3 -> Vec3 -> Thing -> Drop
-newDrop pos vel thing = orientDrop (Drop pos vel (vec3 0 0 0) thing)
+newDrop pos vel thing = orientDrop (Drop pos vel (vec3 0 0 0) thing 1.0)
 
 orientDrop : Drop -> Drop
 orientDrop d =
@@ -65,7 +66,7 @@ bounds b =
                | otherwise          -> vs
         (x,y,z) = V3.toTuple b.position
         (vx,vy,vz) = V3.toTuple b.velocity
-    in { b | velocity <- vec3 (bound vx x -20 20) (bound vy y 1 100) (bound vz z -20 20) }
+    in { b | velocity <- vec3 (bound vx x -20 20) (bound vy y (b.radius) 100) (bound vz z -20 20) }
 
 gravity : Drop -> Vec3
 gravity d = vec3 0 -9.8 0
