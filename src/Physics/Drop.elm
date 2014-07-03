@@ -1,11 +1,14 @@
 module Physics.Drop where
 
+import Array
 import Math.Vector3 as V3
 import Math.Vector3 (Vec3, vec3)
 import Math.Matrix4 (..)
 import Math.RandomVector (..)
 
 import Engine (..)
+
+import Debug(log)
 
 type Drop =
     { position : Vec3
@@ -58,6 +61,28 @@ rule3 n sumVel b =
     in V3.scale (1/10) <| perceived_vel `V3.sub` b.velocity
 -}
 
+-- Run an update function over all combinations of 2 elements of an array
+updatePairs : (a -> a -> Maybe (a, a)) -> Array.Array a -> Array.Array a
+updatePairs f arr0 =
+    let len = Array.length arr0
+        -- update m n arr = log ("Updating ("++show m++","++show n++")") <| case f (Array.getOrFail m arr) (Array.getOrFail n arr) of
+        update m n arr = case f (Array.getOrFail m arr) (Array.getOrFail n arr) of
+            Nothing       -> arr
+            Just (vm, vn) -> Array.set m vm . Array.set n vn <| arr
+        row m arr = foldl (update m) arr [m+1..len-1]
+    in foldl row arr0 [0..len-1]
+
+collide : Time -> Drop -> Drop -> Maybe (Drop, Drop)
+collide dt a b =
+    let dist = V3.length(V3.sub b.position a.position) - a.radius - b.radius
+        mov = V3.scale (dt / second) (V3.sub b.velocity a.velocity)
+        standstill d = { d | velocity <- V3.scale 0.95 d.velocity }
+    in if | V3.length(mov) < dist -> Just (standstill a, standstill b)
+          | otherwise             -> Just (a, b)
+
+collisions : Time -> [Drop] -> [Drop]
+collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList
+
 bounds : Drop -> Drop
 bounds b =
     let bound vs s low high = let dampVs = -vs * 0.99 in
@@ -86,4 +111,4 @@ moveDrops dt boids =
         applyRules b g = { b |
             velocity <- (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = zipWith applyRules boids gs
-    in map (orientDrop . stepDrop dt . bounds) bs
+    in map (orientDrop . stepDrop dt) . collisions dt . (map bounds) <| bs
