@@ -48,7 +48,7 @@ demoThings =
         boids = map orient <~ folds [] moveBoids boids0 (fps 60)
 
         balls0 : Signal [Drop]
-        balls0 = randomDrops 5 (spheres 5 fogMountains)
+        balls0 = randomDrops 15 (spheres 15 fogMountains)
 
         balls : Signal [Thing]
         balls = map orient <~ folds [] moveDrops balls0 (fps 60)

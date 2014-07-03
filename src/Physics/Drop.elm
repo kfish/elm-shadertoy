@@ -72,13 +72,41 @@ updatePairs f arr0 =
         row m arr = foldl (update m) arr [m+1..len-1]
     in foldl row arr0 [0..len-1]
 
+{- Collision between two spheres
+   http://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php?page=2
+-}
 collide : Time -> Drop -> Drop -> Maybe (Drop, Drop)
 collide dt a b =
-    let dist = V3.length(V3.sub b.position a.position) - a.radius - b.radius
-        mov = V3.scale (dt / second) (V3.sub b.velocity a.velocity)
-        standstill d = { d | velocity <- V3.scale 0.95 d.velocity }
-    in if | V3.length(mov) < dist -> Just (standstill a, standstill b)
-          | otherwise             -> Just (a, b)
+    let -- Vector C from center of A to center of B
+        centerDisplacement = V3.sub b.position a.position
+        centerDistance = V3.length centerDisplacement
+
+        -- Distance between the closest surface points of the two spheres
+        surfaceDistance = centerDistance - a.radius - b.radius
+
+        -- Relative movement V in timestep dt
+        relativeMovement = V3.scale (dt / second) (V3.sub b.velocity a.velocity)
+
+        -- Collision is only possible if the magnitude of the relative movement is
+        -- larger than the distance between them
+        tooFar = V3.length(relativeMovement) < surfaceDistance
+
+        -- Are the spheres moving away from each other?
+        movingAway = V3.dot centerDisplacement relativeMovement <= 0
+
+        -- Distance D to closest point to B on V
+        distToPeri = V3.dot ({-N-}V3.normalize relativeMovement) ({-C-}centerDisplacement)
+        square x = x*x
+        -- Square F of the distance between A and B at the closest point on their
+        -- current trajectories
+        periSquared = square centerDistance - square distToPeri
+
+        -- Would the spheres collide at some point, if they maintained these velocities?
+        passBy = {-F-}periSquared <= square (a.radius + b.radius)
+
+        standstill d = { d | velocity <- V3.negate d.velocity }
+    in if | tooFar || movingAway || passBy -> Just (a,b)
+          | otherwise                      -> Just (standstill a, standstill b)
 
 collisions : Time -> [Drop] -> [Drop]
 collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList
