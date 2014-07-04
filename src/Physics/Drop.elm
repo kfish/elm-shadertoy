@@ -101,12 +101,24 @@ collide dt a b =
         -- current trajectories
         periSquared = square centerDistance - square distToPeri
 
+        sumRadii = a.radius + b.radius
+
         -- Would the spheres collide at some point, if they maintained these velocities?
-        passBy = {-F-}periSquared <= square (a.radius + b.radius)
+        passBy = {-F-}periSquared <= square sumRadii
+
+        -- T
+        ttt = square sumRadii - periSquared
+
+        distanceToCollision = distToPeri - sqrt ttt
+
+        -- Have we even moved far enough to collide?
+        notFarEnough = V3.length relativeMovement < distanceToCollision
 
         standstill d = { d | velocity <- V3.negate d.velocity }
-    in if | tooFar || movingAway || passBy -> Just (a,b)
-          | otherwise                      -> Just (standstill a, standstill b)
+        collidedPair = (standstill a, standstill b)
+
+    in if | tooFar || movingAway || passBy || notFarEnough -> Just (a,b)
+          | otherwise                                      -> Just collidedPair
 
 collisions : Time -> [Drop] -> [Drop]
 collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList
