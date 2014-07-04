@@ -87,6 +87,9 @@ collide dt a b =
         -- Relative movement V in timestep dt
         relativeMovement = V3.scale (dt / second) (V3.sub b.velocity a.velocity)
 
+        -- N: Normalized relative movement
+        normRelMovement = V3.normalize relativeMovement
+
         -- Collision is only possible if the magnitude of the relative movement is
         -- larger than the distance between them
         tooFar = V3.length(relativeMovement) < surfaceDistance
@@ -95,7 +98,7 @@ collide dt a b =
         movingAway = V3.dot centerDisplacement relativeMovement <= 0
 
         -- Distance D to closest point to B on V
-        distToPeri = V3.dot ({-N-}V3.normalize relativeMovement) ({-C-}centerDisplacement)
+        distToPeri = V3.dot {-N-}normRelMovement {-C-}centerDisplacement
         square x = x*x
         -- Square F of the distance between A and B at the closest point on their
         -- current trajectories
@@ -113,6 +116,9 @@ collide dt a b =
 
         -- Have we even moved far enough to collide?
         notFarEnough = V3.length relativeMovement < distanceToCollision
+
+        -- Relative movement vector of A to point of collision
+        collisionVectorA = V3.scale distanceToCollision normRelMovement
 
         standstill d = { d | velocity <- V3.negate d.velocity }
         collidedPair = (standstill a, standstill b)
