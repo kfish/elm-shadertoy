@@ -36,8 +36,8 @@ walk directions person =
     let moveDir = normalize (flatten (Model.direction person))
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
 
-        move = V3.scale (toFloat directions.y) moveDir
-        strafe = V3.scale (toFloat directions.x) strafeDir
+        move = V3.scale (3.0 * toFloat directions.y) moveDir
+        strafe = V3.scale (3.0 * toFloat directions.x) strafeDir
     in
         { person | velocity <- adjustVelocity (move `add` strafe) }
 

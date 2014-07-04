@@ -14,7 +14,7 @@ type Person =
     }
 
 eyeLevel : Float
-eyeLevel = 2
+eyeLevel = 10
 
 defaultPerson : Person
 defaultPerson =
