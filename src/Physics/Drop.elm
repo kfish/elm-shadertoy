@@ -90,7 +90,7 @@ collide dt a b =
         surfaceDistance = centerDistance - sumRadii
 
         -- Relative movement V in timestep dt
-        relativeMovement = V3.scale (dt / second) (V3.sub b.velocity a.velocity)
+        relativeMovement = V3.scale (dt / second) (V3.sub a.velocity b.velocity)
 
         -- N: Normalized relative movement
         normRelMovement = V3.normalize relativeMovement
@@ -101,56 +101,69 @@ collide dt a b =
 
         -- Are the spheres moving away from each other?
         movingAway = V3.dot centerDisplacement relativeMovement <= 0
+    in
+        case tooFar || movingAway of
+        True -> Just (a,b)
+        False -> let
 
-        -- Distance D to closest point to B on V
-        distanceToPeriA = V3.dot {-N-}normRelMovement {-C-}centerDisplacement
-        -- F == square of: the distance between A and B at the closest point on their
-        -- current trajectories
-        periSquared = square centerDistance - square distanceToPeriA
+          -- Distance D to closest point to B on V
+          distanceToPeriA = V3.dot {-N-}normRelMovement {-C-}centerDisplacement
+          -- F == square of: the distance between A and B at the closest point on their
+          -- current trajectories
+          periSquared = square centerDistance - square distanceToPeriA
 
-        -- Would the spheres collide at some point, if they maintained these velocities?
-        passBy = {-F-}periSquared > square sumRadii
+          -- Would the spheres collide at some point, if they maintained these velocities?
+          passBy = {-F-}periSquared > square sumRadii
+        in
+          case passBy of
+          True -> Just (a,b)
+          False -> let
 
-        -- T == square of: distanceToPeriA - distanceToCollisionA
-        ttt = square sumRadii - periSquared
+            -- T == square of: distanceToPeriA - distanceToCollisionA
+            ttt = square sumRadii - periSquared
 
-        -- The distance A actually travels before collision, taking radii into account
-        distanceToCollisionA = distanceToPeriA - sqrt ttt
+            -- The distance A actually travels before collision, taking radii into account
+            distanceToCollisionA = distanceToPeriA - sqrt ttt
+  
+            -- Have we even moved far enough to collide?
+            notFarEnough = V3.length relativeMovement < distanceToCollisionA
+          in
+            case notFarEnough of
+            True -> Just (a,b)
+            False -> let
+  
+              -- Relative movement vector of A to point of collision
+              relativeCollision = V3.scale distanceToCollisionA normRelMovement
 
-        -- Have we even moved far enough to collide?
-        notFarEnough = V3.length relativeMovement < distanceToCollisionA
+              -- Time taken before collision == collisionDelta * dt
+              collisionDelta = V3.length relativeCollision / V3.length relativeMovement
 
-        miss = tooFar || movingAway || passBy || notFarEnough
+              -- Movement vector of A to point of collision
+              collisionVectorA = V3.scale (collisionDelta * dt / second) a.velocity
 
-        -- Relative movement vector of A to point of collision
-        collisionVectorA = V3.scale distanceToCollisionA normRelMovement
+              -- Movement vector of B to point of collision
+              collisionVectorB = V3.scale (collisionDelta * dt / second) b.velocity
 
-        -- Time taken before collision == collisionDelta * dt
-        collisionDelta = V3.length collisionVectorA / V3.length relativeMovement
+              movedA = { a | position <- V3.add a.position collisionVectorA }
+              movedB = { b | position <- V3.add b.position collisionVectorB }
 
-        -- Relative movement vector of B to point of collision
-        collisionVectorB = V3.scale (collisionDelta * dt / second) b.velocity
+              -- Projection of movement onto new centerDisplacement
+              centerDisplacement' = V3.sub movedA.position movedB.position
+              nnn = V3.normalize centerDisplacement'
+              projA = V3.dot a.velocity nnn
+              projB = V3.dot b.velocity nnn
 
-        movedA = { a | position <- V3.add a.position collisionVectorA }
-        movedB = { b | position <- V3.add b.position collisionVectorB }
+              optimizedP = (2.0 * (projA - projB)) / (a.mass + b.mass)
 
-        -- Projection of movement onto centerDisplacement
-        nnn = V3.normalize centerDisplacement
-        projA = V3.dot a.velocity nnn
-        projB = V3.dot b.velocity nnn
+              newVelA = V3.sub a.velocity (V3.scale (optimizedP * b.mass) nnn)
+              newVelB = V3.add b.velocity (V3.scale (optimizedP * a.mass) nnn)
 
-        optimizedP = (2.0 * (projA - projB)) / (a.mass + b.mass)
+              -- XXX: Subsequent movement during this timestep should only move for
+              -- the remaining time (1.0-collisionDelta)*dt
 
-        newVelA = V3.sub a.velocity (V3.scale (optimizedP * b.mass) nnn)
-        newVelB = V3.add b.velocity (V3.scale (optimizedP * a.mass) nnn)
+              collidedPair = ({movedA | velocity <- newVelA }, { movedB | velocity <- newVelB })
 
-        -- XXX: Subsequent movement during this timestep should only move for
-        -- the remaining time (1.0-collisionDelta)*dt
-
-        collidedPair = ({movedA | velocity <- newVelA }, { movedB | velocity <- newVelB })
-
-    in if | miss      -> Just (a,b)
-          | otherwise -> Just collidedPair
+          in Just collidedPair
 
 collisions : Time -> [Drop] -> [Drop]
 collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList
