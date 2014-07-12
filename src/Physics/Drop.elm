@@ -42,26 +42,6 @@ randomDrops n things =
     in
         zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
 
-{-
-rule1 : Int -> Vec3 -> Drop -> Vec3 
-rule1 n sumPos b =
-    let perceived_scale = 1.0 / (toFloat (n-1))
-        perceived_center = V3.scale perceived_scale (sumPos `V3.sub` b.position)
-    in V3.scale (1/25) <| perceived_center `V3.sub` b.position
-
-rule2 : [Vec3] -> Drop -> Vec3
-rule2 poss b =
-    let f pos = let d = V3.distanceSquared pos b.position
-                in if (d > 0 && d < 10.0) then b.position `V3.sub` pos else vec3 0 0 0
-    in V3.scale (1/2) <| foldl1 V3.add (map f poss)
-
-rule3 : Int -> Vec3 -> Drop -> Vec3
-rule3 n sumVel b =
-    let perceived_scale = 1.0 / (toFloat (n-1))
-        perceived_vel = V3.scale perceived_scale (sumVel `V3.sub` b.velocity)
-    in V3.scale (1/10) <| perceived_vel `V3.sub` b.velocity
--}
-
 -- Run an update function over all combinations of 2 elements of an array
 updatePairs : (a -> a -> Maybe (a, a)) -> Array.Array a -> Array.Array a
 updatePairs f arr0 =
