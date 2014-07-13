@@ -10,6 +10,12 @@ import Engine (..)
 
 import Debug(log)
 
+type Moving a = { a | position : Vec3, velocity : Vec3 }
+type Massive a = { a | mass : Float }
+type Spherical a = { a | radius : Float }
+
+type TimeLeft a = { a | timeLeft : Float }
+
 type Drop =
     { position : Vec3
     , velocity : Vec3
@@ -29,6 +35,16 @@ orientDrop d =
 
 stepDrop : Time -> Drop -> Drop
 stepDrop dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
+
+-- timeStep : TimeLeft (Moving a) -> Moving a
+timeStep : TimeLeft Drop -> TimeLeft Drop
+timeStep x = { x  | position = x.position `V3.add` (V3.scale (x.timeLeft / second) x.velocity) }
+
+stripTimeStep : TimeLeft a -> a
+stripTimeStep x = { x - timeLeft }
+
+setTimeLeft : Time -> a -> TimeLeft a
+setTimeLeft dt x = { x | timeLeft = dt }
 
 randomDrop : Signal Thing -> Signal Drop
 randomDrop thing =
@@ -56,7 +72,8 @@ updatePairs f arr0 =
 {- Collision between two spheres
    http://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php?page=2
 -}
-collide : Time -> Drop -> Drop -> Maybe (Drop, Drop)
+collide : Time -> TimeLeft (Massive (Spherical (Moving a))) -> TimeLeft (Massive (Spherical (Moving a)))
+    -> Maybe (TimeLeft (Massive (Spherical (Moving a))), TimeLeft (Massive (Spherical (Moving a))))
 collide dt a b =
     let square x = x*x
 
@@ -83,7 +100,7 @@ collide dt a b =
         movingAway = V3.dot centerDisplacement relativeMovement <= 0
     in
         case tooFar || movingAway of
-        True -> Just (a,b)
+        True -> Nothing
         False -> let
 
           -- Distance D to closest point to B on V
@@ -96,7 +113,7 @@ collide dt a b =
           passBy = {-F-}periSquared > square sumRadii
         in
           case passBy of
-          True -> Just (a,b)
+          True -> Nothing
           False -> let
 
             -- T == square of: distanceToPeriA - distanceToCollisionA
@@ -109,7 +126,7 @@ collide dt a b =
             notFarEnough = V3.length relativeMovement < distanceToCollisionA
           in
             case notFarEnough of
-            True -> Just (a,b)
+            True -> Nothing
             False -> let
   
               -- Relative movement vector of A to point of collision
@@ -124,8 +141,10 @@ collide dt a b =
               -- Movement vector of B to point of collision
               collisionVectorB = V3.scale (collisionDelta * dt / second) b.velocity
 
-              movedA = { a | position <- V3.add a.position collisionVectorA }
-              movedB = { b | position <- V3.add b.position collisionVectorB }
+              timeLeft = (1.0 - collisionDelta) * dt
+
+              movedA = { a | position <- V3.add a.position collisionVectorA, timeLeft <- timeLeft }
+              movedB = { b | position <- V3.add b.position collisionVectorB, timeLeft <- timeLeft }
 
               -- Projection of movement onto new centerDisplacement
               centerDisplacement' = V3.sub movedA.position movedB.position
@@ -145,8 +164,8 @@ collide dt a b =
 
           in Just collidedPair
 
-collisions : Time -> [Drop] -> [Drop]
-collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList
+collisions : Time -> [Drop] -> [TimeLeft Drop]
+collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
 
 bounds : Drop -> Drop
 bounds b =
@@ -176,4 +195,4 @@ moveDrops dt boids =
         applyRules b g = { b |
             velocity <- (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = zipWith applyRules boids gs
-    in map (orientDrop . stepDrop dt) . collisions dt . (map bounds) <| bs
+    in map (orientDrop . stripTimeStep . timeStep) . collisions dt . (map bounds) <| bs
