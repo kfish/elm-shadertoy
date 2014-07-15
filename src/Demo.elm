@@ -9,6 +9,7 @@ import Things.Ground (ground)
 import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
 import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
+import Things.Portal (plasmaPortal)
 import Things.Sphere (spheres, cloudsSphere, fogMountainsSphere)
 import Things.Teapot (teapot)
 import Shaders.FogMountains (fogMountains)
@@ -57,6 +58,7 @@ demoThings =
         individuals = combine [
             ground,
             -- place   0   3   0 <~ teapot,
+            place   3   3   1 <~ plasmaPortal,
             place   0   1   0 <~ fogMountainsSphere,
             place   5 1.5   1 <~ cd,
             lift2 (\x e -> tview (rotate (x/1000) (vec3 3 1 5)) . place  10   0  10 <| e) sinFoo (lift snd xvCube),
