@@ -18,8 +18,11 @@ type Things = (Perception -> [Entity])
 mapApply : [(a -> b)] -> a -> [b]
 mapApply fs x = map (\f -> f x) fs
 
-gather : [Signal (a -> b)] -> Signal (a -> [b])
-gather = lift mapApply . combine
+gather1 : [Signal (a -> b)] -> Signal (a -> [b])
+gather1 = lift mapApply . combine
+
+gather : [ Signal [(a -> b)] ] -> Signal (a -> [b])
+gather = lift (mapApply . concat) . combine
 
 tview : (Mat4 -> Mat4) -> (Perception -> Entity) -> Perception -> Entity
 tview f obj p = obj { p | viewMatrix <- f p.viewMatrix }

@@ -67,4 +67,4 @@ demoThings =
             place  10 1.5 -10 <~ fogMountainsCube
             ]
     in
-        lift mapApply <| lift2 (++) individuals (lift2 (++) boids balls)
+        gather [individuals, boids, balls]
