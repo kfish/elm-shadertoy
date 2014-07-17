@@ -33,8 +33,8 @@ diamond vertexShader fragmentShader p =
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
     in
-        entity vertexShader fragmentShader diamondMesh
-            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }
+        [entity vertexShader fragmentShader diamondMesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
 unfold : Int -> (a -> a) -> a -> [a]
 unfold n f x = if n==0 then [] else

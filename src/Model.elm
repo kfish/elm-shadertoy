@@ -6,6 +6,18 @@ data Inputs
     = TimeDelta Bool {x:Int, y:Int} Float
     | Mouse (Int,Int)
 
+-- TODO: Make a new model type with both Person and Things
+-- but the Things are passed in and can be added/subtracted
+-- ... and maybe set portals separately?
+-- ... how to handle collisions between person and things?
+
+{-
+type World =
+    { person : Person
+    , things : [Thing]
+    }
+-}
+
 type Person =
     { position : Vec3
     , velocity : Vec3

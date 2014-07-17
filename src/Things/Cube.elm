@@ -43,8 +43,8 @@ cube vertexShader fragmentShader p =
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
     in
-        entity vertexShader fragmentShader mesh
-            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }
+        [entity vertexShader fragmentShader mesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
 -- The mesh for a crate
 mesh : [Triangle Vertex]

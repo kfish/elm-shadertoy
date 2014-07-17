@@ -12,11 +12,50 @@ type Perception = {
     viewMatrix : Mat4
 }
 
-type Thing = (Perception -> Entity)
+type Thing = (Perception -> [Entity])
 type Things = (Perception -> [Entity])
+
+{-
+
+-- TODO: remove single-entity Thing type, always make a [Entity]
+-- because, really ... objects aren't all one shader
+
+-- TODO: Obstructions: tag with a time, take only newest obstruction?
+actualObstruction = take 1 . sortBy time . catMaybes . map .obstruct things
+
+type Thing = {
+    obstruct : Motion -> Maybe Obstruction,
+    perceive : Perception -> [Entity]
+}
+
+type Motion = {
+    displacement : Vec3,
+    mass? velocity?
+}
+
+data Obstruction =
+    Obstruct Vec3 -- player stops at pos
+  | Bounce Vec3 Vec3 -- player stops at pos, new velocity
+  | Hyperlink URL -- new href
+
+typical implementation:
+
+fooThing : Signal Thing
+fooThing = lift2 Thing fooObstruct fooPerceive
+
+fooObstruct : Motion -> Maybe Obstruction
+fooObstruct move = ...
+
+fooPerceive : Perception -> [Entity]
+fooPerceive p = ...
+
+-}
 
 mapApply : [(a -> b)] -> a -> [b]
 mapApply fs x = map (\f -> f x) fs
+
+mapApply2 : [(a -> [b])] -> a -> [b]
+mapApply2 fs x = concat <| map (\f -> f x) fs
 
 gather1 : [Signal (a -> b)] -> Signal (a -> [b])
 gather1 = lift mapApply . combine
@@ -24,10 +63,13 @@ gather1 = lift mapApply . combine
 gather : [ Signal [(a -> b)] ] -> Signal (a -> [b])
 gather = lift (mapApply . concat) . combine
 
-tview : (Mat4 -> Mat4) -> (Perception -> Entity) -> Perception -> Entity
+gather2 : [ Signal [(a -> [b])] ] -> Signal (a -> [b])
+gather2 = lift (mapApply2 . concat) . combine
+
+tview : (Mat4 -> Mat4) -> Thing -> Thing
 tview f obj p = obj { p | viewMatrix <- f p.viewMatrix }
 
-place : Float -> Float -> Float -> (Perception -> Entity) -> Perception -> Entity
+place : Float -> Float -> Float -> Thing -> Thing
 -- place x y z obj p = obj { p | viewMatrix <- translate3 x y z p.viewMatrix }
 place x y z = tview (translate3 x y z)
 

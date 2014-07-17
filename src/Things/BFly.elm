@@ -37,8 +37,10 @@ bfly vertexShader fragmentShader flapStart p =
         flapL = makeRotate (-flap * 3*pi/8) (vec3 0 0 1)
         flapR = makeRotate (flap * 3*pi/8) (vec3 0 0 1)
     in
-        entity vertexShader fragmentShader mesh
-            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix, flapL=flapL, flapR=flapR }
+        [entity vertexShader fragmentShader mesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix,
+              flapL=flapL, flapR=flapR }
+        ]
 
 mesh : [Triangle Vertex]
 mesh =

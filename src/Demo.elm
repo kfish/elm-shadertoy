@@ -67,4 +67,4 @@ demoThings =
             place  10 1.5 -10 <~ fogMountainsCube
             ]
     in
-        gather [individuals, boids, balls]
+        gather2 [individuals, boids, balls]
