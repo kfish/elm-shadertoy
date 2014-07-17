@@ -27,7 +27,7 @@ folds dfl step state input =
             Just b -> Just (g is b)
     in maybe dfl id <~ foldp (f step) Nothing (lift2 (,) state input)
 
-demoThings : Signal Things
+demoThings : Signal Thing
 demoThings =
     let
         isOdd x = (floor x `mod` 2) == 0
@@ -67,4 +67,4 @@ demoThings =
             place  10 1.5 -10 <~ fogMountainsCube
             ]
     in
-        gather2 [individuals, boids, balls]
+        gather [individuals, boids, balls]
