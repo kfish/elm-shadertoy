@@ -42,7 +42,7 @@ person = foldp Update.step Model.defaultPerson inputs
 main : Signal Element
 main = world Demo.demoThings
 
-world : Signal (Perception -> [Entity]) -> Signal Element
+world : Signal [Thing] -> Signal Element
 world entities =
   let t = foldp (+) 0 (fps 60)
       wh = Window.dimensions

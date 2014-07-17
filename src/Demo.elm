@@ -27,7 +27,7 @@ folds dfl step state input =
             Just b -> Just (g is b)
     in maybe dfl id <~ foldp (f step) Nothing (lift2 (,) state input)
 
-demoThings : Signal Thing
+demoThings : Signal [Thing]
 demoThings =
     let
         isOdd x = (floor x `mod` 2) == 0
