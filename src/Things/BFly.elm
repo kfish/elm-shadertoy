@@ -28,7 +28,11 @@ bflys n fragmentShader = map (bfly bflyVertex fragmentShader . (\x -> x * second
 voronoiBFly : Signal Thing
 voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (constant 7))
 
-bfly vertexShader fragmentShader flapStart p =
+bfly vertexShader fragmentShader flapStart =
+    let see = seeBFly vertexShader fragmentShader flapStart
+    in Thing (vec3 7 0 4) (vec3 0 0 1) see
+
+seeBFly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         -- s = log (show flapStart) <| inSeconds (p.globalTime + flapStart)

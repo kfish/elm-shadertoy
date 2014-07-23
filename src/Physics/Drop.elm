@@ -10,34 +10,25 @@ import Engine (..)
 
 import Debug(log)
 
-type Moving a = { a | position : Vec3, velocity : Vec3 }
-type Massive a = { a | mass : Float }
-type Spherical a = { a | radius : Float }
-
 type TimeLeft a = { a | timeLeft : Float }
 
-type Drop =
-    { position : Vec3
-    , velocity : Vec3
-    , orientation : Vec3
-    , thing : Thing
-    , radius : Float
-    , mass : Float
-    }
+type Drop a = Massive (Spherical (Moving a))
 
-newDrop : Vec3 -> Vec3 -> Thing -> Drop
-newDrop pos vel thing = orientDrop (Drop pos vel (vec3 0 0 0) thing 1.0 1.0)
+-- newDrop : Vec3 -> Vec3 -> a -> Drop a
+newDrop pos vel thing = orientDrop
+    { thing | position <- pos, velocity <- vel, radius <- 1.0, mass <- 1.0 }
+-- { positionupos vel (vec3 0 0 0) thing 1.0 1.0 }
 
-orientDrop : Drop -> Drop
+orientDrop : Drop a -> Drop a
 orientDrop d =
     let v = V3.toRecord d.velocity
     in { d | orientation <- V3.normalize (vec3 v.x 0 v.z) }
 
-stepDrop : Time -> Drop -> Drop
+stepDrop : Time -> Drop a -> Drop a
 stepDrop dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
 -- timeStep : TimeLeft (Moving a) -> Moving a
-timeStep : TimeLeft Drop -> TimeLeft Drop
+timeStep : TimeLeft (Drop a) -> TimeLeft (Drop a)
 timeStep x = { x  | position = x.position `V3.add` (V3.scale (x.timeLeft / second) x.velocity) }
 
 stripTimeStep : TimeLeft a -> a
@@ -46,13 +37,13 @@ stripTimeStep x = { x - timeLeft }
 setTimeLeft : Time -> a -> TimeLeft a
 setTimeLeft dt x = { x | timeLeft = dt }
 
-randomDrop : Signal Thing -> Signal Drop
+-- randomDrop : Signal a -> Signal (Drop a)
 randomDrop thing =
     let pos = (V3.add (vec3 0 30 0)) <~ randomVec3 4.0
     in
         newDrop <~ pos ~ randomVec3 8.0 ~ thing
 
-randomDrops : Int -> Signal [Thing] -> Signal [Drop]
+-- randomDrops : Int -> Signal [a] -> Signal [Drop a]
 randomDrops n things =
     let poss = map (V3.add (vec3 0 30 0)) <~ randomVec3s n 4.0
     in
@@ -164,10 +155,10 @@ collide dt a b =
 
           in Just collidedPair
 
-collisions : Time -> [Drop] -> [TimeLeft Drop]
+collisions : Time -> [Drop a] -> [TimeLeft (Drop a)]
 collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
 
-bounds : Drop -> Drop
+bounds : Drop a -> Drop a
 bounds b =
     let bound vs s low high = let dampVs = -vs * 0.99 in
             if | vs < 0 && s < low  -> dampVs
@@ -177,13 +168,13 @@ bounds b =
         (vx,vy,vz) = V3.toTuple b.velocity
     in { b | velocity <- vec3 (bound vx x -20 20) (bound vy y (b.radius) 100) (bound vz z -20 20) }
 
-gravity : Drop -> Vec3
-gravity d = vec3 0 -9.8 0
+gravity : a -> Vec3
+gravity _ = vec3 0 -9.8 0
 
 boundVelocity : Vec3 -> Vec3
 boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
 
-moveDrops : Time -> [Drop] -> [Drop]
+moveDrops : Time -> [Drop a] -> [Drop a]
 moveDrops dt boids =
     let
         nboids = length boids

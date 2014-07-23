@@ -7,55 +7,51 @@ import Math.RandomVector (..)
 
 import Engine (..)
 
-type Boid =
-    { position : Vec3
-    , velocity : Vec3
-    , orientation : Vec3
-    , thing : Thing
-    }
+type Boid a = Moving a
 
-newBoid : Vec3 -> Vec3 -> Thing -> Boid
-newBoid pos vel thing = orientBoid (Boid pos vel (vec3 0 0 0) thing)
+-- newBoid : Vec3 -> Vec3 -> a -> Boid a
+newBoid pos vel thing = orientBoid
+    { thing | position <- pos, velocity <- vel }
 
-orientBoid : Boid -> Boid
+orientBoid : Boid a -> Boid a
 orientBoid b =
     let v = V3.toRecord b.velocity
     in { b | orientation <- V3.normalize (vec3 v.x (v.y/10) v.z) }
 
-stepBoid : Time -> Boid -> Boid
+stepBoid : Time -> Boid a -> Boid a
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
-randomBoid : Signal Thing -> Signal Boid
+-- randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
-    let pos = (V3.add (vec3 7 8 4)) <~ randomVec3 4.0
+    let pos = lift2 V3.add (lift .position thing) (randomVec3 4.0)
     in
         newBoid <~ pos ~ randomVec3 1.0 ~ thing
 
-randomBoids : Int -> Signal [Thing] -> Signal [Boid]
+-- randomBoids : Int -> Signal [Thing] -> Signal [Boid a]
 randomBoids n things =
     let poss = map (V3.add (vec3 7 8 4)) <~ randomVec3s n 4.0
     in
         zipWith3 newBoid <~ poss ~ randomVec3s n 1.0 ~ things
 
-rule1 : Int -> Vec3 -> Boid -> Vec3 
+rule1 : Int -> Vec3 -> Boid a -> Vec3 
 rule1 n sumPos b =
     let perceived_scale = 1.0 / (toFloat (n-1))
         perceived_center = V3.scale perceived_scale (sumPos `V3.sub` b.position)
     in V3.scale (1/25) <| perceived_center `V3.sub` b.position
 
-rule2 : [Vec3] -> Boid -> Vec3
+rule2 : [Vec3] -> Boid a -> Vec3
 rule2 poss b =
     let f pos = let d = V3.distanceSquared pos b.position
                 in if (d > 0 && d < 10.0) then b.position `V3.sub` pos else vec3 0 0 0
     in V3.scale (1/2) <| foldl1 V3.add (map f poss)
 
-rule3 : Int -> Vec3 -> Boid -> Vec3
+rule3 : Int -> Vec3 -> Boid a -> Vec3
 rule3 n sumVel b =
     let perceived_scale = 1.0 / (toFloat (n-1))
         perceived_vel = V3.scale perceived_scale (sumVel `V3.sub` b.velocity)
     in V3.scale (1/10) <| perceived_vel `V3.sub` b.velocity
 
-bounds : Boid -> Vec3
+bounds : Boid a -> Vec3
 bounds b =
     let bound x low high = if (x < low) then 1 else (if x > high then -1 else 0)
         (x,y,z) = V3.toTuple b.position
@@ -72,7 +68,7 @@ randomBoids n0 thing =
 -}
     
 
-moveBoids : Time -> [Boid] -> [Boid]
+moveBoids : Time -> [Boid a] -> [Boid a]
 moveBoids dt boids =
     let
         nboids = length boids

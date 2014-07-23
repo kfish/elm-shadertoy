@@ -33,26 +33,28 @@ demoThings =
         isOdd x = (floor x `mod` 2) == 0
         ifelse cond x y = if cond then x else y
         switchy = isOdd <~ foldp (+) 0 (fps 1)
-        cd = lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
+        cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
 
         sinLog x = sin (x/1000)
         sinFoo = foldp (+) 0 (fps 60)
         s = sinLog <~ sinFoo
 
-        boid0 : Signal Boid
+        boid0 : Signal (Boid {})
         boid0 = randomBoid plasmaCube
 
-        boids0 : Signal [Boid]
+        boids0 : Signal [Boid {}]
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
         boids : Signal [Thing]
-        boids = map orient <~ folds [] moveBoids boids0 (fps 60)
+        -- boids = map orient <~ folds [] moveBoids boids0 (fps 60)
+        boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 
-        balls0 : Signal [Drop]
+        -- balls0 : Signal [Drop]
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 
         balls : Signal [Thing]
-        balls = map orient <~ folds [] moveDrops balls0 (fps 60)
+        -- balls = map orient <~ folds [] moveDrops balls0 (fps 60)
+        balls = map extractThing <~ folds [] moveDrops balls0 (fps 60)
 
         individuals : Signal [Thing]
         individuals = combine [

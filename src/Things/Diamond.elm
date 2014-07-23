@@ -23,12 +23,16 @@ cloudsDiamond = constant <| diamond worldVertex clouds
 fogMountainsDiamond : Signal Thing
 fogMountainsDiamond = constant <| diamond worldVertex fogMountains
 
+diamond vertexShader fragmentShader =
+    let see = seeDiamond vertexShader fragmentShader
+    in Thing (vec3 0 0 0) (vec3 0 0 1) see
+
 -- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 
 -- diamond : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
 -- diamond : Shader attributes (ShadertoyUniforms {}) varyings -> Shader {} (ShadertoyUniforms {})  varyings -> Perception -> Entity
-diamond vertexShader fragmentShader p =
+seeDiamond vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime

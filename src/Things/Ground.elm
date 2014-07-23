@@ -9,11 +9,10 @@ import Engine (..)
 type Vertex = { position:Vec3, color:Vec3 }
 
 ground : Signal Thing
-ground = constant <| \p -> groundEntities p.viewMatrix
+ground = constant <| Thing (vec3 0 0 0) (vec3 0 0 1) seeGround
 
-groundEntities : Mat4 -> [Entity]
-groundEntities view =
-    [entity vertexShader fragmentShader groundMesh { view=view }]
+seeGround p =
+    [entity vertexShader fragmentShader groundMesh { view=p.viewMatrix }]
 
 
 -- Help create colors as Vectors

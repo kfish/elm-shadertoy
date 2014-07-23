@@ -12,7 +12,25 @@ type Perception = {
     viewMatrix : Mat4
 }
 
-type Thing = (Perception -> [Entity])
+type See = Perception -> [Entity]
+
+type Visible a = { a | see : See }
+
+type Oriented a = { a | position : Vec3, orientation : Vec3 }
+type Moving a = Oriented { a | velocity : Vec3 }
+type Massive a = { a | mass : Float }
+type Spherical a = { a | radius : Float }
+
+
+data Thing = Thing Vec3 Vec3 See
+{-
+    position : Vec3,
+    orientation : Vec3,
+    see : See
+-} 
+
+extractThing : Oriented (Visible a) -> Thing
+extractThing x = Thing x.position x.orientation x.see
 
 {-
 
@@ -53,19 +71,20 @@ mapApply fs x = concat <| map (\f -> f x) fs
 gather : [ Signal [(a -> [b])] ] -> Signal [(a -> [b])]
 gather = lift concat . combine
 
-tview : (Mat4 -> Mat4) -> Thing -> Thing
-tview f obj p = obj { p | viewMatrix <- f p.viewMatrix }
+tview : (Mat4 -> Mat4) -> See -> See
+tview f see p = see { p | viewMatrix <- f p.viewMatrix }
 
 place : Float -> Float -> Float -> Thing -> Thing
-place x y z = tview (translate3 x y z)
+place x y z (Thing _ o s) = Thing (vec3 x y z) o s
 
-orient : { r | thing:Thing, position:Vec3, orientation:Vec3 } -> Thing
-orient o =
+-- orient : { r | thing:Thing, position:Vec3, orientation:Vec3 } -> See
+orient : Thing -> See
+orient (Thing position orientation see) =
     let z_axis = vec3 0 0 1
-        rot_angle = 0 - acos (dot o.orientation z_axis)
-        rot_axis = normalize (cross o.orientation z_axis)
+        rot_angle = 0 - acos (dot orientation z_axis)
+        rot_axis = normalize (cross orientation z_axis)
     in
-        tview (translate o.position) . tview (rotate rot_angle rot_axis) <| o.thing
+        tview (translate position) . tview (rotate rot_angle rot_axis) <| see
 
 
 look : (Int,Int) -> Model.Person -> Mat4
@@ -76,7 +95,7 @@ look (w,h) person =
 scene : [Thing] -> (Int,Int) -> Time -> Model.Person -> Element
 scene things (w,h) t person =
   let
-    see = mapApply things
+    see = mapApply (map orient things)
     p = { viewMatrix = look (w,h) person, globalTime = t, resolution = (w,h) }
   in
     layers [ color (rgb 135 206 235) (spacer w h)

@@ -18,27 +18,32 @@ import Engine (..)
 import Char (..)
 import Keyboard (isDown)
 
-cloudsCube : Signal Thing
+-- cloudsCube : Signal Thing
 cloudsCube = constant <| cube worldVertex clouds
 
-fireCube : Signal Thing
+-- fireCube : Signal Thing
 fireCube = constant <| cube worldVertex fire
 
-fogMountainsCube : Signal Thing
+-- fogMountainsCube : Signal Thing
 fogMountainsCube = constant <| cube worldVertex fogMountains
 
-plasmaCube : Signal Thing
+-- plasmaCube : Signal Thing
 plasmaCube = constant <| cube worldVertex simplePlasma
 
-voronoiCube : Signal Thing
+-- voronoiCube : Signal Thing
 voronoiCube = constant <| cube worldVertex voronoiDistances
 
-xvCube : Signal (Bool, Thing)
+-- xvCube : Signal (Bool, Thing)
 xvCube = lift2 (,) (isDown (toCode 'x')) voronoiCube
+
+-- cube : Oriented (Visible {})
+cube vertexShader fragmentShader =
+    let see = seeCube vertexShader fragmentShader
+    in { position = vec3 0 0 0, orientation = vec3 0 0 1, see = see }
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity
-cube vertexShader fragmentShader p =
+seeCube vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime

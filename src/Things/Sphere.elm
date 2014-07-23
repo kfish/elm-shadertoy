@@ -20,19 +20,23 @@ spheres n fragmentShader = map (always (sphere worldVertex fragmentShader))
     <~ floatList (constant n)
 
 -- cloudsSphere : (Int,Int) -> Time -> Mat4 -> Entity
-cloudsSphere : Signal Thing
+cloudsSphere : Signal (Oriented (Visible {}))
 cloudsSphere = constant <| sphere worldVertex clouds
 
 -- fogMountainsSphere : (Int,Int) -> Time -> Mat4 -> Entity
-fogMountainsSphere : Signal Thing
+fogMountainsSphere : Signal (Oriented (Visible {}))
 fogMountainsSphere = constant <| sphere worldVertex fogMountains
 
--- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
+sphere vertexShader fragmentShader =
+    let see = seeSphere vertexShader fragmentShader
+    in { position = vec3 0 0 0, orientation = vec3 0 0 1, see = see }
+
+type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 
 -- sphere : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Entity
 -- sphere : Shader attributes (ShadertoyUniforms {}) varyings -> Shader {} (ShadertoyUniforms {})  varyings -> Perception -> Entity
-sphere vertexShader fragmentShader p =
+seeSphere vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime

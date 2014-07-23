@@ -36,9 +36,13 @@ voronoiPortal = constant <| portal worldVertex voronoiDistances
 xvPortal : Signal (Bool, Thing)
 xvPortal = lift2 (,) (isDown (toCode 'x')) voronoiPortal
 
+portal vertexShader fragmentShader =
+    let see = seePortal vertexShader fragmentShader
+    in Thing (vec3 0 0 0) (vec3 0 0 1) see
+
 -- portal : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity
-portal vertexShader fragmentShader p =
+seePortal vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
