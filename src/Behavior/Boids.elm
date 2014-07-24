@@ -10,8 +10,9 @@ import Engine (..)
 type Boid a = Moving a
 
 -- newBoid : Vec3 -> Vec3 -> a -> Boid a
-newBoid pos vel thing = orientBoid
-    { thing | position <- pos, velocity <- vel }
+newBoid pos vel thing0 =
+    let thing = { thing0 | position <- pos }
+    in orientBoid { thing | velocity = vel }
 
 orientBoid : Boid a -> Boid a
 orientBoid b =

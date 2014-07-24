@@ -16,16 +16,16 @@ import Model
 import Engine (..)
 
 -- cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
-cloudsDiamond : Signal Thing
+-- cloudsDiamond : Signal Thing
 cloudsDiamond = constant <| diamond worldVertex clouds
 
 -- fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
-fogMountainsDiamond : Signal Thing
+-- fogMountainsDiamond : Signal Thing
 fogMountainsDiamond = constant <| diamond worldVertex fogMountains
 
 diamond vertexShader fragmentShader =
     let see = seeDiamond vertexShader fragmentShader
-    in Thing (vec3 0 0 0) (vec3 0 0 1) see
+    in { position = (vec3 0 0 0), orientation = (vec3 0 0 1), see = see }
 
 -- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 

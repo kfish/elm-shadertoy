@@ -24,7 +24,7 @@ cloudsSphere : Signal (Oriented (Visible {}))
 cloudsSphere = constant <| sphere worldVertex clouds
 
 -- fogMountainsSphere : (Int,Int) -> Time -> Mat4 -> Entity
-fogMountainsSphere : Signal (Oriented (Visible {}))
+-- fogMountainsSphere : Signal (Oriented (Visible a))
 fogMountainsSphere = constant <| sphere worldVertex fogMountains
 
 sphere vertexShader fragmentShader =

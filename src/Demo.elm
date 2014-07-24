@@ -35,14 +35,10 @@ demoThings =
         switchy = isOdd <~ foldp (+) 0 (fps 1)
         cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
 
-        sinLog x = sin (x/1000)
-        sinFoo = foldp (+) 0 (fps 60)
-        s = sinLog <~ sinFoo
-
-        boid0 : Signal (Boid {})
+        boid0 : Signal (Visible (Boid {}))
         boid0 = randomBoid plasmaCube
 
-        boids0 : Signal [Boid {}]
+        boids0 : Signal [Visible (Boid {})]
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
         boids : Signal [Thing]
@@ -59,14 +55,13 @@ demoThings =
         individuals : Signal [Thing]
         individuals = combine [
             ground,
-            -- place   0   3   0 <~ teapot,
-            place   3   3   1 <~ plasmaPortal,
-            place   0   1   0 <~ fogMountainsSphere,
+            -- -- place   0   3   0 <~ teapot,
+            place   3   3   1 <~ (extractThing <~ plasmaPortal),
+            place   0   1   0 <~ (extractThing <~ fogMountainsSphere),
             place   5 1.5   1 <~ cd,
-            lift2 (\x e -> tview (rotate (x/1000) (vec3 3 1 5)) . place  10   0  10 <| e) sinFoo (lift snd xvCube),
-            -- place -10   0 -10 <~ fireCube,
+            place -10   0 -10 <~ (extractThing <~ fireCube),
             -- lift2 (\y e -> place 0 y 0 e) s fireCube,
-            place  10 1.5 -10 <~ fogMountainsCube
+            place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
         gather [individuals, boids, balls]

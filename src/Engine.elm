@@ -68,7 +68,7 @@ fooPerceive p = ...
 mapApply : [(a -> [b])] -> a -> [b]
 mapApply fs x = concat <| map (\f -> f x) fs
 
-gather : [ Signal [(a -> [b])] ] -> Signal [(a -> [b])]
+gather : [ Signal [a] ] -> Signal [a]
 gather = lift concat . combine
 
 tview : (Mat4 -> Mat4) -> See -> See

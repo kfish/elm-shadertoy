@@ -1,4 +1,4 @@
-module Things.Portal (cloudsPortal, firePortal, fogMountainsPortal, plasmaPortal, voronoiPortal, xvPortal, portal) where
+module Things.Portal (cloudsPortal, firePortal, fogMountainsPortal, plasmaPortal, voronoiPortal, portal) where
 
 import Math.Vector2 (Vec2)
 import Math.Vector3 (..)
@@ -18,27 +18,24 @@ import Engine (..)
 import Char (..)
 import Keyboard (isDown)
 
-cloudsPortal : Signal Thing
+-- cloudsPortal : Signal Thing
 cloudsPortal = constant <| portal worldVertex clouds
 
-firePortal : Signal Thing
+-- firePortal : Signal Thing
 firePortal = constant <| portal worldVertex fire
 
-fogMountainsPortal : Signal Thing
+-- fogMountainsPortal : Signal Thing
 fogMountainsPortal = constant <| portal worldVertex fogMountains
 
-plasmaPortal : Signal Thing
+-- plasmaPortal : Signal Thing
 plasmaPortal = constant <| portal worldVertex simplePlasma
 
-voronoiPortal : Signal Thing
+-- voronoiPortal : Signal Thing
 voronoiPortal = constant <| portal worldVertex voronoiDistances
-
-xvPortal : Signal (Bool, Thing)
-xvPortal = lift2 (,) (isDown (toCode 'x')) voronoiPortal
 
 portal vertexShader fragmentShader =
     let see = seePortal vertexShader fragmentShader
-    in Thing (vec3 0 0 0) (vec3 0 0 1) see
+    in { position = (vec3 0 0 0), orientation = (vec3 0 0 1), see = see }
 
 -- portal : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity

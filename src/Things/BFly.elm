@@ -16,21 +16,21 @@ import Debug (log)
 
 type Vertex = { position:Vec3, coord:Vec3, wing:Vec3 }
 
-fireBFly : Signal Thing
+fireBFly : Signal (Visible (Oriented {}))
 fireBFly = bfly bflyVertex fire <~ ((\x -> x * second * pi*2) <~ float (constant 7))
 
-voronoiBFlys : Int -> Signal [Thing]
+voronoiBFlys : Int -> Signal [Visible (Oriented {})]
 voronoiBFlys n = map (bfly bflyVertex voronoiDistances . (\x -> x * second * pi * 2)) <~ floatList (constant n)
 
 -- bflys : Int -> Shader {} a -> Signal [Thing]
 bflys n fragmentShader = map (bfly bflyVertex fragmentShader . (\x -> x * second * pi * 2)) <~ floatList (constant n)
 
-voronoiBFly : Signal Thing
+voronoiBFly : Signal (Visible (Oriented {}))
 voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (constant 7))
 
 bfly vertexShader fragmentShader flapStart =
     let see = seeBFly vertexShader fragmentShader flapStart
-    in Thing (vec3 7 0 4) (vec3 0 0 1) see
+    in { position = (vec3 7 0 4), orientation = (vec3 0 0 1), see = see }
 
 seeBFly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution

@@ -15,9 +15,12 @@ type TimeLeft a = { a | timeLeft : Float }
 type Drop a = Massive (Spherical (Moving a))
 
 -- newDrop : Vec3 -> Vec3 -> a -> Drop a
-newDrop pos vel thing = orientDrop
-    { thing | position <- pos, velocity <- vel, radius <- 1.0, mass <- 1.0 }
--- { positionupos vel (vec3 0 0 0) thing 1.0 1.0 }
+newDrop pos vel thing0 =
+    let thing1= { thing0 | position <- pos }
+        thing2 = { thing1 | velocity = vel }
+        thing3 = { thing2 | radius = 1.0 }
+        thing4 = { thing3 | mass = 1.0 }
+    in orientDrop thing4
 
 orientDrop : Drop a -> Drop a
 orientDrop d =
