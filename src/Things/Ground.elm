@@ -9,7 +9,7 @@ import Engine (..)
 type Vertex = { position:Vec3, color:Vec3 }
 
 ground : Signal Thing
-ground = constant <| Thing (vec3 0 0 0) (vec3 0 0 1) seeGround
+ground = constant <| Thing (vec3 0 0 0) (vec3 1 0 1) seeGround
 
 seeGround p =
     [entity vertexShader fragmentShader groundMesh { view=p.viewMatrix }]

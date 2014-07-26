@@ -35,7 +35,7 @@ voronoiPortal = constant <| portal worldVertex voronoiDistances
 
 portal vertexShader fragmentShader =
     let see = seePortal vertexShader fragmentShader
-    in { position = (vec3 0 0 0), orientation = (vec3 0 0 1), see = see }
+    in { position = (vec3 0 0 0), orientation = (vec3 1 0 1), see = see }
 
 -- portal : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity

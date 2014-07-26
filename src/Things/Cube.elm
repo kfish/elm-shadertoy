@@ -39,7 +39,7 @@ xvCube = lift2 (,) (isDown (toCode 'x')) voronoiCube
 -- cube : Oriented (Visible {})
 cube vertexShader fragmentShader =
     let see = seeCube vertexShader fragmentShader
-    in { position = vec3 0 0 0, orientation = vec3 0 0 1, see = see }
+    in { position = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity
