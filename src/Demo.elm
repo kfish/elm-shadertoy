@@ -42,14 +42,12 @@ demoThings =
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
         boids : Signal [Thing]
-        -- boids = map orient <~ folds [] moveBoids boids0 (fps 60)
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 
         -- balls0 : Signal [Drop]
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 
         balls : Signal [Thing]
-        -- balls = map orient <~ folds [] moveDrops balls0 (fps 60)
         balls = map extractThing <~ folds [] moveDrops balls0 (fps 60)
 
         individuals : Signal [Thing]

@@ -77,7 +77,6 @@ tview f see p = see { p | viewMatrix <- f p.viewMatrix }
 place : Float -> Float -> Float -> Thing -> Thing
 place x y z (Thing _ o s) = Thing (vec3 x y z) o s
 
--- orient : { r | thing:Thing, position:Vec3, orientation:Vec3 } -> See
 orient : Thing -> See
 orient (Thing position orientation see) =
     let z_axis = vec3 0 0 1
