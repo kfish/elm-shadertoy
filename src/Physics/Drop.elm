@@ -22,6 +22,19 @@ newDrop pos vel thing0 =
         thing4 = { thing3 | mass = 1.0 }
     in orientDrop thing4
 
+-- randomDrop : Signal a -> Signal (Drop a)
+randomDrop thing =
+    let pos = (V3.add (vec3 0 30 0)) <~ randomVec3 4.0
+    in
+        newDrop <~ pos ~ randomVec3 8.0 ~ thing
+
+-- randomDrops : Int -> Signal [a] -> Signal [Drop a]
+randomDrops n things =
+    let poss = map (V3.add (vec3 0 30 0)) <~ randomVec3s n 4.0
+    in
+        zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
+
+
 orientDrop : Drop a -> Drop a
 orientDrop d =
     let v = V3.toRecord d.velocity
@@ -39,18 +52,6 @@ stripTimeStep x = { x - timeLeft }
 
 setTimeLeft : Time -> a -> TimeLeft a
 setTimeLeft dt x = { x | timeLeft = dt }
-
--- randomDrop : Signal a -> Signal (Drop a)
-randomDrop thing =
-    let pos = (V3.add (vec3 0 30 0)) <~ randomVec3 4.0
-    in
-        newDrop <~ pos ~ randomVec3 8.0 ~ thing
-
--- randomDrops : Int -> Signal [a] -> Signal [Drop a]
-randomDrops n things =
-    let poss = map (V3.add (vec3 0 30 0)) <~ randomVec3s n 4.0
-    in
-        zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
 
 -- Run an update function over all combinations of 2 elements of an array
 updatePairs : (a -> a -> Maybe (a, a)) -> Array.Array a -> Array.Array a
@@ -158,8 +159,8 @@ collide dt a b =
 
           in Just collidedPair
 
-collisions : Time -> [Drop a] -> [TimeLeft (Drop a)]
-collisions dt = Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
+collisions : Time -> [Drop a] -> [Drop a]
+collisions dt = map (stripTimeStep . timeStep) . Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
 
 bounds : Drop a -> Drop a
 bounds b =
@@ -174,19 +175,11 @@ bounds b =
 gravity : a -> Vec3
 gravity _ = vec3 0 -9.8 0
 
-boundVelocity : Vec3 -> Vec3
-boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
-
 moveDrops : Time -> [Drop a] -> [Drop a]
-moveDrops dt boids =
+moveDrops dt balls =
     let
-        nboids = length boids
-        positions = map .position boids
-        velocities = map .velocity boids
-        sumPos = foldl1 V3.add positions
-        sumVel = foldl1 V3.add velocities
-        gs = map gravity boids
+        gs = map gravity balls
         applyRules b g = { b |
             velocity <- (b.velocity `V3.add` (V3.scale (dt / second) g)) }
-        bs = zipWith applyRules boids gs
-    in map (orientDrop . stripTimeStep . timeStep) . collisions dt . (map bounds) <| bs
+        bs = map bounds <| zipWith applyRules balls gs
+    in map orientDrop . collisions dt <| bs

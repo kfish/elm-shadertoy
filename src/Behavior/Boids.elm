@@ -19,7 +19,7 @@ orientBoid b =
     let v = V3.toRecord b.velocity
     in { b | orientation <- V3.normalize (vec3 v.x (v.y/10) v.z) }
 
-stepBoid : Time -> Boid a -> Boid a
+stepBoid : Time -> Moving a -> Moving a
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
 -- randomBoid : Signal Thing -> Signal Boid

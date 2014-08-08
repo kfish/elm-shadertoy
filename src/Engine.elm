@@ -21,7 +21,6 @@ type Moving a = Oriented { a | velocity : Vec3 }
 type Massive a = { a | mass : Float }
 type Spherical a = { a | radius : Float }
 
-
 data Thing = Thing Vec3 Vec3 See
 {-
     position : Vec3,
