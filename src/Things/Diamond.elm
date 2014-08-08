@@ -25,7 +25,7 @@ fogMountainsDiamond = constant <| diamond worldVertex fogMountains
 
 diamond vertexShader fragmentShader =
     let see = seeDiamond vertexShader fragmentShader
-    in { position = (vec3 0 0 0), orientation = (vec3 1 0 1), see = see }
+    in { position = (vec3 0 0 0), orientation = always (vec3 1 0 1), see = see }
 
 -- type ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, view : (Int,Int) }
 

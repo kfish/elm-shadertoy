@@ -35,16 +35,11 @@ demoThings =
         switchy = isOdd <~ foldp (+) 0 (fps 1)
         cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
 
-        boid0 : Signal (Visible (Boid {}))
-        boid0 = randomBoid plasmaCube
-
-        boids0 : Signal [Visible (Boid {})]
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
 
         boids : Signal [Thing]
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 
-        -- balls0 : Signal [Drop]
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 
         balls : Signal [Thing]

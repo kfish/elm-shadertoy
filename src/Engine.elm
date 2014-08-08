@@ -16,7 +16,7 @@ type See = Perception -> [Entity]
 
 type Visible a = { a | see : See }
 
-type Oriented a = { a | position : Vec3, orientation : Vec3 }
+type Oriented a = { a | position : Vec3, orientation : a -> Vec3 }
 type Moving a = Oriented { a | velocity : Vec3 }
 type Massive a = { a | mass : Float }
 type Spherical a = { a | radius : Float }
@@ -29,7 +29,12 @@ data Thing = Thing Vec3 Vec3 See
 -} 
 
 extractThing : Oriented (Visible a) -> Thing
-extractThing x = Thing x.position x.orientation x.see
+extractThing x =
+    let
+        xo = { x - orientation }
+        xp = { xo - position }
+        o = x.orientation xp
+    in Thing x.position o x.see
 
 {-
 

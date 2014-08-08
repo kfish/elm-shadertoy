@@ -11,13 +11,13 @@ type Boid a = Moving a
 
 -- newBoid : Vec3 -> Vec3 -> a -> Boid a
 newBoid pos vel thing0 =
-    let thing = { thing0 | position <- pos }
-    in orientBoid { thing | velocity = vel }
+    let thing1 = { thing0 | position <- pos }
+        thing2 = { thing1 | velocity = vel }
+    in { thing2 | orientation = boidOrientation }
 
-orientBoid : Boid a -> Boid a
-orientBoid b =
+boidOrientation b =
     let v = V3.toRecord b.velocity
-    in { b | orientation <- V3.normalize (vec3 v.x (v.y/10) v.z) }
+    in V3.normalize (vec3 v.x (v.y/10) v.z)
 
 stepBoid : Time -> Moving a -> Moving a
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
@@ -85,4 +85,4 @@ moveBoids dt boids =
             velocity <- boundVelocity (b.velocity `V3.add` (V3.scale (dt / second)
                 (r1 `V3.add` r2 `V3.add` r3 `V3.add` r4))) }
         bs = zipWith5 applyRules boids r1s r2s r3s box
-    in map (orientBoid . stepBoid dt) bs
+    in map (stepBoid dt) bs

@@ -20,7 +20,11 @@ newDrop pos vel thing0 =
         thing2 = { thing1 | velocity = vel }
         thing3 = { thing2 | radius = 1.0 }
         thing4 = { thing3 | mass = 1.0 }
-    in orientDrop thing4
+    in { thing4 | orientation = dropOrientation }
+
+dropOrientation d =
+    let v = V3.toRecord d.velocity
+    in V3.normalize (vec3 v.x 0 v.z)
 
 -- randomDrop : Signal a -> Signal (Drop a)
 randomDrop thing =
@@ -33,12 +37,6 @@ randomDrops n things =
     let poss = map (V3.add (vec3 0 30 0)) <~ randomVec3s n 4.0
     in
         zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
-
-
-orientDrop : Drop a -> Drop a
-orientDrop d =
-    let v = V3.toRecord d.velocity
-    in { d | orientation <- V3.normalize (vec3 v.x 0 v.z) }
 
 stepDrop : Time -> Drop a -> Drop a
 stepDrop dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
@@ -182,4 +180,4 @@ moveDrops dt balls =
         applyRules b g = { b |
             velocity <- (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = map bounds <| zipWith applyRules balls gs
-    in map orientDrop . collisions dt <| bs
+    in collisions dt <| bs

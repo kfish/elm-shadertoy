@@ -30,7 +30,7 @@ voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ 
 
 bfly vertexShader fragmentShader flapStart =
     let see = seeBFly vertexShader fragmentShader flapStart
-    in { position = (vec3 7 0 4), orientation = (vec3 0 0 1), see = see }
+    in { position = (vec3 7 0 4), orientation = always (vec3 0 0 1), see = see }
 
 seeBFly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution
