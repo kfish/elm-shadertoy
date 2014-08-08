@@ -12,7 +12,7 @@ import Debug(log)
 
 type TimeLeft a = { a | timeLeft : Float }
 
-type Drop a = Massive (Spherical (Moving a))
+type BBall a = Massive (Spherical (Moving a))
 
 -- newDrop : Vec3 -> Vec3 -> a -> Drop a
 newDrop pos vel thing0 =
@@ -38,11 +38,11 @@ randomDrops n things =
     in
         zipWith3 newDrop <~ poss ~ randomVec3s n 8.0 ~ things
 
-stepDrop : Time -> Drop a -> Drop a
+stepDrop : Time -> BBall a -> BBall a
 stepDrop dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
 -- timeStep : TimeLeft (Moving a) -> Moving a
-timeStep : TimeLeft (Drop a) -> TimeLeft (Drop a)
+timeStep : TimeLeft (BBall a) -> TimeLeft (BBall a)
 timeStep x = { x  | position = x.position `V3.add` (V3.scale (x.timeLeft / second) x.velocity) }
 
 stripTimeStep : TimeLeft a -> a
@@ -65,8 +65,8 @@ updatePairs f arr0 =
 {- Collision between two spheres
    http://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php?page=2
 -}
-collide : Time -> TimeLeft (Massive (Spherical (Moving a))) -> TimeLeft (Massive (Spherical (Moving a)))
-    -> Maybe (TimeLeft (Massive (Spherical (Moving a))), TimeLeft (Massive (Spherical (Moving a))))
+collide : Time -> TimeLeft (BBall a) -> TimeLeft (BBall a)
+    -> Maybe (TimeLeft (BBall a), TimeLeft (BBall a))
 collide dt a b =
     let square x = x*x
 
@@ -157,10 +157,10 @@ collide dt a b =
 
           in Just collidedPair
 
-collisions : Time -> [Drop a] -> [Drop a]
+collisions : Time -> [BBall a] -> [BBall a]
 collisions dt = map (stripTimeStep . timeStep) . Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
 
-bounds : Drop a -> Drop a
+bounds : BBall a -> BBall a
 bounds b =
     let bound vs s low high = let dampVs = -vs * 0.99 in
             if | vs < 0 && s < low  -> dampVs
@@ -173,7 +173,7 @@ bounds b =
 gravity : a -> Vec3
 gravity _ = vec3 0 -9.8 0
 
-moveDrops : Time -> [Drop a] -> [Drop a]
+moveDrops : Time -> [BBall a] -> [BBall a]
 moveDrops dt balls =
     let
         gs = map gravity balls
