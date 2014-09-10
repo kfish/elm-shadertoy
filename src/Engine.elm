@@ -21,6 +21,62 @@ type Moving a = Oriented { a | velocity : Vec3 }
 type Massive a = { a | mass : Float }
 type Spherical a = { a | radius : Float }
 
+folds : b -> (a -> b -> b) -> Signal b -> Signal a -> Signal b
+folds dfl step state input =
+    let f g (b0,is) bm = case bm of
+            Nothing -> Just b0
+            Just b -> Just (g is b)
+    in maybe dfl id <~ foldp (f step) Nothing (lift2 (,) state input)
+
+-- NAMING: this name is terrible, please suggest an alternative
+-- data TCont a = TCont a (Time -> a -> (a, TCont a))
+data TCont a = TCont a (Time -> a -> TCont a)
+
+-- foldTCont : TCont a -> Signal Time -> Signal a
+foldTCont c t =
+  let upd dt (TCont x f) = f dt x
+      get (TCont x _) = x
+  in get <~ foldp upd c t
+
+-- foldSigTCont : Signal (TCont a) -> Signal Time -> Signal a
+foldSigTCont dfl c t =
+  let upd dt (TCont x f) = f dt x
+      get (TCont x _) = x
+  in get <~ folds dfl upd c t
+
+simpleTCont : (Time -> a -> a) -> a -> TCont a
+simpleTCont step init =
+  let upd dt x = simpleTCont step (step dt x)
+  in TCont init upd
+
+{-
+signalTCont : a -> (a -> TCont a) -> Signal a -> Signal a
+signalTCont dfl mk init =
+    let
+    in maybe (mk dfl) id <~ 
+-}
+
+{-
+
+-- Use Oleg-style type-hiding to hide the actual details of a Thing inside its
+movement continuation
+
+eg. the private data for a thing is of a, then:
+
+data Cont = Cont (Time -> [SelfMoving] -> ([SelfMoving], Cont))
+
+moveSelf : a -> Cont
+moveSelf priv dt bs =
+    let
+        -- do stuff 
+        priv' = ... -- calculate updated priv
+        bs' = ...  -- calculate updated bs
+    in (bs', moveSelf priv')
+    
+Then the next round, we just call the continuation function
+
+-}
+
 data Thing = Thing Vec3 Vec3 See
 {-
     position : Vec3,

@@ -158,7 +158,8 @@ collide dt a b =
           in Just collidedPair
 
 collisions : Time -> [BBall a] -> [BBall a]
-collisions dt = map (stripTimeStep . timeStep) . Array.toList . updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
+collisions dt = map (stripTimeStep . timeStep) . Array.toList .
+    updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
 
 bounds : BBall a -> BBall a
 bounds b =

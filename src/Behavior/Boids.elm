@@ -86,3 +86,15 @@ moveBoids dt boids =
                 (r1 `V3.add` r2 `V3.add` r3 `V3.add` r4))) }
         bs = zipWith5 applyRules boids r1s r2s r3s box
     in map (stepBoid dt) bs
+
+
+boidsTCont : [Boid a] -> TCont [Boid a]
+boidsTCont = simpleTCont moveBoids
+
+-- runBoids : Signal [a] -> Signal Time -> Signal (TCont [Boid a])
+runBoids boids0 t = foldSigTCont (boidsTCont []) (boidsTCont <~ boids0) t
+
+{-
+runBoids : Signal [Boid a] -> Signal Time -> Signal [Boid a]
+runBoids 
+-}
