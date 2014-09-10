@@ -7,32 +7,34 @@ import Math.RandomVector (..)
 
 import Engine (..)
 
-type Boid a = Moving a
+type Boid a = Massive (Spherical (Moving a))
 
 -- newBoid : Vec3 -> Vec3 -> a -> Boid a
-newBoid pos vel thing0 =
-    let thing1 = { thing0 | position <- pos }
-        thing2 = { thing1 | velocity = vel }
-    in { thing2 | orientation = boidOrientation }
+newBoid m r pos vel thing0 =
+    let thing1 = { thing0 | radius = r }
+        thing2 = { thing1 | mass = m }
+        thing3 = { thing2 | position <- pos }
+        thing4 = { thing3 | velocity = vel }
+    in { thing4 | orientation = boidOrientation }
 
 boidOrientation b =
     let v = V3.toRecord b.velocity
     in V3.normalize (vec3 v.x (v.y/10) v.z)
 
-stepBoid : Time -> Moving a -> Moving a
+-- stepBoid : Time -> Moving a -> Moving a
 stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.velocity) }
 
 -- randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
     let pos = lift2 V3.add (lift .position thing) (randomVec3 4.0)
     in
-        newBoid <~ pos ~ randomVec3 1.0 ~ thing
+        newBoid 0.3 1.0 <~ pos ~ randomVec3 1.0 ~ thing
 
 -- randomBoids : Int -> Signal [Thing] -> Signal [Boid a]
 randomBoids n things =
     let poss = map (V3.add (vec3 7 8 4)) <~ randomVec3s n 4.0
     in
-        zipWith3 newBoid <~ poss ~ randomVec3s n 1.0 ~ things
+        zipWith3 (newBoid 0.3 1.0) <~ poss ~ randomVec3s n 1.0 ~ things
 
 rule1 : Int -> Vec3 -> Boid a -> Vec3 
 rule1 n sumPos b =
