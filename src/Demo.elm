@@ -1,7 +1,7 @@
 module Demo (demoThings) where
 
+import Maybe (maybe)
 import Math.Vector3 (..)
-import Math.Matrix4 (..)
 
 import Engine (..)
 
@@ -25,12 +25,12 @@ folds dfl step state input =
     let f g (b0,is) bm = case bm of
             Nothing -> Just b0
             Just b -> Just (g is b)
-    in maybe dfl id <~ foldp (f step) Nothing (lift2 (,) state input)
+    in maybe dfl identity <~ foldp (f step) Nothing (lift2 (,) state input)
 
 demoThings : Signal [Thing]
 demoThings =
     let
-        isOdd x = (floor x `mod` 2) == 0
+        isOdd x = (floor x % 2) == 0
         ifelse cond x y = if cond then x else y
         switchy = isOdd <~ foldp (+) 0 (fps 1)
         cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond

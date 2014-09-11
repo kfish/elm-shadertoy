@@ -31,7 +31,7 @@ updatePairs f arr0 =
         -- update m n arr = log ("Updating ("++show m++","++show n++")") <| case f (Array.getOrFail m arr) (Array.getOrFail n arr) of
         update m n arr = case f (Array.getOrFail m arr) (Array.getOrFail n arr) of
             Nothing       -> arr
-            Just (vm, vn) -> Array.set m vm . Array.set n vn <| arr
+            Just (vm, vn) -> Array.set m vm << Array.set n vn <| arr
         row m arr = foldl (update m) arr [m+1..len-1]
     in foldl row arr0 [0..len-1]
 
@@ -131,5 +131,5 @@ collide dt a b =
           in Just collidedPair
 
 collisions : Time -> [BBall a] -> [BBall a]
-collisions dt = map (stripTimeStep . timeStep) . Array.toList .
-    updatePairs (collide dt) . Array.fromList . map (setTimeLeft dt)
+collisions dt = map (stripTimeStep << timeStep) << Array.toList <<
+    updatePairs (collide dt) << Array.fromList << map (setTimeLeft dt)

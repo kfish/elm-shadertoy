@@ -20,10 +20,10 @@ fireBFly : Signal (Visible (Oriented {}))
 fireBFly = bfly bflyVertex fire <~ ((\x -> x * second * pi*2) <~ float (constant 7))
 
 voronoiBFlys : Int -> Signal [Visible (Oriented {})]
-voronoiBFlys n = map (bfly bflyVertex voronoiDistances . (\x -> x * second * pi * 2)) <~ floatList (constant n)
+voronoiBFlys n = map (bfly bflyVertex voronoiDistances << (\x -> x * second * pi * 2)) <~ floatList (constant n)
 
 -- bflys : Int -> Shader {} a -> Signal [Thing]
-bflys n fragmentShader = map (bfly bflyVertex fragmentShader . (\x -> x * second * pi * 2)) <~ floatList (constant n)
+bflys n fragmentShader = map (bfly bflyVertex fragmentShader << (\x -> x * second * pi * 2)) <~ floatList (constant n)
 
 voronoiBFly : Signal (Visible (Oriented {}))
 voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (constant 7))

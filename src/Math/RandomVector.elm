@@ -41,5 +41,5 @@ randomVec3s n r =
             []         -> []
             [x]        -> []
             x1::x2::xs -> [x1,x2] :: pairs xs
-    in map fromUV . pairs <~ floatList (constant (2*n))
+    in map fromUV << pairs <~ floatList (constant (2*n))
 

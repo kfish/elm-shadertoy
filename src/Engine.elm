@@ -1,7 +1,10 @@
 module Engine where
 
+import Maybe (maybe)
+
 import Math.Vector3 (..)
-import Math.Matrix4 (..)
+import Math.Matrix4 (Mat4)
+import Math.Matrix4 as M4
 import Graphics.WebGL (..)
 
 import Model
@@ -26,7 +29,7 @@ folds dfl step state input =
     let f g (b0,is) bm = case bm of
             Nothing -> Just b0
             Just b -> Just (g is b)
-    in maybe dfl id <~ foldp (f step) Nothing (lift2 (,) state input)
+    in maybe dfl identity <~ foldp (f step) Nothing (lift2 (,) state input)
 
 -- NAMING: this name is terrible, please suggest an alternative
 -- data TCont a = TCont a (Time -> a -> (a, TCont a))
@@ -129,7 +132,7 @@ mapApply : [(a -> [b])] -> a -> [b]
 mapApply fs x = concat <| map (\f -> f x) fs
 
 gather : [ Signal [a] ] -> Signal [a]
-gather = lift concat . combine
+gather = lift concat << combine
 
 tview : (Mat4 -> Mat4) -> See -> See
 tview f see p = see { p | viewMatrix <- f p.viewMatrix }
@@ -143,13 +146,13 @@ orient (Thing position orientation see) =
         rot_angle = 0 - acos (dot orientation z_axis)
         rot_axis = normalize (cross orientation z_axis)
     in
-        tview (translate position) . tview (rotate rot_angle rot_axis) <| see
+        tview (M4.translate position) << tview (M4.rotate rot_angle rot_axis) <| see
 
 
 look : (Int,Int) -> Model.Person -> Mat4
 look (w,h) person =
-    mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)
-        (makeLookAt person.position (person.position `add` Model.direction person) j)
+    M4.mul (M4.makePerspective 45 (toFloat w / toFloat h) 0.01 100)
+           (M4.makeLookAt person.position (person.position `add` Model.direction person) j)
 
 scene : [Thing] -> (Int,Int) -> Time -> Model.Person -> Element
 scene things (w,h) t person =

@@ -100,7 +100,7 @@ sphereMesh =
           in band1U ++ band1L
 
       qs0 n = map (\x -> x/n) [0..n]
-      qs = map (sin . (\x -> x*pi/2)) (qs0 30)
+      qs = map (sin << (\x -> x*pi/2)) (qs0 30)
       nbands = concat (zipWith nband qs (drop 1 qs))
       sbands = concat (zipWith sband qs (drop 1 qs))
   in
