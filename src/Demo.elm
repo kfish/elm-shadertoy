@@ -20,13 +20,6 @@ import Behavior.Boids (..)
 
 import Debug (log)
 
-folds : b -> (a -> b -> b) -> Signal b -> Signal a -> Signal b
-folds dfl step state input =
-    let f g (b0,is) bm = case bm of
-            Nothing -> Just b0
-            Just b -> Just (g is b)
-    in maybe dfl identity <~ foldp (f step) Nothing (lift2 (,) state input)
-
 demoThings : Signal [Thing]
 demoThings =
     let
