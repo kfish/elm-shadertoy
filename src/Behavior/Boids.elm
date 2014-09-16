@@ -9,7 +9,7 @@ import Engine (..)
 
 type Boid a = Massive (Spherical (Moving a))
 
--- newBoid : Vec3 -> Vec3 -> a -> Boid a
+-- newBoid : Float -> Float -> Vec3 -> Vec3 -> a -> Boid a
 newBoid m r pos vel thing0 =
     let thing1 = { thing0 | radius = r }
         thing2 = { thing1 | mass = m }
@@ -28,7 +28,7 @@ stepBoid dt b = { b | position <- b.position `V3.add` (V3.scale (dt / second) b.
 randomBoid thing =
     let pos = lift2 V3.add (lift .position thing) (randomVec3 4.0)
     in
-        newBoid 0.3 1.0 <~ pos ~ randomVec3 1.0 ~ thing
+        newBoid 0.3 0.5 <~ pos ~ randomVec3 1.0 ~ thing
 
 -- randomBoids : Int -> Signal [Thing] -> Signal [Boid a]
 randomBoids n things =

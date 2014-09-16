@@ -16,6 +16,7 @@ import Shaders.FogMountains (fogMountains)
 import Shaders.VoronoiDistances (voronoiDistances)
 
 import Physics.Drop (..)
+import Physics.Collisions (..)
 import Behavior.Boids (..)
 
 import Debug (log)
@@ -29,9 +30,16 @@ demoThings =
         cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
 
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
-
+{-
         boids : Signal [Thing]
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
+-}
+        -- boids = map extractThing <~ runBoids boids0 (fps 60)
+
+        -- boids2TCont = lift3 tcAndThen boids0 (simpleTCont moveBoids <~ boids0) (simpleTCont collisions <~ boids0)
+        boids2TCont = tcAndThenSig boids0 (lift boidsTCont) (lift (simpleTCont collisions))
+
+        boids = map extractThing <~ foldSigTCont (boidsTCont []) boids2TCont (fps 60)
 
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 

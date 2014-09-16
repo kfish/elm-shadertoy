@@ -26,10 +26,10 @@ type Spherical a = { a | radius : Float }
 
 folds : b -> (a -> b -> b) -> Signal b -> Signal a -> Signal b
 folds dfl step state input =
-    let f g (b0,is) bm = case bm of
+    let f (b0,inputs) bm = case bm of
             Nothing -> Just b0
-            Just b -> Just (g is b)
-    in maybe dfl identity <~ foldp (f step) Nothing (lift2 (,) state input)
+            Just b  -> Just (step inputs b)
+    in maybe dfl identity <~ foldp f Nothing (lift2 (,) state input)
 
 -- NAMING: this name is terrible, please suggest an alternative
 -- data TCont a = TCont a (Time -> a -> (a, TCont a))
@@ -41,7 +41,7 @@ foldTCont c t =
       get (TCont x _) = x
   in get <~ foldp upd c t
 
--- foldSigTCont : Signal (TCont a) -> Signal Time -> Signal a
+foldSigTCont : TCont a -> Signal (TCont a) -> Signal Time -> Signal a
 foldSigTCont dfl c t =
   let upd dt (TCont x f) = f dt x
       get (TCont x _) = x
@@ -51,6 +51,17 @@ simpleTCont : (Time -> a -> a) -> a -> TCont a
 simpleTCont step init =
   let upd dt x = simpleTCont step (step dt x)
   in TCont init upd
+
+tcAndThen : a -> TCont a -> TCont a -> TCont a
+tcAndThen cur (TCont x1 f1) (TCont x2 f2) =
+  let step dt x =
+    let (TCont x1' f1') = f1 dt x
+        (TCont x2' f2') = f2 dt x1'
+    in  tcAndThen x2' (TCont x1' f1') (TCont x2' f2')
+  in TCont cur step
+
+tcAndThenSig : Signal a -> (Signal a -> Signal (TCont a)) -> (Signal a -> Signal (TCont a)) -> Signal (TCont a)
+tcAndThenSig init c1 c2 = lift3 tcAndThen init (c1 init) (c2 init)
 
 {-
 signalTCont : a -> (a -> TCont a) -> Signal a -> Signal a
