@@ -33,35 +33,59 @@ folds dfl step state input =
 
 -- NAMING: this name is terrible, please suggest an alternative
 -- data TCont a = TCont a (Time -> a -> (a, TCont a))
-data TCont a = TCont a (Time -> a -> TCont a)
+-- data TCont a = TCont a (Time -> a -> TCont a)
+data TCont a = TCont (Time -> a -> (TCont a, a))
 
--- foldTCont : TCont a -> Signal Time -> Signal a
-foldTCont c t =
-  let upd dt (TCont x f) = f dt x
-      get (TCont x _) = x
-  in get <~ foldp upd c t
+-- foldTCont : TCont a -> a -> Signal Time -> Signal a
+foldTCont c init t =
+  let upd dt (TCont f, x) = f dt x
+  in snd <~ foldp upd (c, init) t
 
-foldSigTCont : TCont a -> Signal (TCont a) -> Signal Time -> Signal a
-foldSigTCont dfl c t =
-  let upd dt (TCont x f) = f dt x
-      get (TCont x _) = x
-  in get <~ folds dfl upd c t
+identityTCont : TCont a
+identityTCont = TCont (\_ x -> (identityTCont, x))
 
-simpleTCont : (Time -> a -> a) -> a -> TCont a
-simpleTCont step init =
-  let upd dt x = simpleTCont step (step dt x)
-  in TCont init upd
+foldSigTCont : a -> Signal (TCont a) -> Signal a -> Signal Time -> Signal a
+foldSigTCont dfl c init t =
+  let upd dt (TCont f, x) = f dt x
+  in snd <~ folds (identityTCont, dfl) upd (lift2 (,) c init) t
 
+foldSigTCont2 : a -> TCont a -> Signal a -> Signal Time -> Signal a
+foldSigTCont2 dfl c init t =
+  let upd dt (TCont f, x) = f dt x
+  in snd <~ folds (identityTCont, dfl) upd (lift2 (,) (constant c) init) t
+
+
+simpleTCont : (Time -> a -> a) -> TCont a
+simpleTCont step = TCont (\dt x -> (simpleTCont step, step dt x))
+
+tcAndThen : TCont a -> TCont a -> TCont a
+tcAndThen (TCont f1) (TCont f2) =
+  TCont <| \dt x ->
+    let (f1', x') = f1 dt x
+        (f2', x'') = f2 dt x'
+    in (tcAndThen f1' f2', x'')
+
+fAndThen : (Time -> a -> a) -> (Time -> a -> a) -> (Time -> a -> a)
+fAndThen f g = \dt -> f dt >> g dt
+
+composeTCont : (Time -> a -> a) -> (Time -> a -> a) -> TCont a
+composeTCont f g = simpleTCont (fAndThen f g)
+
+{-
 tcAndThen : a -> TCont a -> TCont a -> TCont a
-tcAndThen cur (TCont x1 f1) (TCont x2 f2) =
+tcAndThen cur (TCont f1) (TCont f2) =
   let step dt x =
-    let (TCont x1' f1') = f1 dt x
-        (TCont x2' f2') = f2 dt x1'
+    let (TCont f1', x1') = f1 dt x
+        (TCont f2', x2') = f2 dt x1'
     in  tcAndThen x2' (TCont x1' f1') (TCont x2' f2')
   in TCont cur step
+-}
 
+{-
 tcAndThenSig : Signal a -> (Signal a -> Signal (TCont a)) -> (Signal a -> Signal (TCont a)) -> Signal (TCont a)
 tcAndThenSig init c1 c2 = lift3 tcAndThen init (c1 init) (c2 init)
+-}
+
 
 {-
 signalTCont : a -> (a -> TCont a) -> Signal a -> Signal a

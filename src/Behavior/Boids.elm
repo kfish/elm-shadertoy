@@ -90,11 +90,12 @@ moveBoids dt boids =
     in map (stepBoid dt) bs
 
 
-boidsTCont : [Boid a] -> TCont [Boid a]
+boidsTCont : TCont [Boid a]
 boidsTCont = simpleTCont moveBoids
 
 -- runBoids : Signal [a] -> Signal Time -> Signal (TCont [Boid a])
-runBoids boids0 t = foldSigTCont (boidsTCont []) (boidsTCont <~ boids0) t
+runBoids : Signal [Boid a] -> Signal Time -> Signal ([Boid a])
+runBoids boids0 t = foldSigTCont2 [] boidsTCont boids0 t
 
 {-
 runBoids : Signal [Boid a] -> Signal Time -> Signal [Boid a]
