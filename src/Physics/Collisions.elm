@@ -10,19 +10,19 @@ import Engine (..)
 
 import Debug(log)
 
-type TimeLeft a = { a | timeLeft : Float }
+data TimeLeft a = TimeLeft Float a
 
 type BBall a = Massive (Spherical (Moving a))
 
--- timeStep : TimeLeft (Moving a) -> Moving a
 timeStep : TimeLeft (BBall a) -> TimeLeft (BBall a)
-timeStep x = { x  | position = x.position `V3.add` (V3.scale (x.timeLeft / second) x.velocity) }
+timeStep (TimeLeft dt x) =
+    TimeLeft dt { x  | position = x.position `V3.add` (V3.scale (dt / second) x.velocity) }
 
 stripTimeStep : TimeLeft a -> a
-stripTimeStep x = { x - timeLeft }
+stripTimeStep (TimeLeft _ x) = x
 
 setTimeLeft : Time -> a -> TimeLeft a
-setTimeLeft dt x = { x | timeLeft = dt }
+setTimeLeft dt x = TimeLeft dt x
 
 -- Run an update function over all combinations of 2 elements of an array
 updatePairs : (a -> a -> Maybe (a, a)) -> Array.Array a -> Array.Array a
@@ -40,7 +40,7 @@ updatePairs f arr0 =
 -}
 collide : Time -> TimeLeft (BBall a) -> TimeLeft (BBall a)
     -> Maybe (TimeLeft (BBall a), TimeLeft (BBall a))
-collide dt a b =
+collide dt (TimeLeft _ a) (TimeLeft _ b) =
     let square x = x*x
 
         sumRadii = a.radius + b.radius
@@ -109,8 +109,8 @@ collide dt a b =
 
               timeLeft = (1.0 - collisionDelta) * dt
 
-              movedA = { a | position <- V3.add a.position collisionVectorA, timeLeft <- timeLeft }
-              movedB = { b | position <- V3.add b.position collisionVectorB, timeLeft <- timeLeft }
+              movedA = { a | position <- V3.add a.position collisionVectorA }
+              movedB = { b | position <- V3.add b.position collisionVectorB }
 
               -- Projection of movement onto new centerDisplacement
               centerDisplacement' = V3.sub movedA.position movedB.position
@@ -126,10 +126,15 @@ collide dt a b =
               -- XXX: Subsequent movement during this timestep should only move for
               -- the remaining time (1.0-collisionDelta)*dt
 
-              collidedPair = ({movedA | velocity <- newVelA }, { movedB | velocity <- newVelB })
+              collidedPair = (TimeLeft timeLeft {movedA | velocity <- newVelA },
+                              TimeLeft timeLeft { movedB | velocity <- newVelB })
 
           in Just collidedPair
 
 collisions : Time -> [BBall a] -> [BBall a]
-collisions dt = map (stripTimeStep << timeStep) << Array.toList <<
-    updatePairs (collide dt) << Array.fromList << map (setTimeLeft dt)
+collisions dt =
+       map (setTimeLeft dt)
+    >> Array.fromList
+    >> updatePairs (collide dt)
+    >> Array.toList
+    >> map (timeStep >> stripTimeStep)
