@@ -1,8 +1,8 @@
 module Shaders.Fire (fire) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Graphics.WebGL (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import WebGL exposing (..)
 
 -- https://www.shadertoy.com/view/Xsl3zN
 fire : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }

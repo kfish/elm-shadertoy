@@ -1,11 +1,11 @@
 module Shaders.WorldVertex (Vertex, worldVertex) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import WebGL exposing (..)
 
-type Vertex = { position:Vec3, coord:Vec3 }
+type alias Vertex = { position:Vec3, coord:Vec3 }
 
 worldVertex : Shader Vertex { u | view:Mat4 } { elm_FragCoord:Vec2 }
 worldVertex = [glsl|

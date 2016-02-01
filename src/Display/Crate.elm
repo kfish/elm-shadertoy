@@ -1,56 +1,62 @@
 module Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import List exposing (concatMap, map)
+import Time exposing (Time, inSeconds)
 
-import Shaders.Clouds (clouds)
-import Shaders.Fire (fire)
-import Shaders.FogMountains (fogMountains)
-import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
-import Shaders.WorldVertex (Vertex, worldVertex)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import WebGL exposing (..)
+
+import Shaders.Clouds exposing (clouds)
+import Shaders.Fire exposing (fire)
+import Shaders.FogMountains exposing (fogMountains)
+import Shaders.SimplePlasma exposing (simplePlasma)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-cloudsCube : (Int,Int) -> Time -> Mat4 -> Entity
+type alias Triangle a = (a,a,a)
+
+cloudsCube : (Int,Int) -> Time -> Mat4 -> Renderable
 cloudsCube = cube worldVertex clouds
 
-fireCube : (Int,Int) -> Time -> Mat4 -> Entity
+fireCube : (Int,Int) -> Time -> Mat4 -> Renderable
 fireCube = cube worldVertex fire
 
-fogMountainsCube : (Int,Int) -> Time -> Mat4 -> Entity
+fogMountainsCube : (Int,Int) -> Time -> Mat4 -> Renderable
 fogMountainsCube = cube worldVertex fogMountains
 
-plasmaCube : (Int,Int) -> Time -> Mat4 -> Entity
+plasmaCube : (Int,Int) -> Time -> Mat4 -> Renderable
 plasmaCube = cube worldVertex simplePlasma
 
-voronoiCube : (Int,Int) -> Time -> Mat4 -> Entity
+voronoiCube : (Int,Int) -> Time -> Mat4 -> Renderable
 voronoiCube = cube worldVertex voronoiDistances
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> (Int,Int) -> Time -> Mat4 -> Entity
+--    -> (Int,Int) -> Time -> Mat4 -> Renderable
 cube vertexShader fragmentShader (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds t
     in
-        entity vertexShader fragmentShader mesh
+        render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=view }
 
 -- The mesh for a crate
-mesh : [Triangle Vertex]
-mesh = concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
+-- mesh : List (Triangle Vertex)
+mesh : Drawable { pos:Vec3, coord:Vec3 }
+mesh = Triangle <| concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
-rotatedFace : (Float,Float) -> [Triangle Vertex]
+rotatedFace : (Float,Float) -> List (Triangle Vertex)
 rotatedFace (angleXZ,angleYZ) =
   let x = makeRotate (degrees angleXZ) j
       y = makeRotate (degrees angleYZ) i
       t = x `mul` y
   in
-      map (mapTriangle (\v -> {v | position <- transform t v.position })) face
+      map (mapTriangle (\v -> {v | position = transform t v.position })) face
 
-face : [Triangle Vertex]
+face : List (Triangle Vertex)
 face =
   let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
       topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)

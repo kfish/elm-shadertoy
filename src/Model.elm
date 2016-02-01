@@ -1,12 +1,12 @@
 module Model where
 
-import Math.Vector3 (Vec3, vec3)
+import Math.Vector3 exposing (Vec3, vec3)
 
-data Inputs
+type Inputs
     = TimeDelta Bool {x:Int, y:Int} Float
     | Mouse (Int,Int)
 
-type Person =
+type alias Person =
     { position : Vec3
     , velocity : Vec3
     , horizontalAngle : Float

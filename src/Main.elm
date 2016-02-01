@@ -1,7 +1,7 @@
 module Main where
 
-import Graphics.WebGL (..)
-import Math.Matrix4 (..)
+import WebGL exposing (..)
+import Math.Matrix4 exposing (..)
 import Keyboard
 import Mouse
 import Window

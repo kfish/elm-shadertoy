@@ -1,20 +1,20 @@
 module Display (scene, crateEntities) where
 
-import Http (..)
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+-- import Http exposing (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import WebGL exposing (..)
 
 import Model
-import Display.World (ground)
-import Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
-import Display.Diamond (cloudsDiamond, fogMountainsDiamond)
+import Display.World exposing (ground)
+import Display.Crate exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube)
+import Display.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 
-import Shaders.WorldVertex (Vertex, worldVertex)
-import Shaders.Fire (fire)
-import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
+import Shaders.Fire exposing (fire)
+import Shaders.SimplePlasma exposing (simplePlasma)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
 
 view : (Int,Int) -> Model.Person -> Mat4
 view (w,h) person =

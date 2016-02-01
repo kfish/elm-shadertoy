@@ -1,23 +1,28 @@
 module Display.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import List exposing (map2, repeat)
+import Time exposing (Time, inSeconds)
 
-import Shaders.Clouds (clouds)
-import Shaders.Fire (fire)
-import Shaders.FogMountains (fogMountains)
---import Shaders.SimplePlasma (simplePlasma)
---import Shaders.VoronoiDistances (voronoiDistances)
-import Shaders.WorldVertex (Vertex, worldVertex)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import WebGL exposing (..)
+
+import Shaders.Clouds exposing (clouds)
+import Shaders.Fire exposing (fire)
+import Shaders.FogMountains exposing (fogMountains)
+--import Shaders.SimplePlasma exposing (simplePlasma)
+--import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+type alias Triangle a = (a,a,a)
+
+cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Renderable
 cloudsDiamond = diamond worldVertex clouds
 
-fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Entity
+fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Renderable
 fogMountainsDiamond = diamond worldVertex fogMountains
 
 -- diamond : Shader attributes uniforms varying -> Shader {} uniforms varyings
@@ -26,14 +31,14 @@ diamond vertexShader fragmentShader (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds t
     in
-        entity vertexShader fragmentShader diamondMesh
+        render vertexShader fragmentShader diamondMesh
             { iResolution=resolution, iGlobalTime=s, view=view }
 
-unfold : Int -> (a -> a) -> a -> [a]
+unfold : Int -> (a -> a) -> a -> List a
 unfold n f x = if n==0 then [] else
   let res=f x in (res :: unfold (n-1) f res)
 
-zip3 : [a] -> [b] -> [c] -> [(a,b,c)]
+zip3 : List a -> List b -> List c -> List (a,b,c)
 zip3 xs ys zs =
   case (xs, ys, zs) of
     (x::xs', y::ys', z::zs') -> (x,y,z) :: zip3 xs' ys' zs'
@@ -45,13 +50,13 @@ rotZ n = makeRotate (-2*pi/n) (vec3 0 0 1)
 rotBoth : Float -> Vertex -> Vertex
 rotBoth n x = { position = transform (rotY n) x.position, coord = transform (rotZ n) x.coord }
 
-seven : Vertex -> [Vertex]
+seven : Vertex -> List Vertex
 seven = unfold 7 (rotBoth 8)
 
 eights x = let x7 = seven x in (x::x7, x7++[x])
 
 --diamondMesh : [Triangle { pos:Vec3, coord:Vec3 }]
-diamondMesh : [Triangle Vertex]
+diamondMesh : List (Triangle Vertex)
 diamondMesh =
   let
       yOffset = 1.21
@@ -80,7 +85,7 @@ diamondMesh =
 
       -- Triangles
       mkTable v1 v2 = (table0, v1, v2)
-      table = zipWith mkTable tableVS1 tableVS0
+      table = map2 mkTable tableVS1 tableVS0
 
       stars = zip3 tableVS0 tableVS1 facetVS1
 
