@@ -7,8 +7,7 @@ import Math.Matrix4 exposing (..)
 import WebGL exposing (..)
 
 
-type alias Triangle a = (a,a,a)
-type alias Vertex = { position:Vec3, color:Vec3 }
+type alias Vertex = { pos:Vec3, color:Vec3 }
 
 ground : Mat4 -> Renderable
 ground view =
@@ -23,7 +22,7 @@ color hue saturation lightness =
 
 
 -- The mesh for the ground
-groundMesh : List (Triangle Vertex)
+groundMesh : Drawable Vertex
 groundMesh =
   let green = color (degrees 110) 0.48
 
@@ -32,20 +31,20 @@ groundMesh =
       bottomLeft  = Vertex (vec3 -20 -1 -20) (green 0.5)
       bottomRight = Vertex (vec3  20 -1 -20) (green 0.6)
   in
-      [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
+      Triangle [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
 
 
 -- Shaders
 vertexShader : Shader Vertex { view:Mat4 } { vcolor:Vec3 }
 vertexShader = [glsl|
 
-attribute vec3 position;
+attribute vec3 pos;
 attribute vec3 color;
 uniform mat4 view;
 varying vec3 vcolor;
 
 void main () {
-    gl_Position = view * vec4(position, 1.0);
+    gl_Position = view * vec4(pos, 1.0);
     vcolor = color;
 }
 

@@ -17,8 +17,6 @@ import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-type alias Triangle a = (a,a,a)
-
 cloudsCube : (Int,Int) -> Time -> Mat4 -> Renderable
 cloudsCube = cube worldVertex clouds
 
@@ -44,23 +42,29 @@ cube vertexShader fragmentShader (w,h) t view =
             { iResolution=resolution, iGlobalTime=s, view=view }
 
 -- The mesh for a crate
--- mesh : List (Triangle Vertex)
 mesh : Drawable { pos:Vec3, coord:Vec3 }
 mesh = Triangle <| concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
-rotatedFace : (Float,Float) -> List (Triangle Vertex)
-rotatedFace (angleXZ,angleYZ) =
-  let x = makeRotate (degrees angleXZ) j
-      y = makeRotate (degrees angleYZ) i
-      t = x `mul` y
+rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+rotatedFace (angleX,angleY) =
+  let
+    x = makeRotate (degrees angleX) (vec3 1 0 0)
+    y = makeRotate (degrees angleY) (vec3 0 1 0)
+    t = x `mul` y `mul` makeTranslate (vec3 0 0 1)
+    each f (a,b,c) =
+      (f a, f b, f c)
   in
-      map (mapTriangle (\v -> {v | position = transform t v.position })) face
+    List.map (each (\x -> {x | pos = transform t x.pos })) face
 
-face : List (Triangle Vertex)
+
+face : List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
 face =
-  let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
-      topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)
-      bottomLeft  = Vertex (vec3 -1 -1 1) (vec3 0 0 0)
-      bottomRight = Vertex (vec3  1 -1 1) (vec3 1 0 0)
+  let
+    topLeft     = { pos = vec3 -1  1 0, coord = vec3 0 1 0 }
+    topRight    = { pos = vec3  1  1 0, coord = vec3 1 1 0 }
+    bottomLeft  = { pos = vec3 -1 -1 0, coord = vec3 0 0 0 }
+    bottomRight = { pos = vec3  1 -1 0, coord = vec3 1 0 0 }
   in
-      [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
+    [ (topLeft,topRight,bottomLeft)
+    , (bottomLeft,topRight,bottomRight)
+    ]

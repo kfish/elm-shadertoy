@@ -1,5 +1,10 @@
 module Display (scene, crateEntities) where
 
+import Color exposing (rgb)
+import Graphics.Element exposing (..)
+import Text
+import Time exposing (Time)
+
 -- import Http exposing (..)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
@@ -21,7 +26,7 @@ view (w,h) person =
     mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)
         (makeLookAt person.position (person.position `add` Model.direction person) j)
 
-scene : ((Int,Int) -> Time -> Mat4 -> [Entity])
+scene : ((Int,Int) -> Time -> Mat4 -> List Renderable)
     -> (Int,Int) -> Time -> Bool -> Model.Person -> Element
 scene entities (w,h) t isLocked person =
     layers [ color (rgb 135 206 235) (spacer w h)
@@ -30,7 +35,7 @@ scene entities (w,h) t isLocked person =
                  (if isLocked then exitMsg else enterMsg)
            ]
 
-crateEntities : (Int,Int) -> Time -> Mat4 -> [Entity]
+crateEntities : (Int,Int) -> Time -> Mat4 -> List Renderable
 crateEntities resolution t view =
     let cubes = 
             [ fogMountainsDiamond  resolution t (translate3 0 1.5 0 view)
@@ -50,6 +55,6 @@ exitMsg = message "Press <escape> to exit full screen."
 
 message : String -> Element
 message msg =
-    plainText <|
+    leftAligned <| Text.monospace <| Text.fromString <|
     "This uses stuff that is only available in Chrome and Firefox!\n" ++
     "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
