@@ -100,8 +100,8 @@ run the following sequence of commands:
 git clone https://github.com/kfish/elm-shadertoy.git
 cd elm-shadertoy
 elm-get install
-elm --make --only-js --src-dir=src Main.elm
-elm-server
+elm-make src/Main.elm --output build/Main.js
+elm-reactor
 ```
 
 And then open [http://localhost:8000](http://localhost:8000) to see it in action!
