@@ -7,7 +7,6 @@
         "src"
     ],
     "exposed-modules": [
-        "Main"
     ],
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 4.0.0",
