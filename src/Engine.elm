@@ -24,7 +24,7 @@ type alias See = Perception -> List Renderable
 
 type alias Visible a = { a | see : See }
 
-type alias Oriented a = { a | pos : Vec3, orientation : a -> Vec3 }
+type alias Oriented a = { a | pos : Vec3, orientation : Vec3 }
 type alias Moving a = Oriented { a | velocity : Vec3 }
 type alias Massive a = { a | mass : Float }
 type alias Spherical a = { a | radius : Float }
@@ -140,7 +140,8 @@ extractThing x =
         -- o = x.orientation xp
     in Thing x.pos o x.see
 -}
-    Thing x.pos x.pos x.see
+    -- Thing x.pos (vec3 1 0 1) x.see
+    Thing x.pos x.orientation x.see
 
 {-
 

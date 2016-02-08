@@ -34,7 +34,7 @@ bflys n fragmentShader = List.map (bfly bflyVertex fragmentShader << (\x -> x * 
 
 bfly vertexShader fragmentShader flapStart =
     let see = seeBFly vertexShader fragmentShader flapStart
-    in { pos = (vec3 7 0 4), orientation = always (vec3 0 0 1), see = see }
+    in { pos = (vec3 7 0 4), orientation = vec3 0 0 1, see = see }
 
 seeBFly vertexShader fragmentShader flapStart p =
     let (w,h) = p.resolution

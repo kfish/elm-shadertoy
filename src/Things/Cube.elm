@@ -43,7 +43,8 @@ xvCube = Signal.map2 (,) (isDown (toCode 'x')) voronoiCube
 -- cube : Oriented (Visible {})
 cube vertexShader fragmentShader =
     let see = seeCube vertexShader fragmentShader
-    in { pos = vec3 0 0 0, orientation = always (vec3 1 0 1), see = see }
+    -- in { pos = vec3 0 0 0, orientation = always (vec3 1 0 1), see = see }
+    in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Renderable
