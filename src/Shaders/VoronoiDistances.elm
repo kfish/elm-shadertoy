@@ -1,8 +1,8 @@
 module Shaders.VoronoiDistances (voronoiDistances) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Graphics.WebGL (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import WebGL exposing (..)
 
 -- https://www.shadertoy.com/view/ldl3W8
 voronoiDistances : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }

@@ -1,41 +1,44 @@
 module Things.Portal (cloudsPortal, firePortal, fogMountainsPortal, plasmaPortal, voronoiPortal, portal) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import Time exposing (Time, inSeconds)
+import WebGL exposing (..)
 
-import Shaders.Clouds (clouds)
-import Shaders.Fire (fire)
-import Shaders.FogMountains (fogMountains)
-import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
-import Shaders.WorldVertex (Vertex, worldVertex)
+import Shaders.Clouds exposing (clouds)
+import Shaders.Fire exposing (fire)
+import Shaders.FogMountains exposing (fogMountains)
+import Shaders.SimplePlasma exposing (simplePlasma)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
-import Engine (..)
+import Engine exposing (..)
 
-import Char (..)
-import Keyboard (isDown)
+import Char exposing (..)
+import Keyboard exposing (isDown)
+
+type alias Triangle a = (a,a,a)
 
 -- cloudsPortal : Signal Thing
-cloudsPortal = constant <| portal worldVertex clouds
+cloudsPortal = Signal.constant <| portal worldVertex clouds
 
 -- firePortal : Signal Thing
-firePortal = constant <| portal worldVertex fire
+firePortal = Signal.constant <| portal worldVertex fire
 
 -- fogMountainsPortal : Signal Thing
-fogMountainsPortal = constant <| portal worldVertex fogMountains
+fogMountainsPortal = Signal.constant <| portal worldVertex fogMountains
 
 -- plasmaPortal : Signal Thing
-plasmaPortal = constant <| portal worldVertex simplePlasma
+plasmaPortal = Signal.constant <| portal worldVertex simplePlasma
 
 -- voronoiPortal : Signal Thing
-voronoiPortal = constant <| portal worldVertex voronoiDistances
+voronoiPortal = Signal.constant <| portal worldVertex voronoiDistances
 
 portal vertexShader fragmentShader =
     let see = seePortal vertexShader fragmentShader
-    in { position = (vec3 0 0 0), orientation = always (vec3 1 0 1), see = see }
+    in { pos = (vec3 0 0 0), orientation = always (vec3 1 0 1), see = see }
 
 -- portal : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> Perception -> Entity
@@ -44,11 +47,12 @@ seePortal vertexShader fragmentShader p =
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
     in
-        [entity vertexShader fragmentShader mesh
+        [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-mesh : [Triangle Vertex]
-mesh = face
+-- mesh : List (Triangle Vertex)
+mesh : Drawable { pos:Vec3, coord:Vec3 }
+mesh = Triangle face
 {-
 mesh = concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
@@ -58,10 +62,10 @@ rotatedFace (angleXZ,angleYZ) =
       y = makeRotate (degrees angleYZ) i
       t = x `mul` y
   in
-      map (mapTriangle (\v -> {v | position <- transform t v.position })) face
+      map (mapTriangle (\v -> {v | pos <- transform t v.pos })) face
 -}
 
-face : [Triangle Vertex]
+face : List (Triangle Vertex)
 face =
   let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
       topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)

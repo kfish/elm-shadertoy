@@ -1,8 +1,8 @@
 module Model where
 
-import Math.Vector3 (Vec3, vec3)
+import Math.Vector3 exposing (Vec3, vec3)
 
-data Inputs
+type Inputs
     = TimeDelta Bool {x:Int, y:Int} Float
     | Mouse (Int,Int)
 
@@ -18,8 +18,8 @@ type World =
     }
 -}
 
-type Person =
-    { position : Vec3
+type alias Person =
+    { pos : Vec3
     , velocity : Vec3
     , horizontalAngle : Float
     , verticalAngle   : Float
@@ -30,7 +30,7 @@ eyeLevel = 10
 
 defaultPerson : Person
 defaultPerson =
-    { position = vec3 0 eyeLevel -8
+    { pos = vec3 0 eyeLevel -8
     , velocity = vec3 0 0 0
     , horizontalAngle = degrees 90
     , verticalAngle = 0

@@ -1,73 +1,110 @@
 module Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube, cube) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import List exposing (concatMap, map)
+import Time exposing (Time, inSeconds)
 
-import Shaders.Clouds (clouds)
-import Shaders.Fire (fire)
-import Shaders.FogMountains (fogMountains)
-import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
-import Shaders.WorldVertex (Vertex, worldVertex)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import WebGL exposing (..)
+
+import Shaders.Clouds exposing (clouds)
+import Shaders.Fire exposing (fire)
+import Shaders.FogMountains exposing (fogMountains)
+import Shaders.SimplePlasma exposing (simplePlasma)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
-import Engine (..)
+import Engine exposing (..)
 
-import Char (..)
-import Keyboard (isDown)
+-- <<<<<<< HEAD:src/Things/Cube.elm
+import Char exposing (..)
+import Keyboard exposing (isDown)
 
 -- cloudsCube : Signal Thing
-cloudsCube = constant <| cube worldVertex clouds
+cloudsCube = Signal.constant <| cube worldVertex clouds
 
 -- fireCube : Signal Thing
-fireCube = constant <| cube worldVertex fire
+fireCube = Signal.constant <| cube worldVertex fire
 
 -- fogMountainsCube : Signal Thing
-fogMountainsCube = constant <| cube worldVertex fogMountains
+fogMountainsCube = Signal.constant <| cube worldVertex fogMountains
 
 -- plasmaCube : Signal Thing
-plasmaCube = constant <| cube worldVertex simplePlasma
+plasmaCube = Signal.constant <| cube worldVertex simplePlasma
 
 -- voronoiCube : Signal Thing
-voronoiCube = constant <| cube worldVertex voronoiDistances
+voronoiCube = Signal.constant <| cube worldVertex voronoiDistances
 
 -- xvCube : Signal (Bool, Thing)
-xvCube = lift2 (,) (isDown (toCode 'x')) voronoiCube
+xvCube = Signal.map2 (,) (isDown (toCode 'x')) voronoiCube
 
 -- cube : Oriented (Visible {})
 cube vertexShader fragmentShader =
     let see = seeCube vertexShader fragmentShader
-    in { position = vec3 0 0 0, orientation = always (vec3 1 0 1), see = see }
+    in { pos = vec3 0 0 0, orientation = always (vec3 1 0 1), see = see }
 
 -- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> Perception -> Entity
+--    -> Perception -> Renderable
 seeCube vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
     in
-        [entity vertexShader fragmentShader mesh
+        [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
+{-
+cloudsCube : (Int,Int) -> Time -> Mat4 -> Renderable
+cloudsCube = cube worldVertex clouds
+
+fireCube : (Int,Int) -> Time -> Mat4 -> Renderable
+fireCube = cube worldVertex fire
+
+fogMountainsCube : (Int,Int) -> Time -> Mat4 -> Renderable
+fogMountainsCube = cube worldVertex fogMountains
+
+plasmaCube : (Int,Int) -> Time -> Mat4 -> Renderable
+plasmaCube = cube worldVertex simplePlasma
+
+voronoiCube : (Int,Int) -> Time -> Mat4 -> Renderable
+voronoiCube = cube worldVertex voronoiDistances
+
+-- cube : Shader attributes uniforms varying -> Shader {} uniforms varyings
+--    -> (Int,Int) -> Time -> Mat4 -> Renderable
+cube vertexShader fragmentShader (w,h) t view =
+    let resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds t
+    in
+        render vertexShader fragmentShader mesh
+            { iResolution=resolution, iGlobalTime=s, view=view }
+-}
+
 -- The mesh for a crate
-mesh : [Triangle Vertex]
-mesh = concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
+mesh : Drawable { pos:Vec3, coord:Vec3 }
+mesh = Triangle <| concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
-rotatedFace : (Float,Float) -> [Triangle Vertex]
-rotatedFace (angleXZ,angleYZ) =
-  let x = makeRotate (degrees angleXZ) j
-      y = makeRotate (degrees angleYZ) i
-      t = x `mul` y
+rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+rotatedFace (angleX,angleY) =
+  let
+    x = makeRotate (degrees angleX) (vec3 1 0 0)
+    y = makeRotate (degrees angleY) (vec3 0 1 0)
+    t = x `mul` y `mul` makeTranslate (vec3 0 0 1)
+    each f (a,b,c) =
+      (f a, f b, f c)
   in
-      map (mapTriangle (\v -> {v | position <- transform t v.position })) face
+    List.map (each (\x -> {x | pos = transform t x.pos })) face
 
-face : [Triangle Vertex]
+
+face : List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
 face =
-  let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
-      topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)
-      bottomLeft  = Vertex (vec3 -1 -1 1) (vec3 0 0 0)
-      bottomRight = Vertex (vec3  1 -1 1) (vec3 1 0 0)
+  let
+    topLeft     = { pos = vec3 -1  1 0, coord = vec3 0 1 0 }
+    topRight    = { pos = vec3  1  1 0, coord = vec3 1 1 0 }
+    bottomLeft  = { pos = vec3 -1 -1 0, coord = vec3 0 0 0 }
+    bottomRight = { pos = vec3  1 -1 0, coord = vec3 1 0 0 }
   in
-      [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
+    [ (topLeft,topRight,bottomLeft)
+    , (bottomLeft,topRight,bottomRight)
+    ]

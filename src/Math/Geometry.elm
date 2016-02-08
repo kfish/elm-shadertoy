@@ -6,7 +6,7 @@ import Math.Matrix4 (..)
 
 type Triangle a = (a, a, a)
 
-type Positioned a = { a | position : Vec3 }
+type Positioned a = { a | pos : Vec3 }
 
 -- Does the ray starting at the given position intersect the triangle?
 raySegmentTriangleIntersects : Positioned a -> Vec3 -> Triangle (Positioned b) -> Bool
@@ -19,10 +19,10 @@ http://www.lighthouse3d.com/tutorials/maths/ray-triangle-intersection/
 -}
 rayTriangleIntersection : Positioned a -> Vec3 -> Triangle (Positioned b) -> Maybe Float
 rayTriangleIntersection src ray (t0, t1, t2) =
-    let p = src.position
-        v0 = t0.position
-        v1 = t1.position
-        v2 = t2.position
+    let p = src.pos
+        v0 = t0.pos
+        v1 = t1.pos
+        v2 = t2.pos
 
         e1 = v1 `cross` v0
         e2 = v2 `cross` v0

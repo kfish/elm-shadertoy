@@ -1,8 +1,8 @@
 module Update (step) where
 
-import Math.Vector3 (..)
+import Math.Vector3 exposing (..)
 import Math.Vector3 as V3
-import Math.Matrix4 (..)
+import Math.Matrix4 exposing (..)
 import Model
 
 step : Model.Inputs -> Model.Person -> Model.Person
@@ -26,20 +26,20 @@ turn (dx,dy) person =
         h' = person.horizontalAngle + yo dx
         v' = person.verticalAngle   - yo dy
     in
-        { person | horizontalAngle <- h'
-                 , verticalAngle <- clamp (degrees -45) (degrees 45) v'
+        { person | horizontalAngle = h'
+                 , verticalAngle = clamp (degrees -45) (degrees 45) v'
         }
 
 walk : { x:Int, y:Int } -> Model.Person -> Model.Person
 walk directions person =
-  if getY person.position > Model.eyeLevel then person else
+  if getY person.pos > Model.eyeLevel then person else
     let moveDir = normalize (flatten (Model.direction person))
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
 
         move = V3.scale (3.0 * toFloat directions.y) moveDir
         strafe = V3.scale (3.0 * toFloat directions.x) strafeDir
     in
-        { person | velocity <- adjustVelocity (move `add` strafe) }
+        { person | velocity = adjustVelocity (move `add` strafe) }
 
 adjustVelocity : Vec3 -> Vec3
 adjustVelocity v =
@@ -49,25 +49,25 @@ adjustVelocity v =
 
 jump : Bool -> Model.Person -> Model.Person
 jump isJumping person =
-  if not isJumping || getY person.position > Model.eyeLevel then person else
+  if not isJumping || getY person.pos > Model.eyeLevel then person else
     let v = toRecord person.velocity
     in
-        { person | velocity <- vec3 v.x 2 v.z }
+        { person | velocity = vec3 v.x 2 v.z }
 
 physics : Float -> Model.Person -> Model.Person
 physics dt person =
-    let position = person.position `add` V3.scale dt person.velocity
-        p = toRecord position
+    let pos = person.pos `add` V3.scale dt person.velocity
+        p = toRecord pos
 
-        position' = if p.y < Model.eyeLevel
+        pos' = if p.y < Model.eyeLevel
                     then vec3 p.x Model.eyeLevel p.z
-                    else position
+                    else pos
     in
-        { person | position <- position' }
+        { person | pos = pos' }
 
 gravity : Float -> Model.Person -> Model.Person
 gravity dt person =
-  if getY person.position <= Model.eyeLevel then person else
+  if getY person.pos <= Model.eyeLevel then person else
     let v = toRecord person.velocity
     in
-        { person | velocity <- vec3 v.x (v.y - 2 * dt) v.z }
+        { person | velocity = vec3 v.x (v.y - 2 * dt) v.z }

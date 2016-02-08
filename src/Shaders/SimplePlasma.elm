@@ -1,8 +1,8 @@
 module Shaders.SimplePlasma (simplePlasma) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Graphics.WebGL (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import WebGL exposing (..)
 
 -- https://www.shadertoy.com/view/ldBGRR
 simplePlasma : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }

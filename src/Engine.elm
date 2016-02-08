@@ -1,40 +1,45 @@
 module Engine where
 
-import Maybe (maybe)
+import Color exposing (rgb)
+import Graphics.Element exposing (..)
+import Maybe exposing (withDefault)
+import Signal exposing (foldp)
+import Signal.Extra exposing ((<~), combine)
+import Time exposing (Time)
 
-import Math.Vector3 (..)
-import Math.Matrix4 (Mat4)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (Mat4)
 import Math.Matrix4 as M4
-import Graphics.WebGL (..)
+import WebGL exposing (..)
 
 import Model
 
-type Perception = {
+type alias Perception = {
     resolution : (Int, Int),
     globalTime : Time,
     viewMatrix : Mat4
 }
 
-type See = Perception -> [Entity]
+type alias See = Perception -> List Renderable
 
-type Visible a = { a | see : See }
+type alias Visible a = { a | see : See }
 
-type Oriented a = { a | position : Vec3, orientation : a -> Vec3 }
-type Moving a = Oriented { a | velocity : Vec3 }
-type Massive a = { a | mass : Float }
-type Spherical a = { a | radius : Float }
+type alias Oriented a = { a | pos : Vec3, orientation : a -> Vec3 }
+type alias Moving a = Oriented { a | velocity : Vec3 }
+type alias Massive a = { a | mass : Float }
+type alias Spherical a = { a | radius : Float }
 
 folds : b -> (a -> b -> b) -> Signal b -> Signal a -> Signal b
 folds dfl step state input =
     let f (b0,inputs) bm = case bm of
             Nothing -> Just b0
             Just b  -> Just (step inputs b)
-    in maybe dfl identity <~ foldp f Nothing (lift2 (,) state input)
+    in Signal.map (withDefault dfl) (foldp f Nothing (Signal.map2 (,) state input))
 
 -- NAMING: this name is terrible, please suggest an alternative
 -- data TCont a = TCont a (Time -> a -> (a, TCont a))
 -- data TCont a = TCont a (Time -> a -> TCont a)
-data TCont a = TCont (Time -> a -> (TCont a, a))
+type TCont a = TCont (Time -> a -> (TCont a, a))
 
 -- foldTCont : TCont a -> a -> Signal Time -> Signal a
 foldTCont c init t =
@@ -47,12 +52,12 @@ identityTCont = TCont (\_ x -> (identityTCont, x))
 foldSigTCont : a -> Signal (TCont a) -> Signal a -> Signal Time -> Signal a
 foldSigTCont dfl c init t =
   let upd dt (TCont f, x) = f dt x
-  in snd <~ folds (identityTCont, dfl) upd (lift2 (,) c init) t
+  in snd <~ folds (identityTCont, dfl) upd (Signal.map2 (,) c init) t
 
 foldSigTCont2 : a -> TCont a -> Signal a -> Signal Time -> Signal a
 foldSigTCont2 dfl c init t =
   let upd dt (TCont f, x) = f dt x
-  in snd <~ folds (identityTCont, dfl) upd (lift2 (,) (constant c) init) t
+  in snd <~ folds (identityTCont, dfl) upd (Signal.map2 (,) (Signal.constant c) init) t
 
 
 simpleTCont : (Time -> a -> a) -> TCont a
@@ -115,20 +120,27 @@ Then the next round, we just call the continuation function
 
 -}
 
-data Thing = Thing Vec3 Vec3 See
+
+type Thing = Thing Vec3 Vec3 See
 {-
-    position : Vec3,
+    pos : Vec3,
     orientation : Vec3,
     see : See
 -} 
 
+-- Really, all we want to be able to do is get a snapshot
+-- of each object's position and See function etc., so perhaps they
+-- should just contain a function that gives us exactly that
 extractThing : Oriented (Visible a) -> Thing
 extractThing x =
+{-
     let
-        xo = { x - orientation }
-        xp = { xo - position }
-        o = x.orientation xp
-    in Thing x.position o x.see
+        -- xo = { x - orientation }
+        -- xp = { xo - pos }
+        -- o = x.orientation xp
+    in Thing x.pos o x.see
+-}
+    Thing x.pos x.pos x.see
 
 {-
 
@@ -163,14 +175,14 @@ fooPerceive p = ...
 
 -}
 
-mapApply : [(a -> [b])] -> a -> [b]
-mapApply fs x = concat <| map (\f -> f x) fs
+mapApply : List (a -> List b) -> a -> List b
+mapApply fs x = List.concat <| List.map (\f -> f x) fs
 
-gather : [ Signal [a] ] -> Signal [a]
-gather = lift concat << combine
+gather : List (Signal (List a)) -> Signal (List a)
+gather = Signal.map List.concat << combine
 
 tview : (Mat4 -> Mat4) -> See -> See
-tview f see p = see { p | viewMatrix <- f p.viewMatrix }
+tview f see p = see { p | viewMatrix = f p.viewMatrix }
 
 place : Float -> Float -> Float -> Thing -> Thing
 place x y z (Thing _ o s) = Thing (vec3 x y z) o s
@@ -187,12 +199,12 @@ orient (Thing position orientation see) =
 look : (Int,Int) -> Model.Person -> Mat4
 look (w,h) person =
     M4.mul (M4.makePerspective 45 (toFloat w / toFloat h) 0.01 100)
-           (M4.makeLookAt person.position (person.position `add` Model.direction person) j)
+           (M4.makeLookAt person.pos (person.pos `add` Model.direction person) j)
 
-scene : [Thing] -> (Int,Int) -> Time -> Model.Person -> Element
+scene : List Thing -> (Int,Int) -> Time -> Model.Person -> Element
 scene things (w,h) t person =
   let
-    see = mapApply (map orient things)
+    see = mapApply (List.map orient things)
     p = { viewMatrix = look (w,h) person, globalTime = t, resolution = (w,h) }
   in
     layers [ color (rgb 135 206 235) (spacer w h)

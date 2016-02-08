@@ -1,51 +1,59 @@
 module Demo (demoThings) where
 
-import Maybe (maybe)
-import Math.Vector3 (..)
+import Math.Vector3 exposing (..)
+import Signal.Extra exposing ((<~), combine)
+import Time exposing (fps)
 
-import Engine (..)
+import Engine exposing (..)
 
-import Things.Ground (ground)
-import Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys)
-import Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
-import Things.Diamond (cloudsDiamond, fogMountainsDiamond)
-import Things.Portal (plasmaPortal)
-import Things.Sphere (spheres, cloudsSphere, fogMountainsSphere)
-import Things.Teapot (teapot)
-import Shaders.FogMountains (fogMountains)
-import Shaders.VoronoiDistances (voronoiDistances)
+import Things.Ground exposing (ground)
+import Things.BFly exposing (bflys)
+import Things.Cube exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
+import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
+import Things.Portal exposing (plasmaPortal)
+import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
+-- import Things.Teapot exposing (teapot)
+import Shaders.FogMountains exposing (fogMountains)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
 
-import Physics.Drop (..)
-import Physics.Collisions (..)
-import Behavior.Boids (..)
+import Physics.Drop exposing (..)
+import Physics.Collisions exposing (..)
+import Behavior.Boids exposing (..)
 
-import Debug (log)
+import Debug exposing (log)
 
-demoThings : Signal [Thing]
+demoThings : Signal (List Thing)
 demoThings =
     let
         isOdd x = (floor x % 2) == 0
         ifelse cond x y = if cond then x else y
-        switchy = isOdd <~ foldp (+) 0 (fps 1)
-        cd = extractThing <~ lift3 ifelse (lift fst xvCube) cloudsCube cloudsDiamond
+        switchy = isOdd <~ Signal.foldp (+) 0 (fps 1)
+        cd = extractThing <~ Signal.map3 ifelse (Signal.map fst xvCube) cloudsCube cloudsDiamond
 
+{- ELM 0.16 temp comment out
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
+-}
 {-
         boids : Signal [Thing]
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 -}
-        boids = map extractThing <~ runBoids boids0 (fps 60)
+
+{- ELM 0.16 temp comment out
+        boids = List.map extractThing <~ runBoids boids0 (fps 60)
+-}
 
         -- -- boidsColl = tcAndThen boidsTCont (simpleTCont collisions)
         -- boidsColl = composeTCont moveBoids collisions
         -- boids = map extractThing <~ foldSigTCont2 [] boidsColl boids0 (fps 60)
 
+{- ELM 0.16 temp comment out
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 
-        balls : Signal [Thing]
-        balls = map extractThing <~ folds [] moveDrops balls0 (fps 60)
+        balls : Signal (List Thing)
+        balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
+-}
 
-        individuals : Signal [Thing]
+        individuals : Signal (List Thing)
         individuals = combine [
             ground,
             -- -- place   0   3   0 <~ teapot,
@@ -57,4 +65,5 @@ demoThings =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        gather [individuals, boids, balls]
+        -- gather [individuals, boids, balls]
+        gather [individuals]
