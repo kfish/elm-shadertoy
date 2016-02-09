@@ -14,14 +14,19 @@ import Physics.Collisions exposing (..)
 
 import Debug exposing (log)
 
--- newDrop : Vec3 -> Vec3 -> a -> Drop a
-newDrop pos vel thing0 =
-    let thing1 = { thing0 | pos = pos } -- update
-        thing2 = { thing1 | velocity = vel }
-        thing3 = { thing2 | radius = 1.0 }
-        thing4 = { thing3 | mass = 1.0 }
-    in { thing4 | orientation = dropOrientation }
+type alias Drop a = Massive (Spherical (Moving a))
 
+newDrop : Vec3 -> Vec3 -> Visible (Oriented {}) -> Drop (Visible {})
+newDrop pos vel thing0 =
+    { radius = 1.0
+    , mass = 1.0
+    , velocity = vel
+    , pos = pos
+    , orientation = thing0.orientation
+    , see = thing0.see
+    }
+
+-- TODO: add spin?
 dropOrientation d =
     let v = V3.toRecord d.velocity
     in V3.normalize (vec3 v.x 0 v.z)
@@ -62,4 +67,4 @@ moveDrops dt balls =
         applyRules b g = { b |
             velocity = (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = List.map bounds <| List.map2 applyRules balls gs
-    in collisions dt <| bs
+    in List.map (\x -> { x | orientation = dropOrientation x }) <| collisions dt <| bs

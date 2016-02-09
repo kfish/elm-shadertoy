@@ -42,12 +42,11 @@ demoThings =
         -- boidsColl = composeTCont moveBoids collisions
         -- boids = map extractThing <~ foldSigTCont2 [] boidsColl boids0 (fps 60)
 
-{- ELM 0.16 temp comment out
         balls0 = randomDrops 15 (spheres 15 fogMountains)
 
         balls : Signal (List Thing)
-        balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
--}
+        -- balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
+        balls = List.map extractThing <~ Signal.foldp moveDrops balls0 (fps 60)
 
         individuals : Signal (List Thing)
         individuals = combine [
@@ -61,5 +60,4 @@ demoThings =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        -- gather [individuals, boids, balls]
-        gather [individuals, boids]
+        gather [individuals, boids, balls]
