@@ -53,7 +53,7 @@ demoThings =
             ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
-            place   0   1   0 <~ (extractThing <~ fogMountainsSphere),
+            place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
             place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
             -- lift2 (\y e -> place 0 y 0 e) s fireCube,

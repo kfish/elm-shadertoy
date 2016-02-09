@@ -22,18 +22,15 @@ import Engine exposing (..)
 
 type alias Triangle a = (a,a,a)
 
-spheres n fragmentShader = map (always (sphere worldVertex fragmentShader))
-    -- <~ floatList (constant n)
-    -- <~ list n (float 0 1)
-    <~ Signal.constant [0..n]
+spheres n fragmentShader = map (always (sphere worldVertex fragmentShader)) [0..n]
 
 -- cloudsSphere : (Int,Int) -> Time -> Mat4 -> Renderable
-cloudsSphere : Signal (Oriented (Visible {}))
-cloudsSphere = Signal.constant <| sphere worldVertex clouds
+cloudsSphere : Oriented (Visible {})
+cloudsSphere = sphere worldVertex clouds
 
 -- fogMountainsSphere : (Int,Int) -> Time -> Mat4 -> Renderable
 -- fogMountainsSphere : Signal (Oriented (Visible a))
-fogMountainsSphere = Signal.constant <| sphere worldVertex fogMountains
+fogMountainsSphere = sphere worldVertex fogMountains
 
 sphere vertexShader fragmentShader =
     let see = seeSphere vertexShader fragmentShader
