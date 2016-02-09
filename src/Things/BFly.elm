@@ -28,7 +28,7 @@ type alias Vertex = { pos:Vec3, coord:Vec3, wing:Vec3 }
 -- bflys : Int -> Shader {} a -> Signal [Thing]
 -- bflys n fragmentShader = map (bfly bflyVertex fragmentShader << (\x -> x * second * pi * 2)) <~ floatList (Signal.constant n)
 -- bflys n fragmentShader = List.map (makeBFly bflyVertex fragmentShader << (\x -> x * second * pi * 2)) <~ Signal.constant [1..n]
-bflys n fragmentShader = List.map (makeBFly bflyVertex fragmentShader << ((\x -> x * second * pi * 2) << (\x -> x/n))) [1..n] 
+bflys n fragmentShader = List.map (bfly fragmentShader << (\x -> x/n)) [1..n] 
 
 bfly fragmentShader f01 = makeBFly bflyVertex fragmentShader (f01 * second * pi * 2)
 
