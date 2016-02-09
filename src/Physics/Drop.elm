@@ -28,15 +28,16 @@ dropOrientation d =
 
 -- randomDrop : Signal a -> Signal (Drop a)
 randomDrop thing =
-    let pos = (V3.add (vec3 0 30 0)) <~ randomVec3 4.0
+    let pos = (V3.add (vec3 0 30 0)) (randomVec3 4.0)
     in
-        Signal.map3 newDrop pos (randomVec3 8.0) thing
+        newDrop pos (randomVec3 8.0) thing
 
 -- randomDrops : Int -> Signal [a] -> Signal [Drop a]
+-- randomDrops : Int -> List a -> List (BBall a)
 randomDrops n things =
-    let poss = (List.map (V3.add (vec3 0 30 0))) <~ randomVec3s n 4.0
+    let poss = List.map (V3.add (vec3 0 30 0)) (randomVec3s n 4.0)
     in
-        Signal.map3 (List.map3 newDrop) poss (randomVec3s n 8.0) things
+        List.map3 newDrop poss (randomVec3s n 8.0) things
 
 bounds : BBall a -> BBall a
 bounds b =

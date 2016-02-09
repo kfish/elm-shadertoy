@@ -11,32 +11,35 @@ import Engine exposing (..)
 
 type alias Boid a = Massive (Spherical (Moving a))
 
--- newBoid : Float -> Float -> Vec3 -> Vec3 -> a -> Boid a
+newBoid : Float -> Float -> Vec3 -> Vec3 -> Visible (Oriented {}) -> Boid (Visible {})
 newBoid m r pos vel thing0 =
-    let thing1 = { thing0 | radius = r } -- add field
-        thing2 = { thing1 | mass = m } -- add field
-        thing3 = { thing2 | pos = pos } -- update field
-        thing4 = { thing3 | velocity = vel } -- add field
-    in { thing4 | orientation = boidOrientation }
+    { radius = r
+    , mass = m
+    , velocity = vel
+    , pos = pos
+    , orientation = thing0.orientation
+    , see = thing0.see
+    }
 
 boidOrientation b =
     let v = V3.toRecord b.velocity
     in V3.normalize (vec3 v.x (v.y/10) v.z)
 
 -- stepBoid : Time -> Moving a -> Moving a
-stepBoid dt b = { b | pos = b.pos `V3.add` (V3.scale (dt / second) b.velocity) }
+stepBoid dt b = { b | pos = b.pos `V3.add` (V3.scale (dt / second) b.velocity), orientation = boidOrientation b }
 
 -- randomBoid : Signal Thing -> Signal Boid
 randomBoid thing =
-    let pos = Signal.map2 V3.add (Signal.map .pos thing) (randomVec3 4.0)
+    let pos = V3.add thing.pos (randomVec3 4.0)
     in
-        Signal.map3 (newBoid 0.3 0.50) pos (randomVec3 1.0) thing
+        newBoid 0.3 0.50 pos (randomVec3 1.0) thing
 
 -- randomBoids : Int -> Signal [Thing] -> Signal [Boid a]
+-- randomBoids : Int -> [Thing] -> [Boid a]
 randomBoids n things =
-    let poss = List.map (V3.add (vec3 7 8 4)) <~ randomVec3s n 4.0
+    let poss = List.map (V3.add (vec3 7 8 4)) (randomVec3s n 4.0)
     in
-        Signal.map3 (newBoid 0.3 1.0) poss (randomVec3s n 1.0) things
+        List.map3 (newBoid 0.3 1.0) poss (randomVec3s n 1.0) things
 
 rule1 : Int -> Vec3 -> Boid a -> Vec3 
 rule1 n sumPos b =
@@ -96,8 +99,10 @@ boidsTCont : TCont (List (Boid a))
 boidsTCont = simpleTCont moveBoids
 
 -- runBoids : Signal [a] -> Signal Time -> Signal (TCont [Boid a])
-runBoids : Signal (List (Boid a)) -> Signal Time -> Signal (List (Boid a))
-runBoids boids0 t = foldSigTCont2 [] boidsTCont boids0 t
+-- runBoids : Signal (List (Boid a)) -> Signal Time -> Signal (List (Boid a))
+runBoids : List (Boid a) -> Signal Time -> Signal (List (Boid a))
+-- runBoids boids0 t = foldSigTCont2 [] boidsTCont boids0 t
+runBoids = Signal.foldp moveBoids
 
 {-
 runBoids : Signal [Boid a] -> Signal Time -> Signal [Boid a]

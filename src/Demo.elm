@@ -30,17 +30,13 @@ demoThings =
         switchy = isOdd <~ Signal.foldp (+) 0 (fps 1)
         cd = extractThing <~ Signal.map3 ifelse (Signal.map fst xvCube) cloudsCube cloudsDiamond
 
-{- ELM 0.16 temp comment out
         boids0 = randomBoids 100 (bflys 100 voronoiDistances)
--}
 {-
         boids : Signal [Thing]
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 -}
 
-{- ELM 0.16 temp comment out
         boids = List.map extractThing <~ runBoids boids0 (fps 60)
--}
 
         -- -- boidsColl = tcAndThen boidsTCont (simpleTCont collisions)
         -- boidsColl = composeTCont moveBoids collisions
@@ -66,4 +62,4 @@ demoThings =
             ]
     in
         -- gather [individuals, boids, balls]
-        gather [individuals]
+        gather [individuals, boids]
