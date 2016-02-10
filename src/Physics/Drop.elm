@@ -4,7 +4,6 @@ import Array
 import Math.Vector3 as V3
 import Math.Vector3 exposing (Vec3, vec3)
 import Math.Matrix4 exposing (..)
-import Math.RandomVector exposing (..)
 import Signal.Extra exposing ((<~))
 import Time exposing (Time, second)
 
@@ -30,19 +29,6 @@ newDrop pos vel thing0 =
 dropOrientation d =
     let v = V3.toRecord d.velocity
     in V3.normalize (vec3 v.x 0 v.z)
-
--- randomDrop : Signal a -> Signal (Drop a)
-randomDrop thing =
-    let pos = (V3.add (vec3 0 30 0)) (randomVec3 4.0)
-    in
-        newDrop pos (randomVec3 8.0) thing
-
--- randomDrops : Int -> Signal [a] -> Signal [Drop a]
--- randomDrops : Int -> List a -> List (BBall a)
-randomDrops n things =
-    let poss = List.map (V3.add (vec3 0 30 0)) (randomVec3s n 4.0)
-    in
-        List.map3 newDrop poss (randomVec3s n 8.0) things
 
 bounds : BBall a -> BBall a
 bounds b =

@@ -1,6 +1,6 @@
 module Math.RandomVector where
 
--- import Random exposing (..)
+import Random
 
 import Math.Vector3 exposing (Vec3, vec3)
 
@@ -17,6 +17,20 @@ fromSpherical r theta phi =
 {- Generate a random vector with given length
    http://mathworld.wolfram.com/SpherePointPicking.html
 -}
+randomVec3' : Float -> Random.Generator Vec3
+randomVec3' r =
+    let fromUV u v =
+            let theta = 2 * pi * u
+                phi = acos (2 * v - 1)
+            in fromSpherical r theta phi
+    in Random.map2 fromUV (Random.float 0.0 1.0) (Random.float 0.0 1.0)
+
+randomUnitVec3' : Random.Generator Vec3
+randomUnitVec3' = randomVec3' 1
+
+randomVec3s' : Int -> Float -> Random.Generator (List Vec3)
+randomVec3s' n r = Random.list n (randomVec3' r)
+
 randomVec3 : Float -> Vec3
 randomVec3 r =
     let fromUV (u,v) =
@@ -49,3 +63,4 @@ randomVec3s n r =
 
 rampList : Int -> List Float
 rampList n = List.map (\x -> (toFloat x)/(toFloat n)) [1..n]
+

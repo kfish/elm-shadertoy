@@ -3,7 +3,6 @@ module Behavior.Boids where
 import Math.Vector3 as V3
 import Math.Vector3 exposing (Vec3, vec3)
 import Math.Matrix4 exposing (..)
-import Math.RandomVector exposing (..)
 import Signal.Extra exposing ((<~))
 import Time exposing (Time, second)
 
@@ -27,19 +26,6 @@ boidOrientation b =
 
 -- stepBoid : Time -> Moving a -> Moving a
 stepBoid dt b = { b | pos = b.pos `V3.add` (V3.scale (dt / second) b.velocity), orientation = boidOrientation b }
-
--- randomBoid : Signal Thing -> Signal Boid
-randomBoid thing =
-    let pos = V3.add thing.pos (randomVec3 4.0)
-    in
-        newBoid 0.3 0.50 pos (randomVec3 1.0) thing
-
--- randomBoids : Int -> Signal [Thing] -> Signal [Boid a]
--- randomBoids : Int -> [Thing] -> [Boid a]
-randomBoids n things =
-    let poss = List.map (V3.add (vec3 7 8 4)) (randomVec3s n 4.0)
-    in
-        List.map3 (newBoid 0.3 1.0) poss (randomVec3s n 1.0) things
 
 rule1 : Int -> Vec3 -> Boid a -> Vec3 
 rule1 n sumPos b =
@@ -67,14 +53,6 @@ bounds b =
 
 boundVelocity : Vec3 -> Vec3
 boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
-
-{-
-randomBoids : Int -> Signal Thing -> Signal [Boid]
-randomBoids n0 thing =
-    let f n = if (n==0) then [] else randomBoid thing :: f (n-1)
-    in combine <| f n0
--}
-    
 
 moveBoids : Time -> List (Boid a) -> List (Boid a)
 moveBoids dt boids =

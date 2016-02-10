@@ -1,5 +1,4 @@
--- module Things.BFly (bflys, fireBFly, voronoiBFly, voronoiBFlys) where
-module Things.BFly (bflys) where
+module Things.BFly (bfly) where
 
 import Random exposing (float)
 import Math.Vector2 exposing (Vec2)
@@ -9,9 +8,6 @@ import Signal.Extra exposing ((<~))
 import Time exposing (inSeconds, second)
 import WebGL exposing (..)
 
-import Shaders.Fire exposing (fire)
-import Shaders.VoronoiDistances exposing (voronoiDistances)
-
 import Model
 import Engine exposing (..)
 
@@ -19,21 +15,7 @@ import Debug exposing (log)
 
 type alias Vertex = { pos:Vec3, coord:Vec3, wing:Vec3 }
 
--- fireBFly : Signal (Visible (Oriented {}))
--- fireBFly = bfly bflyVertex fire <~ ((\x -> x * second * pi*2) <~ float (Signal.constant 7))
-
--- voronoiBFlys : Int -> Signal (List (Visible (Oriented {})))
--- voronoiBFlys n = map (bfly bflyVertex voronoiDistances << (\x -> x * second * pi * 2)) <~ floatList (Signal.constant n)
-
--- bflys : Int -> Shader {} a -> Signal [Thing]
--- bflys n fragmentShader = map (bfly bflyVertex fragmentShader << (\x -> x * second * pi * 2)) <~ floatList (Signal.constant n)
--- bflys n fragmentShader = List.map (makeBFly bflyVertex fragmentShader << (\x -> x * second * pi * 2)) <~ Signal.constant [1..n]
-bflys n fragmentShader = List.map (bfly fragmentShader << (\x -> x/n)) [1..n] 
-
 bfly fragmentShader f01 = makeBFly bflyVertex fragmentShader (f01 * second * pi * 2)
-
--- voronoiBFly : Signal (Visible (Oriented {}))
--- voronoiBFly = bfly bflyVertex voronoiDistances <~ ((\x -> x * second * pi*2) <~ float (Signal.constant 7))
 
 makeBFly vertexShader fragmentShader flapStart =
     let see = seeBFly vertexShader fragmentShader flapStart
@@ -53,7 +35,6 @@ seeBFly vertexShader fragmentShader flapStart p =
               flapL=flapL, flapR=flapR }
         ]
 
--- mesh : [Triangle Vertex]
 mesh : Drawable Vertex
 mesh =
     let bHead  = Vertex (vec3 0 0 0.5) (vec3 0.5 0 0) (vec3 0 0 0)

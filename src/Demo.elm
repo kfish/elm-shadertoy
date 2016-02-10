@@ -1,13 +1,16 @@
 module Demo (demoThings) where
 
 import Math.Vector3 exposing (..)
+import Random
 import Signal.Extra exposing ((<~), combine)
 import Time exposing (fps)
+
+import Math.RandomVector exposing (randomVec3')
 
 import Engine exposing (..)
 
 import Things.Ground exposing (ground)
-import Things.BFly exposing (bflys)
+import Things.BFly exposing (bfly)
 import Things.Cube exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
 import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 import Things.Portal exposing (plasmaPortal)
@@ -22,6 +25,22 @@ import Behavior.Boids exposing (..)
 
 import Debug exposing (log)
 
+randomBFly : Random.Generator (Visible (Oriented {}))
+randomBFly = Random.map (bfly voronoiDistances) (Random.float 0.0 1.0)
+
+randomBoid : Random.Generator (Boid (Visible {}))
+randomBoid = Random.map3
+    (newBoid 0.3 1.0)
+    (Random.map (add (vec3 7 8 4)) (randomVec3' 4.0))
+    (randomVec3' 1.0)
+    randomBFly
+
+randomDrop : Random.Generator (Drop (Visible {}))
+randomDrop = Random.map2
+    (\pos vel -> newDrop pos vel fogMountainsSphere)
+    (Random.map (add (vec3 0 30 0)) (randomVec3' 4.0))
+    (randomVec3' 8.0)
+
 demoThings : Signal (List Thing)
 demoThings =
     let
@@ -30,7 +49,15 @@ demoThings =
         switchy = isOdd <~ Signal.foldp (+) 0 (fps 1)
         cd = extractThing <~ Signal.map3 ifelse (Signal.map fst xvCube) cloudsCube cloudsDiamond
 
-        boids0 = randomBoids 100 (bflys 100 voronoiDistances)
+        seed0 = Random.initialSeed 7
+
+{-
+        (rands, seed1) = Random.generate (Random.list 100 (Random.float 0.0 1.0)) seed0
+
+        boids0 = randomBoids 100 (List.map (bfly voronoiDistances) rands)
+-}
+
+        (boids0, seed1) = Random.generate (Random.list 100 randomBoid) seed0
 {-
         boids : Signal [Thing]
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
@@ -42,7 +69,7 @@ demoThings =
         -- boidsColl = composeTCont moveBoids collisions
         -- boids = map extractThing <~ foldSigTCont2 [] boidsColl boids0 (fps 60)
 
-        balls0 = randomDrops 15 (spheres 15 fogMountains)
+        (balls0, seed2) = Random.generate (Random.list 15 randomDrop) seed1
 
         balls : Signal (List Thing)
         -- balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
