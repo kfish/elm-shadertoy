@@ -63,17 +63,22 @@ demoThings =
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
 -}
 
-        boids = List.map extractThing <~ runBoids boids0 (fps 60)
+        -- boids = List.map extractThing <~ runBoids boids0 (fps 60)
 
         -- -- boidsColl = tcAndThen boidsTCont (simpleTCont collisions)
-        -- boidsColl = composeTCont moveBoids collisions
         -- boids = map extractThing <~ foldSigTCont2 [] boidsColl boids0 (fps 60)
+        boidsColl = composeTCont moveBoids collisions
+        boids = List.map extractThing <~ foldTCont boidsColl boids0 (fps 60)
 
         (balls0, seed2) = Random.generate (Random.list 15 randomDrop) seed1
 
+        ballsTCont = composeTCont moveBoids moveDrops
+
         balls : Signal (List Thing)
         -- balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
-        balls = List.map extractThing <~ Signal.foldp moveDrops balls0 (fps 60)
+        -- balls = List.map extractThing <~ Signal.foldp moveDrops balls0 (fps 60)
+        -- balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
+        balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
         individuals : Signal (List Thing)
         individuals = combine [

@@ -46,7 +46,7 @@ bounds b =
 gravity : a -> Vec3
 gravity _ = vec3 0 -9.8 0
 
--- moveDrops : Time -> List (BBall a) -> List (BBall a)
+moveDrops : Time -> List (BBall a) -> List (BBall a)
 moveDrops dt balls =
     let
         gs = List.map gravity balls
