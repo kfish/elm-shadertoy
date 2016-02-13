@@ -53,4 +53,4 @@ moveDrops dt balls =
         applyRules b g = { b |
             velocity = (b.velocity `V3.add` (V3.scale (dt / second) g)) }
         bs = List.map bounds <| List.map2 applyRules balls gs
-    in List.map (\x -> { x | orientation = dropOrientation x }) <| collisions dt <| bs
+    in List.map (\x -> { x | orientation = dropOrientation x }) <| bs

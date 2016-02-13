@@ -41,7 +41,7 @@ folds dfl step state input =
 -- data TCont a = TCont a (Time -> a -> TCont a)
 type TCont a = TCont (Time -> a -> (TCont a, a))
 
--- foldTCont : TCont a -> a -> Signal Time -> Signal a
+foldTCont : TCont a -> a -> Signal Time -> Signal a
 foldTCont c init t =
   let upd dt (TCont f, x) = f dt x
   in snd <~ foldp upd (c, init) t
@@ -75,6 +75,21 @@ fAndThen f g = \dt -> f dt >> g dt
 
 composeTCont : (Time -> a -> a) -> (Time -> a -> a) -> TCont a
 composeTCont f g = simpleTCont (fAndThen f g)
+
+{- 
+Just a sketch ... use Automaton :)
+
+type DCont f a = DCont (Time -> a -> DCont f a) a
+
+return (DCont _ a) = a
+
+-- pair : DCont f a -> DCont g b -> DCont (f,g) (a,b)
+
+foldDCont : DCont f a -> Signal Time -> Signal a
+foldDCont dcont t =
+  let upd dt (DCont g x) = g dt x
+  in Signal.map return (foldp upd dcont t)
+-}
 
 {-
 tcAndThen : a -> TCont a -> TCont a -> TCont a
