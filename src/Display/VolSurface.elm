@@ -1,42 +1,53 @@
 module Display.VolSurface (cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
 
-import Math.Vector2 (Vec2)
-import Math.Vector3 (..)
-import Math.Matrix4 (..)
-import Graphics.WebGL (..)
+import List exposing (..)
+import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (..)
+import Math.Matrix4 exposing (..)
+import Time exposing (Time, inSeconds)
+import WebGL exposing (..)
 
-import Shaders.Clouds (clouds)
-import Shaders.Fire (fire)
-import Shaders.FogMountains (fogMountains)
---import Shaders.SimplePlasma (simplePlasma)
-import Shaders.VoronoiDistances (voronoiDistances)
-import Shaders.WorldVertex (Vertex, worldVertex)
+import Shaders.Clouds exposing (clouds)
+import Shaders.Fire exposing (fire)
+import Shaders.FogMountains exposing (fogMountains)
+--import Shaders.SimplePlasma exposing (simplePlasma)
+import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-cloudsVolSurface : (Int,Int) -> Time -> Mat4 -> Entity
-cloudsVolSurface = volSurface worldVertex clouds
+type alias Triangle a = (a,a,a)
 
-fogMountainsVolSurface : (Int,Int) -> Time -> Mat4 -> Entity
-fogMountainsVolSurface = volSurface worldVertex fogMountains
+-- cloudsVolSurface : Signal Thing
+cloudsVolSurface = Signal.constant <| volSurface worldVertex clouds
 
-voronoiDistancesVolSurface : (Int,Int) -> Time -> Mat4 -> Entity
-voronoiDistancesVolSurface = volSurface worldVertex voronoiDistances
+-- fogMountainsVolSurface : Signal Thing
+fogMountainsVolSurface = Signal.constant <| volSurface worldVertex fogMountains
+
+-- voronoiDistancesVolSurface : (Int,Int) -> Time -> Mat4 -> Renderable
+-- voronoiDistancesVolSurface : Signal Thing
+voronoiDistancesVolSurface = Signal.constant <| volSurface worldVertex voronoiDistances
 
 -- volSurface : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> (Int,Int) -> Time -> Mat4 -> Entity
-volSurface vertexShader fragmentShader (w,h) t view =
-    let resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds t
-    in
-        entity vertexShader fragmentShader volSurfaceMesh
-            { iResolution=resolution, iGlobalTime=s, view=view }
+--    -> (Int,Int) -> Time -> Mat4 -> Renderable
 
-unfold : Int -> (a -> a) -> a -> [a]
+volSurface vertexShader fragmentShader =
+    let see = seeVolSurface vertexShader fragmentShader
+    in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
+
+seeVolSurface vertexShader fragmentShader p =
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds p.globalTime
+    in
+        [render vertexShader fragmentShader volSurfaceMesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
+
+unfold : Int -> (a -> a) -> a -> List a
 unfold n f x = if n==0 then [] else
   let res=f x in (res :: unfold (n-1) f res)
 
-zip3 : [a] -> [b] -> [c] -> [(a,b,c)]
+zip3 : List a -> List b -> List c -> List (a,b,c)
 zip3 xs ys zs =
   case (xs, ys, zs) of
     (x::xs', y::ys', z::zs') -> (x,y,z) :: zip3 xs' ys' zs'
@@ -46,33 +57,34 @@ rotY n = makeRotate (2*pi/n) (vec3 0 1 0)
 rotZ n = makeRotate (-2*pi/n) (vec3 0 0 1)
 
 rotBoth : Float -> Vertex -> Vertex
-rotBoth n x = { position = transform (rotY n) x.position, coord = transform (rotZ n) x.coord }
+rotBoth n x = { pos = transform (rotY n) x.pos, coord = transform (rotZ n) x.coord }
 
-seven : Vertex -> [Vertex]
+seven : Vertex -> List Vertex
 seven = unfold 7 (rotBoth 8)
 
 eights x = let x7 = seven x in (x::x7, x7++[x])
 
-matList : Float -> [Float] -> [Vertex]
+matList : Float -> List Float -> List Vertex
 matList z =
   let m posOffset coordOffset xs0 = case xs0 of
-          (x::xs) -> { position = vec3 posOffset (x*10) z, coord = vec3 coordOffset z 0 } :: (m (posOffset + 0.4) (coordOffset + 0.1) xs)
+          (x::xs) -> { pos = vec3 posOffset (x*10) z, coord = vec3 coordOffset z 0 } :: (m (posOffset + 0.4) (coordOffset + 0.1) xs)
           _       -> []
   in
       m 0.0 0.0
 
-volSurfaceMesh : [Triangle Vertex]
+-- volSurfaceMesh : Drawable (List (Triangle Vertex)
+volSurfaceMesh : Drawable Vertex
 volSurfaceMesh =
   let
       yOffset = 1.21
       yMul = -4.2
       -- Vertices
-      table0 = { position = vec3 0 0 0, coord = vec3 0 (yMul*(0.0-yOffset)) 0 }
-      tableV = { position = vec3 0.57 0 0, coord = vec3 0 (yMul*(0.57-yOffset)) 0 }
+      table0 = { pos = vec3 0 0 0, coord = vec3 0 (yMul*(0.0-yOffset)) 0 }
+      tableV = { pos = vec3 0.57 0 0, coord = vec3 0 (yMul*(0.57-yOffset)) 0 }
       (tableVS0, tableVS1) = eights tableV
 
       facetY = -0.2
-      facet0 = rotBoth -16 { position = vec3 0.8 facetY 0, coord = vec3 0.2 (yMul*(0.8-yOffset)) 0 }
+      facet0 = rotBoth -16 { pos = vec3 0.8 facetY 0, coord = vec3 0.2 (yMul*(0.8-yOffset)) 0 }
       (facetVS0, facetVS1) = eights facet0
 
       mat0 = matList 0 [1.0, 0.8, 0.7, 0.4, 0.3, 0.1, 0.2, 0.5, 0.6, 1.0]
@@ -133,12 +145,14 @@ volSurfaceMesh =
                            0.15549, 0.14913, 0.14374, 0.13932, 0.13708, 0.13708, 0.13708, 0.13708,
                            0.13708, 0.13708]
 
-      mkStrip : [Vertex] -> [Vertex] -> [Triangle Vertex]
+      mkStrip : List Vertex -> List Vertex -> List (Triangle Vertex)
       mkStrip vs1 vs2 = zip3 vs1 vs2 (drop 1 vs1) ++ zip3 vs2 (drop 1 vs1) (drop 1 vs2)
 
       -- Triangles
 
   in
+
+    Triangle <|
       --mkStrip mat0 mat1 ++
       --mkStrip mat1 mat2 ++
 

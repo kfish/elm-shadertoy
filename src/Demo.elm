@@ -16,6 +16,9 @@ import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 -- import Things.Teapot exposing (teapot)
+
+import Display.VolSurface exposing (..)
+
 import Shaders.FogMountains exposing (fogMountains)
 import Shaders.VoronoiDistances exposing (voronoiDistances)
 
@@ -88,6 +91,7 @@ demoThings =
             ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
+            place   1   1   1 <~ (extractThing <~ cloudsVolSurface),
             place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
             place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
