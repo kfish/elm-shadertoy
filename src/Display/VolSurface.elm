@@ -1,4 +1,4 @@
-module Display.VolSurface (cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
+module Display.VolSurface (testSurface, cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
 
 import List exposing (..)
 import Math.Vector2 exposing (Vec2)
@@ -16,8 +16,6 @@ import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-type alias Triangle a = (a,a,a)
-
 -- cloudsVolSurface : Signal Thing
 cloudsVolSurface = Signal.constant <| volSurface worldVertex clouds
 
@@ -29,8 +27,7 @@ fogMountainsVolSurface = Signal.constant <| volSurface worldVertex fogMountains
 voronoiDistancesVolSurface = Signal.constant <| volSurface worldVertex voronoiDistances
 
 -- volSurface : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> (Int,Int) -> Time -> Mat4 -> Renderable
-
+--    -> (Int,Int) -> Time -> Mat4 -> Renderable 
 volSurface vertexShader fragmentShader =
     let see = seeVolSurface vertexShader fragmentShader
     in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
@@ -43,26 +40,44 @@ seeVolSurface vertexShader fragmentShader p =
         [render vertexShader fragmentShader volSurfaceMesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-unfold : Int -> (a -> a) -> a -> List a
-unfold n f x = if n==0 then [] else
-  let res=f x in (res :: unfold (n-1) f res)
+testSurface = Signal.constant <| surface worldVertex clouds testSurfaceMesh
 
-zip3 : List a -> List b -> List c -> List (a,b,c)
-zip3 xs ys zs =
-  case (xs, ys, zs) of
-    (x::xs', y::ys', z::zs') -> (x,y,z) :: zip3 xs' ys' zs'
-    _ -> []
+surface vertexShader fragmentShader mesh =
+    let see = seeSurface vertexShader fragmentShader mesh
+    in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
 
-rotY n = makeRotate (2*pi/n) (vec3 0 1 0)
-rotZ n = makeRotate (-2*pi/n) (vec3 0 0 1)
+seeSurface vertexShader fragmentShader mesh p =
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds p.globalTime
+    in
+        [render vertexShader fragmentShader mesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-rotBoth : Float -> Vertex -> Vertex
-rotBoth n x = { pos = transform (rotY n) x.pos, coord = transform (rotZ n) x.coord }
+testSurfaceMesh = surfaceMesh 0 1.4 1.1 10 0 1
+    [ [1.0, 0.8, 0.7, 0.4, 0.3, 0.1, 0.2, 0.5, 0.6, 1.0]
+    , [0.9, 0.75, 0.63, 0.3, 0.21, 0.2, 0.23, 0.4, 0.56, 0.8]
+    , [0.8, 0.65, 0.53, 0.2, 0.11, 0.23, 0.18, 0.3, 0.46, 0.6]
+    ]
 
-seven : Vertex -> List Vertex
-seven = unfold 7 (rotBoth 8)
+mkStrip : List Vertex -> List Vertex -> List (Vertex, Vertex, Vertex)
+mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
 
-eights x = let x7 = seven x in (x::x7, x7++[x])
+matRow : Float -> Float -> Float -> Float -> Float -> List Float -> List Vertex
+matRow x pos_dx coord_dx ymul z =
+  let m posOffset coordOffset ys0 = case ys0 of
+          (y::ys) -> { pos = vec3 posOffset (y*ymul) z, coord = vec3 coordOffset z 0 } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          _       -> []
+  in
+      m 0.0 0.0
+
+surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List Float) -> Drawable Vertex
+surfaceMesh x dx_pos dx_coord ymul z dz m =
+    let
+        zs = indexedMap (\ix _ -> z + dz * toFloat ix) m
+        rows = List.map2 (matRow x dx_pos dx_coord ymul) zs m
+    in
+        Triangle <| List.concat <| List.map2 mkStrip rows (drop 1 rows)
 
 matList : Float -> List Float -> List Vertex
 matList z =
@@ -72,20 +87,9 @@ matList z =
   in
       m 0.0 0.0
 
--- volSurfaceMesh : Drawable (List (Triangle Vertex)
 volSurfaceMesh : Drawable Vertex
 volSurfaceMesh =
   let
-      yOffset = 1.21
-      yMul = -4.2
-      -- Vertices
-      table0 = { pos = vec3 0 0 0, coord = vec3 0 (yMul*(0.0-yOffset)) 0 }
-      tableV = { pos = vec3 0.57 0 0, coord = vec3 0 (yMul*(0.57-yOffset)) 0 }
-      (tableVS0, tableVS1) = eights tableV
-
-      facetY = -0.2
-      facet0 = rotBoth -16 { pos = vec3 0.8 facetY 0, coord = vec3 0.2 (yMul*(0.8-yOffset)) 0 }
-      (facetVS0, facetVS1) = eights facet0
 
       mat0 = matList 0 [1.0, 0.8, 0.7, 0.4, 0.3, 0.1, 0.2, 0.5, 0.6, 1.0]
       mat1 = matList 1 [0.9, 0.75, 0.63, 0.3, 0.21, 0.2, 0.23, 0.4, 0.56, 0.8]
@@ -144,11 +148,6 @@ volSurfaceMesh =
                            0.20408, 0.19383, 0.18426, 0.17483, 0.16549, 0.17929, 0.17074, 0.16278,
                            0.15549, 0.14913, 0.14374, 0.13932, 0.13708, 0.13708, 0.13708, 0.13708,
                            0.13708, 0.13708]
-
-      mkStrip : List Vertex -> List Vertex -> List (Triangle Vertex)
-      mkStrip vs1 vs2 = zip3 vs1 vs2 (drop 1 vs1) ++ zip3 vs2 (drop 1 vs1) (drop 1 vs2)
-
-      -- Triangles
 
   in
 

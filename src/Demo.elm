@@ -91,7 +91,7 @@ demoThings =
             ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
-            place   1   1   1 <~ (extractThing <~ cloudsVolSurface),
+            place   1   1   1 <~ (extractThing <~ testSurface),
             place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
             place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
