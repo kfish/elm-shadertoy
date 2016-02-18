@@ -5,7 +5,9 @@ import Random
 import Signal.Extra exposing ((<~), combine)
 import Time exposing (fps)
 
+import Math.Procedural exposing (..)
 import Math.RandomVector exposing (randomVec3')
+import Util exposing (bammel)
 
 import Engine exposing (..)
 
@@ -16,6 +18,7 @@ import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 -- import Things.Teapot exposing (teapot)
+import Things.Terrain exposing (placeTerrain)
 
 import Display.VolSurface exposing (..)
 
@@ -25,6 +28,8 @@ import Shaders.VoronoiDistances exposing (voronoiDistances)
 import Physics.Drop exposing (..)
 import Physics.Collisions exposing (..)
 import Behavior.Boids exposing (..)
+
+import Zipper2D
 
 import Debug exposing (log)
 
@@ -83,15 +88,32 @@ demoThings =
         balls : Signal (List Thing)
         -- balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
         -- balls = List.map extractThing <~ Signal.foldp moveDrops balls0 (fps 60)
-        balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
-        -- balls = foldTCont ballsTCont balls0 (fps 60)
+        -- balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
+        balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
+
+        -- terrainSurface = testSurfaceArr (simpleTerrain2D 8)
+{-
+        (terrain0, seed3) = Random.generate (randTerrain2D 64) seed2
+        terrainSurface = testSurfaceArr terrain0
+-}
+        (terrains, seed3) = Random.generate (Random.list 64 (randTerrain2D 8)) seed2
+        terrainz = placeTerrain terrains
+
+        visibleTerrain : Signal (List Thing)
+        visibleTerrain =
+            Signal.constant <|
+            List.map extractThing <|
+            Zipper2D.radius 2 <|
+            bammel 4 Zipper2D.north <|
+            bammel 4 Zipper2D.east <|
+            terrainz
 
         individuals : Signal (List Thing)
         individuals = combine [
-            ground,
+            -- ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
-            place   1   1   1 <~ (extractThing <~ testSurface),
+            -- place   -30   -3   -10 <~ (extractThing <~ terrainSurface),
             place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
             place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
@@ -99,4 +121,4 @@ demoThings =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        gather [individuals, boids, balls]
+        gather [visibleTerrain, individuals, boids, balls]

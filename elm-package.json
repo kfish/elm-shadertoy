@@ -11,7 +11,9 @@
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 4.0.0",
         "Apanatshka/elm-signal-extra" : "5.7.0 <= v < 6.0.0",
+        "NoRedInk/elm-random-extra": "2.1.1 <= v < 3.0.0",
         "circuithub/elm-list-extra": "3.9.0 <= v < 4.0.0",
+        "circuithub/elm-maybe-extra": "1.6.0 <= v < 2.0.0",
         "elm-community/elm-webgl": "1.0.0 <= v < 2.0.0",
         "elm-community/elm-linear-algebra": "1.0.0 <= v < 2.0.0"
     },

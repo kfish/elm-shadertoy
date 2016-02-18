@@ -1,10 +1,14 @@
-module Display.VolSurface (testSurface, cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
+module Display.VolSurface (testSurface, testSurfaceArr, cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
 
+import Array
+import Array2D exposing (Array2D, side)
 import List exposing (..)
+import List.Extra exposing (splitAt)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
+import Util exposing (splitEvery)
 import WebGL exposing (..)
 
 import Shaders.Clouds exposing (clouds)
@@ -42,6 +46,8 @@ seeVolSurface vertexShader fragmentShader p =
 
 testSurface = Signal.constant <| surface worldVertex clouds testSurfaceMesh
 
+testSurfaceArr arr0 = surface worldVertex fire <| testSurfaceMeshArr arr0
+
 surface vertexShader fragmentShader mesh =
     let see = seeSurface vertexShader fragmentShader mesh
     in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
@@ -60,6 +66,10 @@ testSurfaceMesh = surfaceMesh 0 1.4 1.1 10 0 1
     , [0.8, 0.65, 0.53, 0.2, 0.11, 0.23, 0.18, 0.3, 0.46, 0.6]
     ]
 
+testSurfaceMeshArr = surfaceMeshArr -10 1.4 1.1 10 0 1
+
+----------------------------------------------------------------------
+
 mkStrip : List Vertex -> List Vertex -> List (Vertex, Vertex, Vertex)
 mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
 
@@ -70,6 +80,10 @@ matRow x pos_dx coord_dx ymul z =
           _       -> []
   in
       m 0.0 0.0
+
+surfaceMeshArr : Float -> Float -> Float -> Float -> Float -> Float -> Array2D Float -> Drawable Vertex
+surfaceMeshArr x dx_pos dx_coord ymul z dz arr0 =
+    surfaceMesh x dx_pos dx_coord ymul z dz (splitEvery (side arr0) (Array.toList arr0))
 
 surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List Float) -> Drawable Vertex
 surfaceMesh x dx_pos dx_coord ymul z dz m =
