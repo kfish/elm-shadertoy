@@ -7,7 +7,7 @@ import Time exposing (fps)
 
 import Math.Procedural exposing (..)
 import Math.RandomVector exposing (randomVec3')
-import Util exposing (bammel)
+import Util exposing (repeatedly)
 
 import Engine exposing (..)
 
@@ -104,8 +104,8 @@ demoThings =
             Signal.constant <|
             List.map extractThing <|
             Zipper2D.radius 2 <|
-            bammel 4 Zipper2D.north <|
-            bammel 4 Zipper2D.east <|
+            repeatedly 4 Zipper2D.north <|
+            repeatedly 4 Zipper2D.east <|
             terrainz
 
         individuals : Signal (List Thing)

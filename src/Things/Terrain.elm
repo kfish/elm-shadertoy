@@ -4,7 +4,7 @@ import List.Extra exposing (splitAt)
 
 import Array2D exposing (Array2D)
 import Math.Vector3 exposing (..)
-import Util exposing (bammel, splitEvery)
+import Util exposing (repeatedly, splitEvery)
 import Zipper2D exposing (Zipper2D, map)
 
 import Display.VolSurface exposing (..)
