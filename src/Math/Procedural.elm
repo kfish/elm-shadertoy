@@ -4,6 +4,7 @@ import Array
 import Array2D exposing (..)
 import Random
 import Random.Array
+import Util exposing (unfoldWhile)
 
 ----------------------------------------------------------------------
 
@@ -18,11 +19,12 @@ randTerrain2D side =
           setXY (side-1) (side-1) 1.0 arr))))) <|
       Random.Array.array (side*side) (Random.float (-1.0) 1.0)
 
+----------------------------------------------------------------------
+
 simpleTerrain2D : Int -> Array2D Float
 simpleTerrain2D side = terrain2D side (Array.repeat (side*side) 1.0)
 
-unfoldWhile : (a -> a) -> (a -> Bool) -> a -> List a
-unfoldWhile f p x = if p x then x :: unfoldWhile f p (f x) else []
+----------------------------------------------------------------------
 
 -- Given an input 2D array of floats in the range [-1.0 .. 1.0],
 -- generate terrain
