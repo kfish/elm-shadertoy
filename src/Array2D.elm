@@ -1,19 +1,22 @@
 module Array2D where
 
 import Array
+import Util exposing (splitEvery)
 
-type alias Array2D a = Array.Array a
+type Array2D a = Array2D Int (Array.Array a)
 
 side : Array2D a -> Int
-side arr0 = round <| sqrt <| toFloat <| Array.length arr0
+side (Array2D s _) = s
 
--- This will fail for non-square Arrays (getXY will return def, setXY will noop)
-xy : Array2D a -> Int -> Int -> Int
-xy arr x y = x + y * (round <| sqrt <| toFloat <| Array.length arr)
+fromArray : Array.Array a -> Array2D a
+fromArray arr = let s = round <| sqrt <| toFloat <| Array.length arr in Array2D s arr
+
+toLists : Array2D a -> List (List a)
+toLists (Array2D s arr) = splitEvery s (Array.toList arr)
 
 getXY : Int -> Int -> a -> Array2D a -> a
-getXY x y def arr = Maybe.withDefault def (Array.get (xy arr x y) arr)
+getXY x y def (Array2D s arr) = Maybe.withDefault def (Array.get (x + y*s) arr)
 
 setXY : Int -> Int -> a -> Array2D a -> Array2D a
-setXY x y val arr = Array.set (xy arr x y) val arr
+setXY x y val (Array2D s arr) = Array2D s (Array.set (x + y*s) val arr)
 

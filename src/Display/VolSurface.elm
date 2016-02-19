@@ -8,7 +8,6 @@ import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
-import Util exposing (splitEvery)
 import WebGL exposing (..)
 
 import Shaders.Clouds exposing (clouds)
@@ -83,7 +82,7 @@ matRow x pos_dx coord_dx ymul z =
 
 surfaceMeshArr : Float -> Float -> Float -> Float -> Float -> Float -> Array2D Float -> Drawable Vertex
 surfaceMeshArr x dx_pos dx_coord ymul z dz arr0 =
-    surfaceMesh x dx_pos dx_coord ymul z dz (splitEvery (side arr0) (Array.toList arr0))
+    surfaceMesh x dx_pos dx_coord ymul z dz (Array2D.toLists arr0)
 
 surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List Float) -> Drawable Vertex
 surfaceMesh x dx_pos dx_coord ymul z dz m =

@@ -17,12 +17,13 @@ randTerrain2D side =
           setXY 0 (side-1) 1.0 (
           setXY (side-1) 0 1.0 (
           setXY (side-1) (side-1) 1.0 arr))))) <|
+      Random.map Array2D.fromArray <|
       Random.Array.array (side*side) (Random.float (-1.0) 1.0)
 
 ----------------------------------------------------------------------
 
 simpleTerrain2D : Int -> Array2D Float
-simpleTerrain2D side = terrain2D side (Array.repeat (side*side) 1.0)
+simpleTerrain2D side = terrain2D side (fromArray (Array.repeat (side*side) 1.0))
 
 ----------------------------------------------------------------------
 
