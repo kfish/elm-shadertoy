@@ -2,6 +2,11 @@ module Util where
 
 import List.Extra exposing (splitAt)
 
+import Color exposing (hsl, toRgb)
+import Math.Vector3 exposing (..)
+
+---------------------------------------------------------------------
+
 splitEvery : Int -> List a -> List (List a)
 splitEvery size xs = case xs of
     [] -> []
@@ -20,3 +25,12 @@ subSquares smallSide bigSide =
     let offsets = unfoldWhile (\x -> x + smallSide) (\x -> x < bigSide) 0
         pairs l = List.map (\x -> (List.map (\y -> (x,y)) l)) l
     in  pairs offsets
+
+---------------------------------------------------------------------
+
+-- Help create colors as Vectors
+hsvToVec3 : Float -> Float -> Float -> Vec3
+hsvToVec3 hue saturation lightness =
+    let c = toRgb (hsl hue saturation lightness)
+    in  vec3 (toFloat c.red / 255) (toFloat c.green / 255) (toFloat c.blue / 255)
+

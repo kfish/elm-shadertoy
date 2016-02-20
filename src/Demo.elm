@@ -105,14 +105,14 @@ demoThings =
         visibleTerrain =
             Signal.constant <|
             List.map extractThing <|
-            Zipper2D.radius 4 <|
+            Zipper2D.radius 16 <|
             -- repeatedly 2 Zipper2D.north <|
             -- repeatedly 4 Zipper2D.east <|
             terrainz
 
         individuals : Signal (List Thing)
         individuals = combine [
-            -- ground,
+            ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
             -- place   -30   -3   -10 <~ (extractThing <~ terrainSurface),
