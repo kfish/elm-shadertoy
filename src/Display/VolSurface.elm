@@ -1,7 +1,7 @@
 module Display.VolSurface (testSurface, testSurfaceArr, cloudsVolSurface, fogMountainsVolSurface, voronoiDistancesVolSurface, volSurface) where
 
 import Array
-import Array2D exposing (Array2D, side)
+import Array2D exposing (Array2D)
 import List exposing (..)
 import List.Extra exposing (splitAt)
 import Math.Vector2 exposing (Vec2)

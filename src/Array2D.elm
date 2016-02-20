@@ -5,9 +5,6 @@ import Util exposing (splitEvery)
 
 type Array2D a = Array2D Int (Array.Array a)
 
-side : Array2D a -> Int
-side (Array2D s _) = s
-
 fromArray : Array.Array a -> Array2D a
 fromArray arr = let s = round <| sqrt <| toFloat <| Array.length arr in Array2D s arr
 
