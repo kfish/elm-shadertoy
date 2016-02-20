@@ -65,7 +65,7 @@ testSurfaceMesh = surfaceMesh 0 1.4 1.1 10 0 1
     , [0.8, 0.65, 0.53, 0.2, 0.11, 0.23, 0.18, 0.3, 0.46, 0.6]
     ]
 
-testSurfaceMeshArr = surfaceMeshArr -10 1.4 1.1 10 0 1
+testSurfaceMeshArr = surfaceMeshArr 0 2 2 70 0 2
 
 ----------------------------------------------------------------------
 

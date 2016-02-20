@@ -18,7 +18,7 @@ import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 -- import Things.Teapot exposing (teapot)
-import Things.Terrain exposing (placeTerrain)
+import Things.Terrain exposing (tileTerrain, placeTerrain)
 
 import Display.VolSurface exposing (..)
 
@@ -92,20 +92,22 @@ demoThings =
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
         -- terrainSurface = testSurfaceArr (simpleTerrain2D 8)
-{-
-        (terrain0, seed3) = Random.generate (randTerrain2D 64) seed2
-        terrainSurface = testSurfaceArr terrain0
--}
-        (terrains, seed3) = Random.generate (Random.list 64 (randTerrain2D 8)) seed2
+        (terrain0, seed3) = Random.generate (randTerrain2D 128) seed2
+        terrains = tileTerrain 8 terrain0
+
+        -- terrainSurface = testSurfaceArr terrain0
+
+        -- (terrains, seed3) = Random.generate (Random.list 64 (randTerrain2D 8)) seed2
+
         terrainz = placeTerrain terrains
 
         visibleTerrain : Signal (List Thing)
         visibleTerrain =
             Signal.constant <|
             List.map extractThing <|
-            Zipper2D.radius 2 <|
-            repeatedly 4 Zipper2D.north <|
-            repeatedly 4 Zipper2D.east <|
+            Zipper2D.radius 4 <|
+            -- repeatedly 2 Zipper2D.north <|
+            -- repeatedly 4 Zipper2D.east <|
             terrainz
 
         individuals : Signal (List Thing)
