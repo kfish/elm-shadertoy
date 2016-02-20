@@ -4,7 +4,7 @@ import Array
 import Array2D exposing (..)
 import Random
 import Random.Array
-import Util exposing (unfoldWhile)
+import Util exposing (subSquares, unfoldWhile)
 
 ----------------------------------------------------------------------
 
@@ -39,11 +39,8 @@ terrain2D side arr0 =
 -- Generate terrain for all quads of given size
 allQuads : Int -> (Int, Float) -> Array2D Float -> Array2D Float
 allQuads side (size, range) arr0 =
-    let offsets = unfoldWhile (\x -> x + size) (\x -> x < side) 0
-        pairs l = List.concatMap (\x -> (List.map (\y -> (x,y)) l)) l
-        coords = pairs offsets
-    in
-        List.foldl (quad size range) arr0 coords
+    let coords = List.concat <| subSquares size side
+    in List.foldl (quad size range) arr0 coords
 
     -- For each value: side, side/2, side/4 ... 3,
     -- call quad on each quadrant of that side length
