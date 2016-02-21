@@ -10,10 +10,14 @@ step inputs person =
     case inputs of
       Model.Mouse movement -> turn movement person
       Model.TimeDelta isJumping directions dt ->
+          person |> fly directions
+                 |> physics dt
+{-
           person |> walk directions
                  |> jump isJumping
                  |> gravity dt
                  |> physics dt
+-}
 
 flatten : Vec3 -> Vec3
 flatten v =
@@ -29,6 +33,17 @@ turn (dx,dy) person =
         { person | horizontalAngle = h'
                  , verticalAngle = clamp (degrees -45) (degrees 45) v'
         }
+
+fly : { x:Int, y:Int } -> Model.Person -> Model.Person
+fly directions person =
+  -- if getY person.pos > Model.eyeLevel then person else
+    let moveDir = normalize (Model.direction person)
+        strafeDir = transform (makeRotate (degrees -90) j) moveDir
+
+        move = V3.scale (8.0 * toFloat directions.y) moveDir
+        strafe = V3.scale (8.0 * toFloat directions.x) strafeDir
+    in
+        { person | velocity = adjustVelocity (move `add` strafe) }
 
 walk : { x:Int, y:Int } -> Model.Person -> Model.Person
 walk directions person =
