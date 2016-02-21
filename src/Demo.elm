@@ -5,6 +5,7 @@ import Random
 import Signal.Extra exposing ((<~), combine)
 import Time exposing (fps)
 
+import Array2D
 import Math.Procedural exposing (..)
 import Math.RandomVector exposing (randomVec3')
 import Util exposing (repeatedly)
@@ -99,9 +100,13 @@ demoThings =
         visibleTerrain =
             Signal.constant <|
             List.map extractThing <|
+            List.concat <|
+            Array2D.toLists <|
+{-
             Zipper2D.radius 64 <|
             repeatedly 64 Zipper2D.north <|
             repeatedly 64 Zipper2D.east <|
+-}
             terrainz
 
         individuals : Signal (List Thing)

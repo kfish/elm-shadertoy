@@ -8,6 +8,9 @@ type Array2D a = Array2D Int (Array.Array a)
 fromArray : Array.Array a -> Array2D a
 fromArray arr = let s = round <| sqrt <| toFloat <| Array.length arr in Array2D s arr
 
+fromLists : List (List a) -> Array2D a
+fromLists = fromArray << Array.fromList << List.concat
+
 toLists : Array2D a -> List (List a)
 toLists (Array2D s arr) = splitEvery s (Array.toList arr)
 
