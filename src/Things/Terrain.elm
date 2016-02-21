@@ -14,7 +14,7 @@ import Engine exposing (..)
 
 mountains : Array2D Float -> Array2D (Float, Vec3)
 mountains arr0 =
-  let green h = hslToVec3 (degrees (100 + h*50)) (0.3 + (1-h)/4) (0.2 + (1-h)/2)
+  let green h = hslToVec3 (degrees (70 + toFloat (round ((h+0.14)*300) % 70))) (0.3 + (1-h)/4) (0.2 + (1-h)/2)
       blue h = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
       snow h = hslToVec3 (degrees 178) 0.8 h
       paint h =
