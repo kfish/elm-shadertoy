@@ -1,4 +1,4 @@
-module Display.VolSurface (testSurface, testSurfaceArr) where
+module Things.Surface2D (testSurface, testSurfaceArr) where
 
 import Array
 import Array2D exposing (Array2D)

@@ -8,7 +8,7 @@ import Math.Vector3 exposing (..)
 import Util exposing (..)
 import Zipper2D exposing (Zipper2D, map)
 
-import Display.VolSurface exposing (..)
+import Things.Surface2D exposing (..)
 
 import Engine exposing (..)
 

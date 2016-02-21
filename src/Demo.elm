@@ -17,10 +17,10 @@ import Things.Cube exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube,
 import Things.Diamond exposing (cloudsDiamond, fogMountainsDiamond)
 import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
+import Things.Surface2D exposing (..)
 -- import Things.Teapot exposing (teapot)
 import Things.Terrain exposing (tileTerrain, placeTerrain)
 
-import Display.VolSurface exposing (..)
 
 import Shaders.FogMountains exposing (fogMountains)
 import Shaders.VoronoiDistances exposing (voronoiDistances)
