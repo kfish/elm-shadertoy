@@ -105,9 +105,9 @@ demoThings =
         visibleTerrain =
             Signal.constant <|
             List.map extractThing <|
-            Zipper2D.radius 16 <|
-            -- repeatedly 2 Zipper2D.north <|
-            -- repeatedly 4 Zipper2D.east <|
+            Zipper2D.radius 64 <|
+            repeatedly 64 Zipper2D.north <|
+            repeatedly 64 Zipper2D.east <|
             terrainz
 
         individuals : Signal (List Thing)

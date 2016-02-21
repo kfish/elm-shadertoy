@@ -14,12 +14,13 @@ import Engine exposing (..)
 
 mountains : Array2D Float -> Array2D (Float, Vec3)
 mountains arr0 =
-  let green = hslToVec3 (degrees 100) 0.41
-      blue = hslToVec3 (degrees 196) 0.8
+  let green h = hslToVec3 (degrees (110 + h*20)) (0.3 + (1-h)/4) (0.2 + (1-h)/2)
+      blue h = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
+      snow h = hslToVec3 (degrees 178) 0.8 h
       paint h =
-          if h > 0.8 then (h, vec3 1 1 1)
-          else if h < 0.1 then (0.1, blue ((h+0.1)*4))
-          else (h, green (0.2 + h/2))
+          if h > 0.8 then (h, snow h)
+          else if h < 0.1 then (0.1, blue h)
+          else (h, green h)
   in Array2D.map paint arr0
 
 tileTerrain : Int -> Array2D (Float,Vec3) -> List (List ((Array2D (Float, Vec3), (Int, Int))))

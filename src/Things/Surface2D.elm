@@ -34,7 +34,7 @@ seeSurface vertexShader fragmentShader mesh p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-fromArray2DDefaults = fromArray2D 0 2 2 20 0 2
+fromArray2DDefaults = fromArray2D 0 2 2 40 0 2
 
 ----------------------------------------------------------------------
 
