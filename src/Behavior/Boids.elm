@@ -31,7 +31,7 @@ rule1 : Int -> Vec3 -> Boid a -> Vec3
 rule1 n sumPos b =
     let perceived_scale = 1.0 / (toFloat (n-1))
         perceived_center = V3.scale perceived_scale (sumPos `V3.sub` b.pos)
-    in V3.scale (1/25) <| perceived_center `V3.sub` b.pos
+    in V3.scale (1/100) <| perceived_center `V3.sub` b.pos
 
 rule2 : List Vec3 -> Boid a -> Vec3
 rule2 poss b =
@@ -43,13 +43,13 @@ rule3 : Int -> Vec3 -> Boid a -> Vec3
 rule3 n sumVel b =
     let perceived_scale = 1.0 / (toFloat (n-1))
         perceived_vel = V3.scale perceived_scale (sumVel `V3.sub` b.velocity)
-    in V3.scale (1/10) <| perceived_vel `V3.sub` b.velocity
+    in V3.scale (1/15) <| perceived_vel `V3.sub` b.velocity
 
 bounds : Boid a -> Vec3
 bounds b =
     let bound x low high = if (x < low) then 1 else (if x > high then -1 else 0)
         (x,y,z) = V3.toTuple b.pos
-    in vec3 (bound x -20 20) (bound y 0 30) (bound z -20 20)
+    in vec3 (bound x -200 200) (bound y 0 100) (bound z -200 200)
 
 boundVelocity : Vec3 -> Vec3
 boundVelocity v = let l = V3.length v in if (l<1) then (V3.scale (1/l) v) else v
