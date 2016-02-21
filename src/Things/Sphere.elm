@@ -63,10 +63,10 @@ rotY n = makeRotate (2*pi/n) (vec3 0 1 0)
 rotZ n = makeRotate (-2*pi/n) (vec3 0 0 1)
 
 rotBoth : Float -> Vertex -> Vertex
-rotBoth n x = { pos = transform (rotY n) x.pos, coord = transform (rotZ n) x.coord }
+rotBoth n x = { x | pos = transform (rotY n) x.pos, coord = transform (rotZ n) x.coord }
 
 rotMercator : Float -> Vertex -> Vertex
-rotMercator n v = { pos = transform (rotY n) v.pos,
+rotMercator n v = { v | pos = transform (rotY n) v.pos,
     coord = vec3 (getX v.coord + (1.0/n)) (getY v.coord) 0 }
 
 seven : Vertex -> List Vertex
@@ -80,14 +80,15 @@ unfoldMercator n = unfold (n-1) (rotMercator (toFloat n))
 verticesMercator n x = let xs = unfoldMercator n x in (x::xs, xs++[x])
 
 -- sphereMesh : List (Triangle Vertex)
-sphereMesh : Drawable { pos:Vec3, coord:Vec3 }
+sphereMesh : Drawable Vertex
 sphereMesh =
   let
+      white = vec3 1 1 1
       npole = { pos = vec3 0 1 0, coord = vec3 0 0 0 }
       spole = { pos = vec3 0 -1 0, coord = vec3 0 1 0 }
 
-      nlat q = let x = sqrt (1-q*q) in { pos = vec3 x (-q) 0, coord = vec3 0 ((1-q)/2) 0 }
-      slat q = let x = sqrt (1-q*q) in { pos = vec3 x q 0, coord = vec3 0 ((1+q)/2) 0 }
+      nlat q = let x = sqrt (1-q*q) in { pos = vec3 x (-q) 0, color = white, coord = vec3 0 ((1-q)/2) 0 }
+      slat q = let x = sqrt (1-q*q) in { pos = vec3 x q 0, color = white, coord = vec3 0 ((1+q)/2) 0 }
 
       nband q1 q2 = 
           let

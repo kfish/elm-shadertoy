@@ -17,3 +17,5 @@ getXY x y def (Array2D s arr) = Maybe.withDefault def (Array.get (x + y*s) arr)
 setXY : Int -> Int -> a -> Array2D a -> Array2D a
 setXY x y val (Array2D s arr) = Array2D s (Array.set (x + y*s) val arr)
 
+map : (a -> b) -> Array2D a -> Array2D b
+map f (Array2D s arr) = Array2D s (Array.map f arr)

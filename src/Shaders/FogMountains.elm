@@ -5,7 +5,7 @@ import Math.Vector3 exposing (..)
 import WebGL exposing (..)
 
 -- https://www.shadertoy.com/view/XdsGD7
-fogMountains : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }
+fogMountains : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2 }
 fogMountains = [glsl|
 
 precision mediump float;
@@ -14,6 +14,7 @@ precision mediump float;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 
+varying vec3 elm_FragColor;
 varying vec2 elm_FragCoord;
 
 const float dMax = 28.0;

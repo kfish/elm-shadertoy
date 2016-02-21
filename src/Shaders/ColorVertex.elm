@@ -7,13 +7,14 @@ import WebGL exposing (..)
 
 type alias ColorVertex = { pos:Vec3, color:Vec3 }
 
-colorVertex : Shader ColorVertex { u | view:Mat4 } { vcolor:Vec3 }
+colorVertex : Shader ColorVertex { u | view:Mat4 } { elm_FragColor:Vec3 }
 colorVertex = [glsl|
 
 attribute vec3 pos;
 attribute vec3 color;
 uniform mat4 view;
-varying vec3 vcolor;
+
+varying vec3 elm_FragColor;
 
 void main () {
     gl_Position = view * vec4(pos, 1.0);

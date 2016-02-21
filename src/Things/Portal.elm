@@ -19,7 +19,7 @@ import Engine exposing (..)
 import Char exposing (..)
 import Keyboard exposing (isDown)
 
-type alias Triangle a = (a,a,a)
+type alias Triple a = (a,a,a)
 
 -- cloudsPortal : Signal Thing
 cloudsPortal = Signal.constant <| portal worldVertex clouds
@@ -50,8 +50,8 @@ seePortal vertexShader fragmentShader p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
--- mesh : List (Triangle Vertex)
-mesh : Drawable { pos:Vec3, coord:Vec3 }
+-- mesh : List (Triple Vertex)
+mesh : Drawable Vertex
 mesh = Triangle face
 {-
 mesh = concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
@@ -65,11 +65,13 @@ rotatedFace (angleXZ,angleYZ) =
       map (mapTriangle (\v -> {v | pos <- transform t v.pos })) face
 -}
 
-face : List (Triangle Vertex)
+face : List (Triple Vertex)
 face =
-  let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
-      topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)
-      bottomLeft  = Vertex (vec3 -1 -1 1) (vec3 0 0 0)
-      bottomRight = Vertex (vec3  1 -1 1) (vec3 1 0 0)
+  let
+      white       = vec3 1 1 1
+      topLeft     = { pos = vec3 -1  1 1, color = white, coord = vec3 0 1 0 }
+      topRight    = { pos = vec3  1  1 1, color = white, coord = vec3 1 1 0 }
+      bottomLeft  = { pos = vec3 -1 -1 1, color = white, coord = vec3 0 0 0 }
+      bottomRight = { pos = vec3  1 -1 1, color = white, coord = vec3 1 0 0 }
   in
       [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]

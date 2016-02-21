@@ -5,13 +5,14 @@ import Math.Vector3 exposing (..)
 import WebGL exposing (..)
 
 -- https://www.shadertoy.com/view/XslGRr
-clouds : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragCoord:Vec2 }
+clouds : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2 }
 clouds = [glsl|
 
 precision mediump float;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 
+varying vec3 elm_FragColor;
 varying vec2 elm_FragCoord;
 
 // Created by inigo quilez - iq/2013

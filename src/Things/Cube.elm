@@ -22,6 +22,8 @@ import Engine exposing (..)
 import Char exposing (..)
 import Keyboard exposing (isDown)
 
+type alias Triple a = (a,a,a)
+
 -- cloudsCube : Signal Thing
 cloudsCube = Signal.constant <| cube worldVertex clouds
 
@@ -83,10 +85,11 @@ cube vertexShader fragmentShader (w,h) t view =
 -}
 
 -- The mesh for a crate
-mesh : Drawable { pos:Vec3, coord:Vec3 }
+mesh : Drawable Vertex
 mesh = Triangle <| concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
-rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+-- rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+rotatedFace : (Float,Float) -> List (Triple Vertex)
 rotatedFace (angleX,angleY) =
   let
     x = makeRotate (degrees angleX) (vec3 1 0 0)
@@ -98,13 +101,15 @@ rotatedFace (angleX,angleY) =
     List.map (each (\x -> {x | pos = transform t x.pos })) face
 
 
-face : List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+-- face : List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
+face : List (Triple Vertex)
 face =
   let
-    topLeft     = { pos = vec3 -1  1 0, coord = vec3 0 1 0 }
-    topRight    = { pos = vec3  1  1 0, coord = vec3 1 1 0 }
-    bottomLeft  = { pos = vec3 -1 -1 0, coord = vec3 0 0 0 }
-    bottomRight = { pos = vec3  1 -1 0, coord = vec3 1 0 0 }
+    white       = vec3 1 1 1
+    topLeft     = { pos = vec3 -1  1 0, color = white, coord = vec3 0 1 0 }
+    topRight    = { pos = vec3  1  1 0, color = white, coord = vec3 1 1 0 }
+    bottomLeft  = { pos = vec3 -1 -1 0, color = white, coord = vec3 0 0 0 }
+    bottomRight = { pos = vec3  1 -1 0, color = white, coord = vec3 1 0 0 }
   in
     [ (topLeft,topRight,bottomLeft)
     , (bottomLeft,topRight,bottomRight)

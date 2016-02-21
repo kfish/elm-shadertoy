@@ -13,7 +13,7 @@ import Engine exposing (..)
 
 import Debug exposing (log)
 
-type alias Vertex = { pos:Vec3, coord:Vec3, wing:Vec3 }
+type alias BoidVertex = { pos:Vec3, color:Vec3, coord:Vec3, wing:Vec3 }
 
 bfly fragmentShader f01 = makeBFly bflyVertex fragmentShader (f01 * second * pi * 2)
 
@@ -35,24 +35,27 @@ seeBFly vertexShader fragmentShader flapStart p =
               flapL=flapL, flapR=flapR }
         ]
 
-mesh : Drawable Vertex
+mesh : Drawable BoidVertex
 mesh =
-    let bHead  = Vertex (vec3 0 0 0.5) (vec3 0.5 0 0) (vec3 0 0 0)
-        bTail  = Vertex (vec3 0 0 -0.5) (vec3 0.5 1 0) (vec3 0 0 0)
-        bLeft  = Vertex (vec3 -0.7 0 -0.7) (vec3 0 0.5 0) (vec3 -1 0 0)
-        bRight = Vertex (vec3 0.7 0 -0.7)  (vec3 1 0.5 0) (vec3 1 0 0)
+    let white  = vec3 1 1 1
+        bHead  = { pos = vec3 0 0 0.5, color = white, coord = vec3 0.5 0 0, wing = vec3 0 0 0 }
+        bTail  = { pos = vec3 0 0 -0.5, color = white, coord = vec3 0.5 1 0, wing = vec3 0 0 0 }
+        bLeft  = { pos = vec3 -0.7 0 -0.7, color = white, coord = vec3 0 0.5 0, wing = vec3 -1 0 0 }
+        bRight = { pos = vec3 0.7 0 -0.7, color = white, coord = vec3 1 0.5 0, wing = vec3 1 0 0 }
     in
         Triangle <| [ (bHead, bTail, bLeft), (bHead, bTail, bRight) ]
 
-bflyVertex : Shader Vertex { u | view:Mat4, flapL:Mat4, flapR:Mat4 } { elm_FragCoord:Vec2 }
+bflyVertex : Shader BoidVertex { u | view:Mat4, flapL:Mat4, flapR:Mat4 } { elm_FragColor:Vec3, elm_FragCoord:Vec2 }
 bflyVertex = [glsl|
 
 attribute vec3 pos;
+attribute vec3 color;
 attribute vec3 coord;
 attribute vec3 wing;
 uniform mat4 view;
 uniform mat4 flapL;
 uniform mat4 flapR;
+varying vec3 elm_FragColor;
 varying vec2 elm_FragCoord;
 void main () {
   mat4 flap;
@@ -60,6 +63,7 @@ void main () {
   else if (wing.x > 0.0) { flap = flapR; }
   else { flap = mat4(1.0); }
   gl_Position = view * flap * vec4(pos, 1.0);
+  elm_FragColor = color;
   elm_FragCoord = coord.xy;
 }
 

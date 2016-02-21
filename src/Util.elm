@@ -29,8 +29,8 @@ subSquares smallSide bigSide =
 ---------------------------------------------------------------------
 
 -- Help create colors as Vectors
-hsvToVec3 : Float -> Float -> Float -> Vec3
-hsvToVec3 hue saturation lightness =
+hslToVec3 : Float -> Float -> Float -> Vec3
+hslToVec3 hue saturation lightness =
     let c = toRgb (hsl hue saturation lightness)
     in  vec3 (toFloat c.red / 255) (toFloat c.green / 255) (toFloat c.blue / 255)
 

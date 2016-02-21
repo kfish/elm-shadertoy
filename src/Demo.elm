@@ -19,7 +19,7 @@ import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 import Things.Surface2D exposing (..)
 -- import Things.Teapot exposing (teapot)
-import Things.Terrain exposing (tileTerrain, placeTerrain)
+import Things.Terrain exposing (mountains, tileTerrain, placeTerrain)
 
 
 import Shaders.FogMountains exposing (fogMountains)
@@ -93,7 +93,7 @@ demoThings =
 
         -- terrainSurface = testSurfaceArr (simpleTerrain2D 8)
         (terrain0, seed3) = Random.generate (randTerrain2D 128) seed2
-        terrains = tileTerrain 8 terrain0
+        terrains = tileTerrain 8 (mountains terrain0)
 
         -- terrainSurface = testSurfaceArr terrain0
 

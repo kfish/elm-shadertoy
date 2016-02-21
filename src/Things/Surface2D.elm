@@ -15,11 +15,12 @@ import Shaders.Fire exposing (fire)
 import Shaders.FogMountains exposing (fogMountains)
 --import Shaders.SimplePlasma exposing (simplePlasma)
 import Shaders.VoronoiDistances exposing (voronoiDistances)
+import Shaders.ColorFragment exposing (colorFragment)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-surface2D arr0 = surface worldVertex fire <| fromArray2DDefaults arr0
+surface2D arr0 = surface worldVertex colorFragment <| fromArray2DDefaults arr0
 
 surface vertexShader fragmentShader mesh =
     let see = seeSurface vertexShader fragmentShader mesh
@@ -33,17 +34,17 @@ seeSurface vertexShader fragmentShader mesh p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-fromArray2DDefaults = fromArray2D 0 2 2 70 0 2
+fromArray2DDefaults = fromArray2D 0 2 2 20 0 2
 
 ----------------------------------------------------------------------
 
 mkStrip : List Vertex -> List Vertex -> List (Vertex, Vertex, Vertex)
 mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
 
-matRow : Float -> Float -> Float -> Float -> Float -> List Float -> List Vertex
+matRow : Float -> Float -> Float -> Float -> Float -> List (Float, Vec3) -> List Vertex
 matRow x pos_dx coord_dx ymul z =
   let m posOffset coordOffset ys0 = case ys0 of
-          (y::ys) -> { pos = vec3 posOffset (y*ymul) z, coord = vec3 coordOffset z 0 } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          ((y,rgb)::ys) -> { pos = vec3 posOffset (y*ymul) z, color = rgb, coord = vec3 coordOffset z 0 } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           _       -> []
   in
       m 0.0 0.0
@@ -53,11 +54,11 @@ matRow x pos_dx coord_dx ymul z =
 -- ... then, color the input according to elevation (eg. water, grass, snow etc.)
 --  and gradient (rocks, cliffs), and both (beaches)
 
-fromArray2D : Float -> Float -> Float -> Float -> Float -> Float -> Array2D Float -> Drawable Vertex
+fromArray2D : Float -> Float -> Float -> Float -> Float -> Float -> Array2D (Float, Vec3) -> Drawable Vertex
 fromArray2D x dx_pos dx_coord ymul z dz arr0 =
     surfaceMesh x dx_pos dx_coord ymul z dz (Array2D.toLists arr0)
 
-surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List Float) -> Drawable Vertex
+surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List (Float, Vec3)) -> Drawable Vertex
 surfaceMesh x dx_pos dx_coord ymul z dz m =
     let
         zs = indexedMap (\ix _ -> z + dz * toFloat ix) m
@@ -65,6 +66,7 @@ surfaceMesh x dx_pos dx_coord ymul z dz m =
     in
         Triangle <| List.concat <| List.map2 mkStrip rows (drop 1 rows)
 
+{-
 matList : Float -> List Float -> List Vertex
 matList z =
   let m posOffset coordOffset xs0 = case xs0 of
@@ -72,3 +74,4 @@ matList z =
           _       -> []
   in
       m 0.0 0.0
+-}
