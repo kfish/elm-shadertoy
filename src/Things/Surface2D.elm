@@ -1,4 +1,4 @@
-module Things.Surface2D (testSurface, testSurfaceArr) where
+module Things.Surface2D (surface2D) where
 
 import Array
 import Array2D exposing (Array2D)
@@ -19,9 +19,7 @@ import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-testSurface = Signal.constant <| surface worldVertex clouds testSurfaceMesh
-
-testSurfaceArr arr0 = surface worldVertex fire <| testSurfaceMeshArr arr0
+surface2D arr0 = surface worldVertex fire <| fromArray2DDefaults arr0
 
 surface vertexShader fragmentShader mesh =
     let see = seeSurface vertexShader fragmentShader mesh
@@ -35,13 +33,7 @@ seeSurface vertexShader fragmentShader mesh p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-testSurfaceMesh = surfaceMesh 0 1.4 1.1 10 0 1
-    [ [1.0, 0.8, 0.7, 0.4, 0.3, 0.1, 0.2, 0.5, 0.6, 1.0]
-    , [0.9, 0.75, 0.63, 0.3, 0.21, 0.2, 0.23, 0.4, 0.56, 0.8]
-    , [0.8, 0.65, 0.53, 0.2, 0.11, 0.23, 0.18, 0.3, 0.46, 0.6]
-    ]
-
-testSurfaceMeshArr = surfaceMeshArr 0 2 2 70 0 2
+fromArray2DDefaults = fromArray2D 0 2 2 70 0 2
 
 ----------------------------------------------------------------------
 
@@ -61,8 +53,8 @@ matRow x pos_dx coord_dx ymul z =
 -- ... then, color the input according to elevation (eg. water, grass, snow etc.)
 --  and gradient (rocks, cliffs), and both (beaches)
 
-surfaceMeshArr : Float -> Float -> Float -> Float -> Float -> Float -> Array2D Float -> Drawable Vertex
-surfaceMeshArr x dx_pos dx_coord ymul z dz arr0 =
+fromArray2D : Float -> Float -> Float -> Float -> Float -> Float -> Array2D Float -> Drawable Vertex
+fromArray2D x dx_pos dx_coord ymul z dz arr0 =
     surfaceMesh x dx_pos dx_coord ymul z dz (Array2D.toLists arr0)
 
 surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> List (List Float) -> Drawable Vertex

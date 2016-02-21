@@ -30,7 +30,7 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
 -- placeTerrain : List (Array2D Float) -> Zipper2D Thing
 placeTerrain terrainsCoords =
     let
-        terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (testSurfaceArr t, xy))) terrainsCoords
+        terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (surface2D t, xy))) terrainsCoords
         terrainz = Zipper2D.fromLists terrainSurfacesCoords
     in
         Zipper2D.map (\(s,(x,z)) -> { s | pos = vec3 (toFloat x*1.6) (-70) (toFloat z*1.6)}) terrainz
