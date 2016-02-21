@@ -10,11 +10,6 @@ import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
 import WebGL exposing (..)
 
-import Shaders.Clouds exposing (clouds)
-import Shaders.Fire exposing (fire)
-import Shaders.FogMountains exposing (fogMountains)
---import Shaders.SimplePlasma exposing (simplePlasma)
-import Shaders.VoronoiDistances exposing (voronoiDistances)
 import Shaders.ColorFragment exposing (colorFragment)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
@@ -49,11 +44,6 @@ matRow x pos_dx coord_dx ymul z =
   in
       m 0.0 0.0
 
--- Todo: turn this into something that takes an Array2D of (Float (elevation), color) and
--- produces a Drawable ColorVertex
--- ... then, color the input according to elevation (eg. water, grass, snow etc.)
---  and gradient (rocks, cliffs), and both (beaches)
-
 fromArray2D : Float -> Float -> Float -> Float -> Float -> Float -> Array2D (Float, Vec3) -> Drawable Vertex
 fromArray2D x dx_pos dx_coord ymul z dz arr0 =
     surfaceMesh x dx_pos dx_coord ymul z dz (Array2D.toLists arr0)
@@ -65,13 +55,3 @@ surfaceMesh x dx_pos dx_coord ymul z dz m =
         rows = List.map2 (matRow x dx_pos dx_coord ymul) zs m
     in
         Triangle <| List.concat <| List.map2 mkStrip rows (drop 1 rows)
-
-{-
-matList : Float -> List Float -> List Vertex
-matList z =
-  let m posOffset coordOffset xs0 = case xs0 of
-          (x::xs) -> { pos = vec3 posOffset (x*10) z, coord = vec3 coordOffset z 0 } :: (m (posOffset + 0.4) (coordOffset + 0.1) xs)
-          _       -> []
-  in
-      m 0.0 0.0
--}
