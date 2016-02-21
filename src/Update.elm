@@ -26,12 +26,12 @@ flatten v =
 
 turn : (Int,Int) -> Model.Person -> Model.Person
 turn (dx,dy) person =
-    let yo x = toFloat (clamp -10 10 x) / 500
+    let yo x = toFloat (clamp -30 30 x) / 500
         h' = person.horizontalAngle + yo dx
         v' = person.verticalAngle   - yo dy
     in
         { person | horizontalAngle = h'
-                 , verticalAngle = clamp (degrees -45) (degrees 45) v'
+                 , verticalAngle = clamp (degrees -90) (degrees 90) v'
         }
 
 fly : { x:Int, y:Int } -> Model.Person -> Model.Person
