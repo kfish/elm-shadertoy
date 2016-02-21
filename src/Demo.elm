@@ -91,14 +91,8 @@ demoThings =
         -- balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        -- terrainSurface = testSurfaceArr (simpleTerrain2D 8)
         (terrain0, seed3) = Random.generate (randTerrain2D 128) seed2
         terrains = tileTerrain 8 (mountains terrain0)
-
-        -- terrainSurface = testSurfaceArr terrain0
-
-        -- (terrains, seed3) = Random.generate (Random.list 64 (randTerrain2D 8)) seed2
-
         terrainz = placeTerrain terrains
 
         visibleTerrain : Signal (List Thing)

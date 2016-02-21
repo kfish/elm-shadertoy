@@ -44,17 +44,4 @@ placeTerrain terrainsCoords =
         terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (surface2D t, xy))) terrainsCoords
         terrainz = Zipper2D.fromLists terrainSurfacesCoords
     in
-        Zipper2D.map (\(s,(x,z)) -> { s | pos = vec3 (toFloat x*1.6) 0 (toFloat z*1.6)}) terrainz
-
-{-
-splitEveryWithCoords : Int -> List a -> List (List (a, (Int,Int)))
-splitEveryWithCoords size xs0 =
-    let
-        izs = [0..size]
-        go ix xs = case xs of
-            [] -> []
-            _  -> let (p,q) = splitAt size xs in
-                      List.map2 (\val iz -> (val, (ix,iz))) p izs :: go (ix+1) q
-    in
-        go 0 xs0
--}
+        Zipper2D.map (\(s,(x,z)) -> { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz

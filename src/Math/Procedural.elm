@@ -31,8 +31,8 @@ simpleTerrain2D side = terrain2D side (fromArray (Array.repeat (side*side) 1.0))
 -- generate terrain
 terrain2D : Int -> Array2D Float -> Array2D Float
 terrain2D side arr0 =
-    let h = 0.5
-        range = 0.5
+    let h = 0.4
+        range = 0.3
         sizesRanges = unfoldWhile (\(x,r) -> (x//2,r*h)) (\(x,r) -> x > 1) (side, range)
     in  List.foldl (allQuads side) arr0 sizesRanges
 
