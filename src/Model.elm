@@ -26,11 +26,11 @@ type alias Person =
     }
 
 eyeLevel : Float
-eyeLevel = 10
+eyeLevel = 1.8
 
 defaultPerson : Person
 defaultPerson =
-    { pos = vec3 0 eyeLevel -8
+    { pos = vec3 0 eyeLevel 0
     , velocity = vec3 0 0 0
     , horizontalAngle = degrees 90
     , verticalAngle = 0

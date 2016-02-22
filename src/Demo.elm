@@ -92,7 +92,7 @@ demoThings =
         -- balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        (terrain0, seed3) = Random.generate (randTerrain2D 128) seed2
+        (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
         terrains = tileTerrain 8 (mountains terrain0)
         terrainz = placeTerrain terrains
 
@@ -111,11 +111,11 @@ demoThings =
 
         individuals : Signal (List Thing)
         individuals = combine [
-            ground,
+            -- ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
             -- place   -30   -3   -10 <~ (extractThing <~ terrainSurface),
-            place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
+            -- place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
             place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
             -- lift2 (\y e -> place 0 y 0 e) s fireCube,

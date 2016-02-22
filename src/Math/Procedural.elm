@@ -11,13 +11,17 @@ import Util exposing (subSquares, unfoldWhile)
 -- Generate random terrain of side length side
 randTerrain2D : Int -> Random.Generator (Array2D Float)
 randTerrain2D side =
-      Random.map (\arr ->
-          terrain2D side (
-          setXY 0 0 1.0 (
-          setXY 0 (side-1) 1.0 (
-          setXY (side-1) 0 1.0 (
-          setXY (side//2) 0 2.0 (
-          setXY (side-1) (side-1) 1.0 arr)))))) <|
+    let s2 = side - 1 - (side%8) in
+      Random.map (
+          terrain2D side <<
+          setXY 0   0 0.2 <<
+          setXY 0  s2 0.2 <<
+          setXY s2  0 1.0 <<
+          setXY (side//4) (side//4) 1.0 <<
+          setXY (10+side//4) (side//4) 1.0 <<
+          setXY (side//4) (10+side//4) 0.9 <<
+          setXY (side//4) (20+side//4) 1.0 <<
+          setXY s2 s2 0.5) <|
       Random.map Array2D.fromArray <|
       Random.Array.array (side*side) (Random.float (-1.0) 1.0)
 
@@ -34,8 +38,8 @@ simpleTerrain2D side = terrain2D side (fromArray (Array.repeat (side*side) 1.0))
 -- generate terrain
 terrain2D : Int -> Array2D Float -> Array2D Float
 terrain2D side arr0 =
-    let h = 0.4
-        range = 0.4
+    let h = 0.5
+        range = 0.5
         sizesRanges = unfoldWhile (\(x,r) -> (x//2,r*h)) (\(x,r) -> x > 1) (side, range)
     in  List.foldl (allQuads side) arr0 sizesRanges
 
@@ -43,13 +47,13 @@ terrain2D side arr0 =
 allQuads : Int -> (Int, Float) -> Array2D Float -> Array2D Float
 allQuads side (size, range) arr0 =
     let coords = List.concat <| subSquares size side
-    in List.foldl (quad size range) arr0 coords
+    in List.foldl (quad side size range) arr0 coords
 
     -- For each value: side, side/2, side/4 ... 3,
     -- call quad on each quadrant of that side length
 
-quad : Int -> Float -> (Int, Int) -> Array2D Float -> Array2D Float
-quad len range (x,y) arr = 
+quad : Int -> Int -> Float -> (Int, Int) -> Array2D Float -> Array2D Float
+quad side len range (x,y) arr = 
     let
         tL = getXY x y 0 arr
         tR = getXY (x+len) y 0 arr

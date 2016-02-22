@@ -26,7 +26,8 @@ flatten v =
 
 turn : (Int,Int) -> Model.Person -> Model.Person
 turn (dx,dy) person =
-    let yo x = toFloat (clamp -30 30 x) / 500
+    -- let yo x = toFloat (clamp -30 30 x) / 500
+    let yo x = toFloat x / 500
         h' = person.horizontalAngle + yo dx
         v' = person.verticalAngle   - yo dy
     in
@@ -60,7 +61,7 @@ adjustVelocity : Vec3 -> Vec3
 adjustVelocity v =
     case toTuple v of
       (0,0,0) -> v
-      _       -> V3.scale 20 (normalize v)
+      _       -> V3.scale 8 (normalize v)
 
 jump : Bool -> Model.Person -> Model.Person
 jump isJumping person =
