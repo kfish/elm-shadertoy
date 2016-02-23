@@ -25,7 +25,7 @@ void main () {
 
 -- TODO: make surface2D tile seamlessly
 
-noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2 }
+noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float }
 noiseColorFragment = [glsl|
 
 precision mediump float;
@@ -34,6 +34,8 @@ uniform float iGlobalTime;
 
 varying vec3 elm_FragColor;
 varying vec2 elm_FragCoord;
+varying float iTextureScale;
+varying float iTimeScale;
 
 // by @301z
 
@@ -64,10 +66,12 @@ void main() {
 	vec3 c4 = elm_FragColor * vec3(0.9, 0.9, 0.9);
 	vec3 c5 = vec3(0.10);
 	vec3 c6 = vec3(0.50);
-	//vec2 p = gl_FragCoord.xy * 8.0 / iResolution.xx;
-	vec2 p = elm_FragCoord.xy * 4.0;
-	float q = fbm(p - iGlobalTime * 0.1);
-	vec2 r = vec2(fbm(p + q + iGlobalTime * 1.7 - p.x - p.y), fbm(p + q - iGlobalTime * 0.4));
+
+	vec2 p = elm_FragCoord.xy * iTextureScale;
+
+        float scaledTime = iGlobalTime * iTimeScale;
+	float q = fbm(p - scaledTime * 0.1);
+	vec2 r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
 	vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
 	gl_FragColor = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), 1.0);
 }

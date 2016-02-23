@@ -1,4 +1,4 @@
-module Things.Surface2D (surface2D) where
+module Things.Surface2D (SurfaceVertex, NoiseSurfaceVertex, surface2D, noiseSurface2D) where
 
 import Array
 import Array2D exposing (Array2D)
@@ -10,12 +10,22 @@ import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
 import WebGL exposing (..)
 
-import Shaders.ColorFragment exposing (colorFragment, noiseColorFragment)
-import Shaders.WorldVertex exposing (Vertex, worldVertex)
+import Shaders.ColorFragment exposing (..)
+import Shaders.NoiseVertex exposing (..)
 
 import Model
 
-surface2D = surface worldVertex noiseColorFragment << fromListsDefaults
+type alias SurfaceVertex = (Float, Vec3)
+type alias NoiseSurfaceVertex = (Float, Vec3, Float, Float)
+{- default texture scale: 8.0; default timeScale: 0.7 -}
+
+toNSV (y,rgb) = (y, rgb, 0.0, 0.0)
+
+surface2D = surface noiseVertex noiseColorFragment
+    << fromListsDefaults
+    << List.map (List.map toNSV)
+
+noiseSurface2D = surface noiseVertex noiseColorFragment << fromListsDefaults
 
 surface vertexShader fragmentShader mesh =
     let see = seeSurface vertexShader fragmentShader mesh
@@ -33,20 +43,20 @@ fromListsDefaults = surfaceMesh -256 2 2 -4 40 -256 2
 
 ----------------------------------------------------------------------
 
-mkStrip : List Vertex -> List Vertex -> List (Vertex, Vertex, Vertex)
+mkStrip : List v -> List v -> List (v, v, v)
 mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
 
-matRow : Float -> Float -> Float -> Float -> Float -> Float -> List (Float, Vec3) -> List Vertex
+matRow : Float -> Float -> Float -> Float -> Float -> Float -> List NoiseSurfaceVertex -> List NoiseVertex
 matRow x pos_dx coord_dx y0 ymul z =
   let m posOffset coordOffset ys0 = case ys0 of
-          ((y,rgb)::ys) -> { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0 } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          ((y,rgb,tex,tim)::ys) -> { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           _       -> []
   in
       m 0.0 0.0
 
 surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> Float
-    -> List (List (Float, Vec3))
-    -> Drawable Vertex
+    -> List (List NoiseSurfaceVertex)
+    -> Drawable NoiseVertex
 surfaceMesh x dx_pos dx_coord y0 ymul z dz m =
     let
         zs = indexedMap (\ix _ -> z + dz * toFloat ix) m
