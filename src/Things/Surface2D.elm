@@ -10,12 +10,12 @@ import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
 import WebGL exposing (..)
 
-import Shaders.ColorFragment exposing (colorFragment)
+import Shaders.ColorFragment exposing (colorFragment, noiseColorFragment)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Model
 
-surface2D = surface worldVertex colorFragment << fromListsDefaults
+surface2D = surface worldVertex noiseColorFragment << fromListsDefaults
 
 surface vertexShader fragmentShader mesh =
     let see = seeSurface vertexShader fragmentShader mesh

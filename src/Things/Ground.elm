@@ -2,8 +2,10 @@ module Things.Ground (ground) where
 
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
-import Util exposing (hslToVec3)
+import Time exposing (inSeconds)
 import WebGL exposing (..)
+
+import Util exposing (hslToVec3)
 
 import Shaders.ColorFragment exposing (colorFragment)
 -- import Shaders.ColorVertex exposing (ColorVertex, colorVertex)
@@ -14,7 +16,12 @@ ground : Signal Thing
 ground = Signal.constant <| Thing (vec3 0 0 0) (vec3 1 0 1) seeGround
 
 seeGround p =
-    [render worldVertex colorFragment groundMesh { view=p.viewMatrix }]
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = inSeconds p.globalTime
+    in
+        [render worldVertex colorFragment groundMesh
+            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
 
 -- The mesh for the ground
