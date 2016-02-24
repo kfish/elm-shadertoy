@@ -14,14 +14,10 @@ randTerrain2D side =
     let s2 = side - 1 - (side%8) in
       Random.map (
           terrain2D side <<
-          setXY 0   0 0.2 <<
-          setXY 0  s2 0.2 <<
-          setXY s2  0 1.0 <<
-          setXY (side//4) (side//4) 1.0 <<
-          setXY (10+side//4) (side//4) 1.0 <<
-          setXY (side//4) (10+side//4) 0.9 <<
-          setXY (side//4) (20+side//4) 1.0 <<
-          setXY s2 s2 0.5) <|
+          setXY 0   0 1.0 <<
+          setXY 0  side 0.8 <<
+          setXY side 0 1.0 <<
+          setXY side side 0.5) <|
       Random.map Array2D.fromArray <|
       Random.Array.array (side*side) (Random.float (-1.0) 1.0)
 
