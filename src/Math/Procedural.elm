@@ -15,11 +15,16 @@ randTerrain2D side =
       Random.map (
           terrain2D side <<
           setXY 0   0 1.0 <<
-          setXY 0  side 0.8 <<
-          setXY side 0 1.0 <<
-          setXY side side 0.5) <|
+          setXY 0  s2 0.8 <<
+          setXY s2 0 1.0 <<
+          setXY s2 s2 0.9 <<
+          setXY 0  (side//2) 1.0 <<
+          setXY (side//2) 0 1.0 <<
+          setXY (side//2) s2 1.0 <<
+          setXY s2 (side//2) 1.0
+      ) <|
       Random.map Array2D.fromArray <|
-      Random.Array.array (side*side) (Random.float (-1.0) 1.0)
+      Random.Array.array (side*side) (Random.float (-0.5) 1.0)
 
 ----------------------------------------------------------------------
 
@@ -34,7 +39,7 @@ simpleTerrain2D side = terrain2D side (fromArray (Array.repeat (side*side) 1.0))
 -- generate terrain
 terrain2D : Int -> Array2D Float -> Array2D Float
 terrain2D side arr0 =
-    let h = 0.5
+    let h = 0.3
         range = 0.5
         sizesRanges = unfoldWhile (\(x,r) -> (x//2,r*h)) (\(x,r) -> x > 1) (side, range)
     in  List.foldl (allQuads side) arr0 sizesRanges
