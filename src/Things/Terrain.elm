@@ -12,6 +12,19 @@ import Things.Surface2D exposing (..)
 
 import Engine exposing (..)
 
+-- TODO: Fix radius, increasing texture size really slows things down ...
+--- and include LOD, ie. use different shaders / parameterize shader by distance
+
+-- visibleTerrain : Signal (List Thing)
+visibleTerrain =
+       Signal.constant
+    << List.map extractThing
+    << List.concat
+    << Array2D.toLists
+    -- Array2D.radius 8
+
+terrainGrid = placeTerrain << tileTerrain 8
+
 mountains : Array2D Float -> Array2D NoiseSurfaceVertex
 mountains arr0 =
   let green h = hslToVec3
@@ -53,3 +66,6 @@ placeTerrain terrainsCoords =
         terrainz = Array2D.fromLists terrainSurfacesCoords
     in
         Array2D.map (\(s,(x,z)) -> { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz
+
+-- The x*2, z*2 numbers above must match the arguments to surfaceMesh. Put these
+-- into a record and pass it to both functions, and also to visibleTerrain

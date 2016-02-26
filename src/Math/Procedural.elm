@@ -24,7 +24,7 @@ randTerrain2D side =
           setXY s2 (side//2) 1.0
       ) <|
       Random.map Array2D.fromArray <|
-      Random.Array.array (side*side) (Random.float (-0.5) 1.0)
+      Random.Array.array (side*side) (Random.float (-0.5) 0.8)
 
 ----------------------------------------------------------------------
 

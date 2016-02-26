@@ -20,7 +20,7 @@ import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 import Things.Surface2D exposing (..)
 -- import Things.Teapot exposing (teapot)
-import Things.Terrain exposing (mountains, tileTerrain, placeTerrain)
+import Things.Terrain exposing (mountains, terrainGrid, visibleTerrain)
 
 
 import Shaders.FogMountains exposing (fogMountains)
@@ -93,21 +93,7 @@ demoThings =
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
         (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
-        terrains = tileTerrain 8 (mountains terrain0)
-        terrainz = placeTerrain terrains
-
-        visibleTerrain : Signal (List Thing)
-        visibleTerrain =
-            Signal.constant <|
-            List.map extractThing <|
-            List.concat <|
-            Array2D.toLists <|
-{-
-            Zipper2D.radius 64 <|
-            repeatedly 64 Zipper2D.north <|
-            repeatedly 64 Zipper2D.east <|
--}
-            terrainz
+        terrainz = terrainGrid (mountains terrain0)
 
         individuals : Signal (List Thing)
         individuals = combine [
@@ -122,4 +108,4 @@ demoThings =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        gather [visibleTerrain, individuals, boids, balls]
+        gather [visibleTerrain terrainz, individuals, boids, balls]
