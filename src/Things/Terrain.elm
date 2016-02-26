@@ -26,7 +26,7 @@ mountains arr0 =
           if h > 0.8 then (h, snow h, 0.8, 0.0)
           else if h < 0.0 then (0.1, sea h, 4.0, 0.7)
           else if h < 0.1 then (0.1, blue h, 4.0, 0.7)
-          else if h < 0.15 then (0.1, sand h, 100.0, 0.0)
+          else if h < 0.15 then (h, sand h, 100.0, 0.0)
           else (h, green h, 0.8, 0.001)
   in Array2D.map paint arr0
 
