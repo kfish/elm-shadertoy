@@ -36,11 +36,11 @@ mountains arr0 =
       sea h = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
       snow h = hslToVec3 (degrees 178) 0.8 h
       paint h =
-          if h > 0.8 then (h, snow h, 0.8, 0.0)
-          else if h < 0.0 then (0.1, sea h, 4.0, 0.7)
-          else if h < 0.1 then (0.1, blue h, 4.0, 0.7)
-          else if h < 0.15 then (h, sand h, 100.0, 0.0)
-          else (h, green h, 0.8, 0.001)
+          if h > 0.8 then (h, snow h, 0.8, 0.0, 0.3)
+          else if h < 0.0 then (0.1, sea h, 1.0, 0.7, 0.5)
+          else if h < 0.1 then (0.1, blue h, 1.0, 0.7, 0.5)
+          else if h < 0.15 then (h, sand h, 80.0, 0.0, 0.7)
+          else (h, green h, 0.8, 0.001, 0.3)
   in Array2D.map paint arr0
 
 tileTerrain : Int -> Array2D NoiseSurfaceVertex

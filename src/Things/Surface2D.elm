@@ -16,10 +16,10 @@ import Shaders.NoiseVertex exposing (..)
 import Model
 
 type alias SurfaceVertex = (Float, Vec3)
-type alias NoiseSurfaceVertex = (Float, Vec3, Float, Float)
-{- default texture scale: 8.0; default timeScale: 0.7 -}
+type alias NoiseSurfaceVertex = (Float, Vec3, Float, Float, Float)
+{- default texture scale: 8.0; default timeScale: 0.7, default smoothing = 0.5 -}
 
-toNSV (y,rgb) = (y, rgb, 0.0, 0.0)
+toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
 surface2D = surface noiseVertex noiseColorFragment
     << fromListsDefaults
@@ -49,7 +49,7 @@ mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (
 matRow : Float -> Float -> Float -> Float -> Float -> Float -> List NoiseSurfaceVertex -> List NoiseVertex
 matRow x pos_dx coord_dx y0 ymul z =
   let m posOffset coordOffset ys0 = case ys0 of
-          ((y,rgb,tex,tim)::ys) -> { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          ((y,rgb,tex,tim,smoo)::ys) -> { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim, smoothing = smoo } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           _       -> []
   in
       m 0.0 0.0

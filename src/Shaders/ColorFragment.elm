@@ -25,7 +25,7 @@ void main () {
 
 -- TODO: make surface2D tile seamlessly
 
-noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float }
+noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float, iSmoothing:Float }
 noiseColorFragment = [glsl|
 
 precision mediump float;
@@ -36,6 +36,7 @@ varying vec3 elm_FragColor;
 varying vec2 elm_FragCoord;
 varying float iTextureScale;
 varying float iTimeScale;
+varying float iSmoothing;
 
 // by @301z
 
@@ -73,7 +74,10 @@ void main() {
 	float q = fbm(p - scaledTime * 0.1);
 	vec2 r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
 	vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
-	gl_FragColor = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), 1.0);
+
+	vec4 fractalTexture = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), 1.0);
+        vec4 flatTexture = vec4(elm_FragColor, 1.0);
+        gl_FragColor = mix(fractalTexture, flatTexture, iSmoothing);
 }
 
 |]
