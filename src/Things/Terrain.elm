@@ -91,7 +91,7 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
   Array2D.Array2D bigSide arr ->
     let extent x = min (x+smallSide+1) (bigSide - 1)
         slice x y = Array.toList <| Array.slice (x + y*bigSide) (extent x + y*bigSide) arr
-        rows = List.map (slice x0) [y0 .. extent y0]
+        rows = List.map (slice x0) [y0 .. extent (y0-1)]
         out = List.reverse <| List.foldl (::) [] rows
     in (out, (x0, y0))
 
