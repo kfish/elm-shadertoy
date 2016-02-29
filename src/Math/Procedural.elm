@@ -16,11 +16,11 @@ randTerrain2D side =
           terrain2D side <<
           setXY 0   0 1.0 <<
           setXY 0  s2 0.8 <<
-          setXY s2 0 1.0 <<
-          setXY s2 s2 0.9 <<
+          setXY s2 0 0.1 <<
+          setXY s2 s2 0.3 <<
           setXY 0  (side//2) 1.0 <<
-          setXY (side//2) 0 1.0 <<
-          setXY (side//2) s2 1.0 <<
+          setXY (side//2) 0 0.7 <<
+          setXY (side//2) s2 0.8 <<
           setXY s2 (side//2) 1.0
       ) <|
       Random.map Array2D.fromArray <|

@@ -14,18 +14,7 @@ import Things.Surface2D exposing (..)
 
 import Engine exposing (..)
 
--- TODO: Fix radius, increasing texture size really slows things down ...
---- and include LOD, ie. use different shaders / parameterize shader by distance
-
-{-
 visibleTerrain : Array2D Thing -> List Thing
-visibleTerrain =
-       List.concat
-    << Array2D.toLists
-    -- Array2D.radius 8
--}
-
--- visibleTerrain : Array2D Thing -> Thing
 visibleTerrain arr =
     let
         sees = Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see)) arr
