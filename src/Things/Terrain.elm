@@ -1,6 +1,8 @@
 module Things.Terrain where
 
 import List.Extra exposing (splitAt)
+import Math.Matrix4 as M4
+import WebGL exposing (..)
 
 import Array
 import Array2D exposing (Array2D)
@@ -15,13 +17,31 @@ import Engine exposing (..)
 -- TODO: Fix radius, increasing texture size really slows things down ...
 --- and include LOD, ie. use different shaders / parameterize shader by distance
 
--- visibleTerrain : Signal (List Thing)
+{-
+visibleTerrain : Array2D Thing -> List Thing
 visibleTerrain =
-       Signal.constant
-    << List.map extractThing
-    << List.concat
+       List.concat
     << Array2D.toLists
     -- Array2D.radius 8
+-}
+
+visibleTerrain : Array2D Thing -> List Thing
+visibleTerrain arr = List.map extractThing
+    [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain arr }]
+
+-- CONGRATS! You've successfully plumbed a Perception into terrain, making the
+-- terrain itself into a Thing. Now, all you need to do is add the camera pos
+-- to Perception, and you'll be able to do "radius 8" on the terrain.
+-- ... THEN ... go back and plumb dt into demoThings, so you can get the boids
+-- and balls working again.
+-- ... THEN, trivially add back the static objects like cubes and diamonds
+-- that don't have a signal input.
+seeTerrain : Array2D Thing -> See
+seeTerrain arr p =
+       List.concat
+    <| List.concat
+    <| Array2D.toLists 
+    <| Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see) p) arr
 
 terrainGrid = placeTerrain << tileTerrain 8
 
@@ -59,13 +79,13 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
         out = List.reverse <| List.foldl (::) [] rows
     in (out, (x0, y0))
 
--- placeTerrain : List (List (Array2D (Float, Vec3), (Int, Int))) -> Array2D Thing
+-- placeTerrain : List (List ((List (List NoiseSurfaceVertex)), (Int, Int))) -> Array2D Thing
 placeTerrain terrainsCoords =
     let
         terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (noiseSurface2D t, xy))) terrainsCoords
         terrainz = Array2D.fromLists terrainSurfacesCoords
     in
-        Array2D.map (\(s,(x,z)) -> { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz
+        Array2D.map (\(s,(x,z)) -> extractThing { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz
 
 -- The x*2, z*2 numbers above must match the arguments to surfaceMesh. Put these
 -- into a record and pass it to both functions, and also to visibleTerrain

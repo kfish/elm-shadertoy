@@ -50,15 +50,15 @@ randomDrop = Random.map2
     (Random.map (add (vec3 0 30 0)) (randomVec3' 4.0))
     (randomVec3' 8.0)
 
-demoThings : Signal (List Thing)
+demoThings : List Thing
 demoThings =
     let
-        isOdd x = (floor x % 2) == 0
-        ifelse cond x y = if cond then x else y
-        switchy = isOdd <~ Signal.foldp (+) 0 (fps 1)
-        cd = extractThing <~ Signal.map3 ifelse (Signal.map fst xvCube) cloudsCube cloudsDiamond
+        -- isOdd x = (floor x % 2) == 0
+        -- ifelse cond x y = if cond then x else y
+        -- switchy = isOdd <~ Signal.foldp (+) 0 (fps 1)
+        -- cd = extractThing <~ Signal.map3 ifelse (Signal.map fst xvCube) cloudsCube cloudsDiamond
 
-        seed0 = Random.initialSeed 7
+        seed0 = Random.initialSeed 7777
 
 {-
         (rands, seed1) = Random.generate (Random.list 100 (Random.float 0.0 1.0)) seed0
@@ -66,7 +66,9 @@ demoThings =
         boids0 = randomBoids 100 (List.map (bfly voronoiDistances) rands)
 -}
 
+        {- OK
         (boids0, seed1) = Random.generate (Random.list 100 randomBoid) seed0
+        -}
 
 {-
         boids = map extractThing <~ folds [] moveBoids boids0 (fps 60)
@@ -76,25 +78,36 @@ demoThings =
 
         -- -- boidsColl = tcAndThen boidsTCont (simpleTCont collisions)
         -- boids = map extractThing <~ foldSigTCont2 [] boidsColl boids0 (fps 60)
+
+        {- OK
         boidsColl = composeTCont moveBoids collisions
 
         boids : Signal (List Thing)
         boids = List.map extractThing <~ foldTCont boidsTCont boids0 (fps 60)
+        -}
+
         -- boids = foldTCont boidsTCont boids0 (fps 60)
 
+        {- OK
         (balls0, seed2) = Random.generate (Random.list 15 randomDrop) seed1
 
         ballsTCont = composeTCont moveBoids moveDrops
 
         balls : Signal (List Thing)
+        -}
         -- balls = List.map extractThing <~ folds [] moveDrops balls0 (fps 60)
         -- balls = List.map extractThing <~ Signal.foldp moveDrops balls0 (fps 60)
         -- balls = List.map extractThing <~ foldTCont (simpleTCont moveDrops) balls0 (fps 60)
-        balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
+        {- OK
+        balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
+        -}
+
+        -- (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
+        (terrain0, seed3) = Random.generate (randTerrain2D 257) seed0
         terrainz = terrainGrid (mountains terrain0)
 
+{- OK
         individuals : Signal (List Thing)
         individuals = combine [
             -- ground,
@@ -102,10 +115,12 @@ demoThings =
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
             -- place   -30   -3   -10 <~ (extractThing <~ terrainSurface),
             -- place   0   1   0 <~ (extractThing <~ Signal.constant fogMountainsSphere),
-            place   5 1.5   1 <~ cd,
+            -- place   5 1.5   1 <~ cd,
             place -10   0 -10 <~ (extractThing <~ fireCube),
             -- lift2 (\y e -> place 0 y 0 e) s fireCube,
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
+-}
     in
-        gather [visibleTerrain terrainz, individuals, boids, balls]
+        -- gather [visibleTerrain terrainz, individuals, boids, balls]
+        List.concat [visibleTerrain terrainz]
