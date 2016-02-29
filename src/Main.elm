@@ -66,13 +66,13 @@ person = foldp Update.step Model.defaultPerson inputs
 main : Signal Element
 main = world Demo.demoThings
 
-world : List Thing -> Signal Element
+world : Signal (List Thing) -> Signal Element
 world entities =
   let t = foldp (+) 0 (fps 30)
       wh = Window.dimensions
   in 
       Signal.map3 lockMessage wh isLocked
-            (Signal.map3 (scene entities) wh t person)
+            (Signal.map4 scene entities wh t person)
 {-
 world : ((Int,Int) -> Time -> Mat4 -> List Renderable) -> Signal Element
 world entities =
