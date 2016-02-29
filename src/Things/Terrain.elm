@@ -22,13 +22,6 @@ visibleTerrain arr =
         List.map extractThing
             [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain sees }]
 
--- CONGRATS! You've successfully plumbed a Perception into terrain, making the
--- terrain itself into a Thing. Now, all you need to do is add the camera pos
--- to Perception, and you'll be able to do "radius 8" on the terrain.
--- ... THEN ... go back and plumb dt into demoThings, so you can get the boids
--- and balls working again.
--- ... THEN, trivially add back the static objects like cubes and diamonds
--- that don't have a signal input.
 seeTerrain : Array2D See -> See
 seeTerrain sees p =
        List.concat
