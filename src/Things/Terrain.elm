@@ -25,9 +25,13 @@ visibleTerrain =
     -- Array2D.radius 8
 -}
 
-visibleTerrain : Array2D Thing -> List Thing
-visibleTerrain arr = List.map extractThing
-    [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain arr }]
+-- visibleTerrain : Array2D Thing -> Thing
+visibleTerrain arr =
+    let
+        sees = Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see)) arr
+    in
+        List.map extractThing
+            [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain sees }]
 
 -- CONGRATS! You've successfully plumbed a Perception into terrain, making the
 -- terrain itself into a Thing. Now, all you need to do is add the camera pos
@@ -36,12 +40,24 @@ visibleTerrain arr = List.map extractThing
 -- and balls working again.
 -- ... THEN, trivially add back the static objects like cubes and diamonds
 -- that don't have a signal input.
-seeTerrain : Array2D Thing -> See
-seeTerrain arr p =
+seeTerrain : Array2D See -> See
+seeTerrain sees p =
        List.concat
-    <| List.concat
-    <| Array2D.toLists 
-    <| Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see) p) arr
+    <| List.map (\see -> see p)
+    <| nearby p.cameraPos sees
+
+nearby : Vec3 -> Array2D See -> List See
+nearby pos sees =
+    let
+        ix0 = floor ((getX pos + 256) / (2*8))
+        iz0 = floor ((getZ pos + 256) / (2*8))
+        getXZ x z = Array2D.getXY z x (\_ -> []) sees
+
+        -- The visible radius of tiles depends on the height of the camera
+        r = max 8 (floor ((getY pos) / 10))
+        ir = iradius r
+    in
+        List.map (\(x,y) -> getXZ (ix0+x) (iz0+y)) ir
 
 terrainGrid = placeTerrain << tileTerrain 8
 

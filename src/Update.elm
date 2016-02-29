@@ -32,7 +32,8 @@ turn (dx,dy) person =
         v' = person.verticalAngle   - yo dy
     in
         { person | horizontalAngle = h'
-                 , verticalAngle = clamp (degrees -90) (degrees 90) v'
+                 -- , verticalAngle = clamp (degrees -90) (degrees 90) v'
+                 , verticalAngle = v'
         }
 
 fly : { x:Int, y:Int } -> Model.Person -> Model.Person
@@ -61,7 +62,7 @@ adjustVelocity : Vec3 -> Vec3
 adjustVelocity v =
     case toTuple v of
       (0,0,0) -> v
-      _       -> V3.scale 8 (normalize v)
+      _       -> V3.scale 20 (normalize v)
 
 jump : Bool -> Model.Person -> Model.Person
 jump isJumping person =

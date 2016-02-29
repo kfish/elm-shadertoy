@@ -26,6 +26,16 @@ subSquares smallSide bigSide =
         pairs l = List.map (\x -> (List.map (\y -> (x,y)) l)) l
     in  pairs offsets
 
+-- Integer coordinates within radius r of the origin
+iradius : Int -> List (Int, Int)
+iradius r =
+    let
+        l0 = unfoldWhile (\x -> x+1) (\x -> x <= r) 1
+        l y0 = unfoldWhile (\(x,y) -> (x+1,y)) (\(x,y) -> (x*x) + (y*y) <= r*r) (0,y0)
+        rots (x,y) = [(x,y), (-y,x), (-x,-y), (y, -x)]
+    in
+        (0,0) :: (List.concatMap rots <| List.concat <| List.map l l0)
+
 ---------------------------------------------------------------------
 
 -- Help create colors as Vectors

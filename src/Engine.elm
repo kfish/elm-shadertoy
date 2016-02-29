@@ -15,6 +15,7 @@ import WebGL exposing (..)
 import Model
 
 type alias Perception = {
+    cameraPos  : Vec3,
     resolution : (Int, Int),
     globalTime : Time,
     viewMatrix : Mat4
@@ -221,7 +222,7 @@ scene : List Thing -> (Int,Int) -> Time -> Model.Person -> Element
 scene things (w,h) t person =
   let
     see = mapApply (List.map orient things)
-    p = { viewMatrix = look (w,h) person, globalTime = t, resolution = (w,h) }
+    p = { cameraPos = person.pos, viewMatrix = look (w,h) person, globalTime = t, resolution = (w,h) }
   in
     layers [ color (rgb 135 206 235) (spacer w h)
            , webgl (w,h) (see p)

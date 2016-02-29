@@ -68,7 +68,7 @@ main = world Demo.demoThings
 
 world : List Thing -> Signal Element
 world entities =
-  let t = foldp (+) 0 (fps 60)
+  let t = foldp (+) 0 (fps 30)
       wh = Window.dimensions
   in 
       Signal.map3 lockMessage wh isLocked
