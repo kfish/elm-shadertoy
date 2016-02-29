@@ -104,7 +104,7 @@ demoThings =
         -}
 
         -- (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
-        (terrain0, seed3) = Random.generate (randTerrain2D 257) seed0
+        (terrain0, seed3) = Random.generate (randTerrain2D 1025) seed0
         terrainz = terrainGrid (mountains terrain0)
 
 {- OK
