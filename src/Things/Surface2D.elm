@@ -39,7 +39,7 @@ seeSurface vertexShader fragmentShader mesh p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
 
-fromListsDefaults = surfaceMesh -256 2 2 -8 80 -256 2
+fromListsDefaults = surfaceMesh -256 2 2 0 80 -256 2
 
 ----------------------------------------------------------------------
 

@@ -7,6 +7,7 @@ module Main (main) where
 -}
 
 import Graphics.Element exposing (..)
+import Random
 import Set
 import Signal exposing (..)
 import Text
@@ -18,6 +19,8 @@ import Keyboard
 import Mouse
 import Window
 
+import Array2D exposing (Array2D)
+import Math.Procedural exposing (..)
 import Model
 import Engine exposing (..)
 import Update
@@ -59,20 +62,24 @@ inputs =
   in  merge (sampleOn dt <| map3 Model.TimeDelta Keyboard.space dirKeys dt)
             (map Model.Mouse movement)
 
-person : Signal Model.Person
-person = foldp Update.step Model.defaultPerson inputs
+person : Array2D Float -> Signal Model.Person
+person terrain = foldp (Update.step terrain) Model.defaultPerson inputs
 
 {-| The main function -}
 main : Signal Element
 main = world Demo.demoThings
 
-world : Signal (List Thing) -> Signal Element
-world entities =
+world : (Array2D Float -> Signal (List Thing)) -> Signal Element
+world thingsOnTerrain =
   let t = foldp (+) 0 (fps 30)
       wh = Window.dimensions
+
+      seed0 = Random.initialSeed 7777
+      (terrain, seed1) = Random.generate (randTerrain2D 1025) seed0
+      entities = thingsOnTerrain terrain
   in 
       Signal.map3 lockMessage wh isLocked
-            (Signal.map4 scene entities wh t person)
+            (Signal.map4 scene entities wh t (person terrain))
 {-
 world : ((Int,Int) -> Time -> Mat4 -> List Renderable) -> Signal Element
 world entities =

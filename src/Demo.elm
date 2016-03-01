@@ -9,9 +9,7 @@ import Array2D
 import Math.Procedural exposing (..)
 import Math.RandomVector exposing (randomVec3')
 import Util exposing (repeatedly)
-
 import Engine exposing (..)
-
 import Things.Ground exposing (ground)
 import Things.BFly exposing (bfly)
 import Things.Cube exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube)
@@ -50,8 +48,8 @@ randomDrop = Random.map2
     (Random.map (add (vec3 0 30 0)) (randomVec3' 4.0))
     (randomVec3' 8.0)
 
-demoThings : Signal (List Thing)
-demoThings =
+demoThings : Array2D.Array2D Float -> Signal (List Thing)
+demoThings terrain0 =
     let
         -- isOdd x = (floor x % 2) == 0
         -- ifelse cond x y = if cond then x else y
@@ -94,8 +92,6 @@ demoThings =
 
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        -- (terrain0, seed3) = Random.generate (randTerrain2D 257) seed2
-        (terrain0, seed3) = Random.generate (randTerrain2D 1025) seed0
         terrainz = terrainGrid (mountains terrain0)
         terrain = Signal.constant <| visibleTerrain terrainz
 
