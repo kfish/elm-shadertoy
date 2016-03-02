@@ -1,4 +1,4 @@
-module Things.Terrain (elevation, bounds, paint, mountains) where
+module Things.Terrain (bounds, elevation, paint, mountains) where
 
 import List.Extra exposing (splitAt)
 import Math.Matrix4 as M4
@@ -36,16 +36,11 @@ mountains h =
 
 ----------------------------------------------------------------------
 
-{-
-elevation : Array2D Float -> Vec3 -> Float
-elevation terrain pos =
-    let
-        ix0 = floor <| (getX pos + 256) / 2
-        iz0 = floor <| (getZ pos + 256) / 2
-        getXZ x z = (Array2D.getXY x z 0 terrain) * 80
-    in
-        getXZ ix0 iz0
--}
+bounds : Vec3 -> Vec3
+bounds pos =
+    let bound x low high = if (x < low) then low else (if x > high then high else x)
+        (x,y,z) = V3.toTuple pos
+    in vec3 (bound x -246 1782) (bound y 0 1000) (bound z -246 1782)
 
 -- Elevation of terrain at a given coordinate
 -- Linearly interpolated on the mesh triangle
@@ -77,54 +72,54 @@ elevation terrain pos =
         else
             mix i01 i11 ixf + mix i10 i11 izf
 
-bounds : Vec3 -> Vec3
-bounds pos =
-    let bound x low high = if (x < low) then low else (if x > high then high else x)
-        (x,y,z) = V3.toTuple pos
-    in vec3 (bound x -246 1782) (bound y 0 1000) (bound z -246 1782)
-
+-- A faster version of elevation that doesn't attempt to interpolate between
+-- the four surrounding points. Useful for rough calculations like deciding
+-- how many nearby terrain tiles to display based on how close to the ground
+-- the camera is.
+approxElevation : Array2D Float -> Vec3 -> Float
+approxElevation terrain pos =
+    let
+        ix0 = floor <| (getX pos + 256) / 2
+        iz0 = floor <| (getZ pos + 256) / 2
+        getXZ x z = (Array2D.getXY x z 0 terrain) * 80
+    in
+        getXZ ix0 iz0
             
 ----------------------------------------------------------------------
 
 paint : (Float -> NoiseSurfaceVertex) -> Array2D Float -> List Thing
 paint how terrain =
-       visibleTerrain
-    <| terrainGrid
-    <| Array2D.map how terrain
+    let paintedTerrain = Array2D.map how terrain
+    in visibleTerrain terrain (terrainGrid paintedTerrain)
 
-visibleTerrain : Array2D Thing -> List Thing
-visibleTerrain arr =
+visibleTerrain : Array2D Float -> Array2D Thing -> List Thing
+visibleTerrain terrain arr =
     let
         sees = Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see)) arr
     in
         List.map extractThing
-            [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain sees }]
+            [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain terrain sees }]
 
-seeTerrain : Array2D See -> See
-seeTerrain sees p =
+seeTerrain : Array2D Float -> Array2D See -> See
+seeTerrain terrain sees p =
        List.concat
     <| List.map (\see -> see p)
-    <| nearby p.cameraPos sees
+    <| nearby terrain p.cameraPos sees
 
-nearby : Vec3 -> Array2D See -> List See
-nearby pos sees =
+nearby : Array2D Float -> Vec3 -> Array2D See -> List See
+nearby terrain pos sees =
     let
         ix0 = floor ((getX pos + 256) / (2*8))
         iz0 = floor ((getZ pos + 256) / (2*8))
         getXZ x z = Array2D.getXY z x (\_ -> []) sees
 
         -- The visible radius of tiles depends on the height of the camera
-        r = max 8 (floor ((getY pos) / 10))
+        r = max 8 (floor ((getY pos - approxElevation terrain pos) / 10))
         ir = iradius r
     in
         List.map (\(x,y) -> getXZ (ix0+x) (iz0+y)) ir
 
 terrainGrid = placeTerrain << tileTerrain 8
-
--- TODO: break out a (Float -> NoiseSurfaceVertex) paint function, and
--- pass this to a function that makes a [Thing] out of a terrain : Array2D Float
--- ... then, that function can make use of the passed-in terrain to take elevation
--- into account for nearby
 
 tileTerrain : Int -> Array2D NoiseSurfaceVertex
     -> List (List ((List (List NoiseSurfaceVertex), (Int, Int))))
