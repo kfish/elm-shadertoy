@@ -1,7 +1,8 @@
-module Things.Terrain (paint, mountains) where
+module Things.Terrain (elevation, bounds, paint, mountains) where
 
 import List.Extra exposing (splitAt)
 import Math.Matrix4 as M4
+import Math.Vector3 as V3
 import WebGL exposing (..)
 
 import Array
@@ -13,6 +14,77 @@ import Zipper2D exposing (Zipper2D, map)
 import Things.Surface2D exposing (..)
 
 import Engine exposing (..)
+
+----------------------------------------------------------------------
+
+mountains : Float -> NoiseSurfaceVertex
+mountains h =
+  let green = hslToVec3
+          (degrees (70 + toFloat (round ((h+0.34)*500) % 70)))
+          (0.3 + h/4)
+          (0.2 + (1-h)/3)
+      blue = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
+      sand = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
+      sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
+      snow = hslToVec3 (degrees 178) 0.8 h
+  in
+      if h > 0.8 then (h, snow, 0.8, 0.0, 0.3)
+      else if h < 0.0 then (0.1, sea, 1.0, 0.7, 0.5)
+      else if h < 0.1 then (0.1, blue, 1.0, 0.7, 0.5)
+      else if h < 0.15 then (h, sand, 80.0, 0.0, 0.7)
+      else (h, green, 0.8, 0.001, 0.3)
+
+----------------------------------------------------------------------
+
+{-
+elevation : Array2D Float -> Vec3 -> Float
+elevation terrain pos =
+    let
+        ix0 = floor <| (getX pos + 256) / 2
+        iz0 = floor <| (getZ pos + 256) / 2
+        getXZ x z = (Array2D.getXY x z 0 terrain) * 80
+    in
+        getXZ ix0 iz0
+-}
+
+-- Elevation of terrain at a given coordinate
+-- Linearly interpolated on the mesh triangle
+-- TODO: move this to the Terrain module
+elevation : Array2D Float -> Vec3 -> Float
+elevation terrain pos =
+    let
+        ix0 = (getX pos + 256) / 2
+        ix  = floor ix0
+        ixf = ix0 - toFloat ix
+
+        iz0 = (getZ pos + 256) / 2
+        iz  = floor iz0
+        izf = iz0 - toFloat iz
+
+        getXZ x z = (Array2D.getXY x z 0 terrain) * 80
+
+        i00 = getXZ ix     iz      --     00 ... 10  -> x
+        i10 = getXZ (ix+1) iz      --  |  .    /  .
+                                   --  v  .   /   .
+        i01 = getXZ ix     (iz+1)  --     .  /    .
+        i11 = getXZ (ix+1) (iz+1)  --  z  01 ... 11
+
+        mix a b f = (a * (1-f) + b * f) / 2 -- f describes how close to a
+
+    in
+        if ixf + izf < 1.0 then
+            mix i00 i10 ixf + mix i00 i01 izf
+        else
+            mix i01 i11 ixf + mix i10 i11 izf
+
+bounds : Vec3 -> Vec3
+bounds pos =
+    let bound x low high = if (x < low) then low else (if x > high then high else x)
+        (x,y,z) = V3.toTuple pos
+    in vec3 (bound x -246 1782) (bound y 0 1000) (bound z -246 1782)
+
+            
+----------------------------------------------------------------------
 
 paint : (Float -> NoiseSurfaceVertex) -> Array2D Float -> List Thing
 paint how terrain =
@@ -53,23 +125,6 @@ terrainGrid = placeTerrain << tileTerrain 8
 -- pass this to a function that makes a [Thing] out of a terrain : Array2D Float
 -- ... then, that function can make use of the passed-in terrain to take elevation
 -- into account for nearby
-
-mountains : Float -> NoiseSurfaceVertex
-mountains h =
-  let green = hslToVec3
-          (degrees (70 + toFloat (round ((h+0.34)*500) % 70)))
-          (0.3 + h/4)
-          (0.2 + (1-h)/3)
-      blue = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
-      sand = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
-      sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
-      snow = hslToVec3 (degrees 178) 0.8 h
-  in
-      if h > 0.8 then (h, snow, 0.8, 0.0, 0.3)
-      else if h < 0.0 then (0.1, sea, 1.0, 0.7, 0.5)
-      else if h < 0.1 then (0.1, blue, 1.0, 0.7, 0.5)
-      else if h < 0.15 then (h, sand, 80.0, 0.0, 0.7)
-      else (h, green, 0.8, 0.001, 0.3)
 
 tileTerrain : Int -> Array2D NoiseSurfaceVertex
     -> List (List ((List (List NoiseSurfaceVertex), (Int, Int))))
