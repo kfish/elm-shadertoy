@@ -6,6 +6,7 @@ import List exposing (..)
 import List.Extra exposing (splitAt)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
+import Math.Vector4 exposing (Vec4)
 import Math.Matrix4 exposing (..)
 import Time exposing (Time, inSeconds)
 import WebGL exposing (..)
@@ -16,7 +17,7 @@ import Shaders.NoiseVertex exposing (..)
 import Model
 
 type alias SurfaceVertex = (Float, Vec3)
-type alias NoiseSurfaceVertex = (Float, Vec3, Float, Float, Float)
+type alias NoiseSurfaceVertex = (Float, Vec4, Float, Float, Float)
 {- default texture scale: 8.0; default timeScale: 0.7, default smoothing = 0.5 -}
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)

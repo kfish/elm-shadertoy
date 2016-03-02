@@ -3,6 +3,7 @@ module Things.Terrain (bounds, elevation, paint, mountains) where
 import List.Extra exposing (splitAt)
 import Math.Matrix4 as M4
 import Math.Vector3 as V3
+import Math.Vector4 as V4
 import WebGL exposing (..)
 
 import Array
@@ -27,12 +28,13 @@ mountains h =
       sand = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
       sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
       snow = hslToVec3 (degrees 178) 0.8 h
+      alpha1 v0 = let v = V3.toRecord v0 in V4.fromTuple (v.x, v.y, v.z, 1.0)
   in
-      if h > 0.8 then (h, snow, 0.8, 0.0, 0.3)
-      else if h < 0.0 then (0.1, sea, 1.0, 0.7, 0.5)
-      else if h < 0.1 then (0.1, blue, 1.0, 0.7, 0.5)
-      else if h < 0.15 then (h, sand, 80.0, 0.0, 0.7)
-      else (h, green, 0.8, 0.001, 0.3)
+      if h > 0.8 then (h, alpha1 snow, 0.8, 0.0, 0.3)
+      else if h < 0.0 then (0.1, alpha1 sea, 1.0, 0.7, 0.5)
+      else if h < 0.1 then (0.1, alpha1 blue, 1.0, 0.7, 0.5)
+      else if h < 0.15 then (h, alpha1 sand, 80.0, 0.0, 0.7)
+      else (h, alpha1 green, 0.8, 0.001, 0.3)
 
 ----------------------------------------------------------------------
 

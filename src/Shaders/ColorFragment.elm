@@ -1,7 +1,8 @@
 module Shaders.ColorFragment (colorFragment, noiseColorFragment) where
 
 import Math.Vector2 exposing (Vec2)
-import Math.Vector3 exposing (..)
+import Math.Vector3 exposing (Vec3)
+import Math.Vector4 exposing (Vec4)
 import WebGL exposing (..)
 
 colorFragment : Shader {} u { elm_FragColor:Vec3, elm_FragCoord:Vec2 }
@@ -25,14 +26,14 @@ void main () {
 
 -- TODO: make surface2D tile seamlessly
 
-noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec3, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float, iSmoothing:Float }
+noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec4, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float, iSmoothing:Float }
 noiseColorFragment = [glsl|
 
 precision mediump float;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 
-varying vec3 elm_FragColor;
+varying vec4 elm_FragColor;
 varying vec2 elm_FragCoord;
 varying float iTextureScale;
 varying float iTimeScale;
@@ -61,10 +62,10 @@ float fbm(vec2 n) {
 }
 
 void main() {
-	vec3 c1 = elm_FragColor;
-	vec3 c2 = elm_FragColor * vec3(0.7, 0.7, 0.7);
-	vec3 c3 = elm_FragColor * vec3(0.6, 0.6, 0.6);
-	vec3 c4 = elm_FragColor * vec3(0.9, 0.9, 0.9);
+	vec3 c1 = vec3(elm_FragColor);
+	vec3 c2 = c1 * vec3(0.7, 0.7, 0.7);
+	vec3 c3 = c1 * vec3(0.6, 0.6, 0.6);
+	vec3 c4 = c1 * vec3(0.9, 0.9, 0.9);
 	vec3 c5 = vec3(0.10);
 	vec3 c6 = vec3(0.50);
 
@@ -75,8 +76,8 @@ void main() {
 	vec2 r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
 	vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
 
-	vec4 fractalTexture = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), 1.0);
-        vec4 flatTexture = vec4(elm_FragColor, 1.0);
+	vec4 fractalTexture = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), elm_FragColor.a);
+        vec4 flatTexture = elm_FragColor;
         gl_FragColor = mix(fractalTexture, flatTexture, iSmoothing);
 }
 
