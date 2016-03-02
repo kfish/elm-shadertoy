@@ -18,7 +18,7 @@ import Things.Portal exposing (plasmaPortal)
 import Things.Sphere exposing (spheres, cloudsSphere, fogMountainsSphere)
 import Things.Surface2D exposing (..)
 -- import Things.Teapot exposing (teapot)
-import Things.Terrain exposing (mountains, terrainGrid, visibleTerrain)
+import Things.Terrain as Terrain
 
 
 import Shaders.FogMountains exposing (fogMountains)
@@ -92,12 +92,10 @@ demoThings terrain0 =
 
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        terrainz = terrainGrid (mountains terrain0)
-        terrain = Signal.constant <| visibleTerrain terrainz
+        ground = Signal.constant <| Terrain.paint Terrain.mountains terrain0
 
         individuals : Signal (List Thing)
         individuals = combine [
-            -- ground,
             -- -- place   0   3   0 <~ teapot,
             place   3   3   1 <~ (extractThing <~ plasmaPortal),
             -- place   -30   -3   -10 <~ (extractThing <~ terrainSurface),
@@ -108,4 +106,4 @@ demoThings terrain0 =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        gather [terrain, individuals, boids, balls]
+        gather [ground, individuals, boids, balls]

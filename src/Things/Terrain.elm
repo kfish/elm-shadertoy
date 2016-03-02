@@ -1,4 +1,4 @@
-module Things.Terrain where
+module Things.Terrain (paint, mountains) where
 
 import List.Extra exposing (splitAt)
 import Math.Matrix4 as M4
@@ -13,6 +13,12 @@ import Zipper2D exposing (Zipper2D, map)
 import Things.Surface2D exposing (..)
 
 import Engine exposing (..)
+
+paint : (Float -> NoiseSurfaceVertex) -> Array2D Float -> List Thing
+paint how terrain =
+       visibleTerrain
+    <| terrainGrid
+    <| Array2D.map how terrain
 
 visibleTerrain : Array2D Thing -> List Thing
 visibleTerrain arr =
@@ -43,23 +49,27 @@ nearby pos sees =
 
 terrainGrid = placeTerrain << tileTerrain 8
 
-mountains : Array2D Float -> Array2D NoiseSurfaceVertex
-mountains arr0 =
-  let green h = hslToVec3
+-- TODO: break out a (Float -> NoiseSurfaceVertex) paint function, and
+-- pass this to a function that makes a [Thing] out of a terrain : Array2D Float
+-- ... then, that function can make use of the passed-in terrain to take elevation
+-- into account for nearby
+
+mountains : Float -> NoiseSurfaceVertex
+mountains h =
+  let green = hslToVec3
           (degrees (70 + toFloat (round ((h+0.34)*500) % 70)))
           (0.3 + h/4)
           (0.2 + (1-h)/3)
-      blue h = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
-      sand h = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
-      sea h = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
-      snow h = hslToVec3 (degrees 178) 0.8 h
-      paint h =
-          if h > 0.8 then (h, snow h, 0.8, 0.0, 0.3)
-          else if h < 0.0 then (0.1, sea h, 1.0, 0.7, 0.5)
-          else if h < 0.1 then (0.1, blue h, 1.0, 0.7, 0.5)
-          else if h < 0.15 then (h, sand h, 80.0, 0.0, 0.7)
-          else (h, green h, 0.8, 0.001, 0.3)
-  in Array2D.map paint arr0
+      blue = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
+      sand = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
+      sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
+      snow = hslToVec3 (degrees 178) 0.8 h
+  in
+      if h > 0.8 then (h, snow, 0.8, 0.0, 0.3)
+      else if h < 0.0 then (0.1, sea, 1.0, 0.7, 0.5)
+      else if h < 0.1 then (0.1, blue, 1.0, 0.7, 0.5)
+      else if h < 0.15 then (h, sand, 80.0, 0.0, 0.7)
+      else (h, green, 0.8, 0.001, 0.3)
 
 tileTerrain : Int -> Array2D NoiseSurfaceVertex
     -> List (List ((List (List NoiseSurfaceVertex), (Int, Int))))
