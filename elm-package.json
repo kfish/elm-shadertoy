@@ -8,6 +8,7 @@
     ],
     "exposed-modules": [
     ],
+    "native-modules": true,
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 4.0.0",
         "Apanatshka/elm-signal-extra" : "5.7.0 <= v < 6.0.0",
