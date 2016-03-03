@@ -6,6 +6,8 @@ module Main (main) where
 @docs main
 -}
 
+import Debug
+
 import Graphics.Element exposing (..)
 import Random
 import Set
@@ -20,6 +22,7 @@ import Mouse
 import Window
 
 import Array2D exposing (Array2D)
+import Gamepad
 import Math.Procedural exposing (..)
 import Model
 import Engine exposing (..)
@@ -54,11 +57,29 @@ port exitPointerLock =
     always True <~ keepIf (any (\x -> x == 27)) [] Keyboard.keysDown
 -}
 
+-- I'm sure there is a better way to this staircase from hell
+gamepadsToArrows : List Gamepad.Gamepad -> { x : Int, y : Int }
+gamepadsToArrows gamepads =
+  case List.head gamepads of
+    Nothing -> {x=0, y=0}
+    Just gamepad ->
+      case List.head gamepad.axes of
+        Nothing -> Debug.crash "No x axis"
+        Just x ->
+          case List.tail gamepad.axes of
+            Nothing -> Debug.crash "No y axis"
+            Just rest ->
+              case List.head rest of
+                Nothing -> Debug.crash "No y axis2"
+                -- I would prefer to keep the floats to be honest
+                Just y -> { x=(round x), y=(-1 * round y) }
+
 -- Set up 3D world
 inputs : Signal Model.Inputs
 inputs =
   let dt = map (\t -> t/500) (fps 60)
-      dirKeys = merge Keyboard.arrows Keyboard.wasd
+      gamepadArrows = Signal.map gamepadsToArrows Gamepad.gamepads
+      dirKeys = merge gamepadArrows (merge Keyboard.arrows Keyboard.wasd)
   in  merge (sampleOn dt <| map3 Model.TimeDelta Keyboard.space dirKeys dt)
             (map Model.Mouse movement)
 
