@@ -2,9 +2,17 @@ module Model where
 
 import Math.Vector3 exposing (Vec3, vec3)
 
-type Inputs
-    = TimeDelta Bool {x:Int, y:Int} Float
-    | Mouse (Int,Int)
+type alias Inputs =
+    { isJumping: Bool
+    , x: Int
+    , y: Int
+    , mx: Int
+    , my: Int
+    , dt: Float
+    }
+
+noInput : Inputs
+noInput = { isJumping = False, x=0, y=0, mx=0, my=0, dt=0 }
 
 -- TODO: Make a new model type with both Person and Things
 -- but the Things are passed in and can be added/subtracted

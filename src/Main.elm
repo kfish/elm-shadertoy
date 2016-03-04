@@ -24,7 +24,7 @@ import Window
 import Array2D exposing (Array2D)
 import Gamepad
 import Math.Procedural exposing (..)
-import Model
+import Model exposing (noInput)
 import Engine exposing (..)
 import Update
 
@@ -71,15 +71,17 @@ gamepadsToArrows gamepads =
                 Just y -> { x=(round x), y=(-1 * round y) }
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
-gamepadsToInputs gamepads dt = Model.TimeDelta False (gamepadsToArrows gamepads) dt
+gamepadsToInputs gamepads dt =
+    let {x,y} = gamepadsToArrows gamepads
+    in  { noInput | x = x, y = y, dt = dt }
 
 -- Set up 3D world
 kbMouseInputs : Signal Model.Inputs
 kbMouseInputs =
   let dt = map (\t -> t/500) (fps 60)
       dirKeys = merge Keyboard.arrows Keyboard.wasd
-  in  merge (sampleOn dt <| map3 Model.TimeDelta Keyboard.space dirKeys dt)
-            (map Model.Mouse movement)
+  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | x=x, y=y, dt=kdt }) Keyboard.space dirKeys dt)
+            (map (\(mdt, (mx,my)) -> { noInput | mx=mx, my=my, dt=mdt }) (Time.timestamp movement))
 
 gamepadInputs : Signal Model.Inputs
 gamepadInputs =

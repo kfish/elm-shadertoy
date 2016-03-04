@@ -12,9 +12,6 @@ type alias EyeLevel = Vec3 -> Float
 
 step : Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
 step terrain inputs person =
-    case inputs of
-      Model.Mouse movement -> turn movement person
-      Model.TimeDelta isJumping directions dt ->
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
         in
@@ -22,18 +19,19 @@ step terrain inputs person =
           person |> fly directions
                  |> physics eyeLevel dt
 -}
-          person |> walk eyeLevel directions
-                 |> jump eyeLevel isJumping
-                 |> gravity eyeLevel dt
-                 |> physics eyeLevel dt
+          person |> turn inputs.mx inputs.my
+                 |> walk eyeLevel inputs
+                 |> jump eyeLevel inputs.isJumping
+                 |> gravity eyeLevel inputs.dt
+                 |> physics eyeLevel inputs.dt
 
 flatten : Vec3 -> Vec3
 flatten v =
     let r = toRecord v
     in  normalize (vec3 r.x 0 r.z)
 
-turn : (Int,Int) -> Model.Person -> Model.Person
-turn (dx,dy) person =
+turn : Int -> Int -> Model.Person -> Model.Person
+turn dx dy person =
     -- let yo x = toFloat (clamp -30 30 x) / 500
     let yo x = toFloat x / 500
         h' = person.horizontalAngle + yo dx
@@ -44,7 +42,7 @@ turn (dx,dy) person =
                  , verticalAngle = v'
         }
 
-fly : { x:Int, y:Int } -> Model.Person -> Model.Person
+fly : { a | x:Int, y:Int } -> Model.Person -> Model.Person
 fly directions person =
     let moveDir = normalize (Model.direction person)
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
@@ -54,7 +52,7 @@ fly directions person =
     in
         { person | velocity = adjustVelocity (move `add` strafe) }
 
-walk : EyeLevel -> { x:Int, y:Int } -> Model.Person -> Model.Person
+walk : EyeLevel -> { a | x:Int, y:Int } -> Model.Person -> Model.Person
 walk eyeLevel directions person =
   -- if getY person.pos > eyeLevel person.pos then person else
     let moveDir = normalize (flatten (Model.direction person))
