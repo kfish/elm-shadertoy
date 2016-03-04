@@ -58,8 +58,8 @@ gamepadsToArrows gamepads =
         u l x = if abs x < l then 0.0 else (x - l) / (1.0 - l)
         use = u 0.2
         sens {x,y,mx,my} = {x=(use x)/10, y=(use y)/10, mx=(use mx)/20, my=(use my)/20}
-    in
-        case List.head gamepads of
+
+        axs = case List.head gamepads of
             Nothing -> {x=0, y=0, mx=0, my=0}
             Just gamepad ->
               case gamepad.axes of
@@ -71,6 +71,16 @@ gamepadsToArrows gamepads =
 
                   _ ->
                       {x = 0, y = 0, mx = 0, my = 0 }
+
+        btns = case List.head gamepads of
+            Nothing -> 0
+            Just gamepad ->
+                case gamepad.buttons of
+                    (_::_::_::_::_::_::l::r::_) -> r.value - l.value
+                    _ -> 0
+
+    in
+        { axs | y = btns + axs.y }
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
