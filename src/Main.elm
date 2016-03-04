@@ -6,8 +6,6 @@ module Main (main) where
 @docs main
 -}
 
-import Debug
-
 import Graphics.Element exposing (..)
 import Random
 import Set
@@ -54,26 +52,25 @@ port exitPointerLock =
 -- ... THEN, allow float types for the movement controls
 -- ... THEN, ... use other buttons for acceleration, braking etc.
 
-gamepadsToArrows : List Gamepad.Gamepad -> { x : Int, y : Int }
+gamepadsToArrows : List Gamepad.Gamepad -> { x : Int, y : Int, mx : Int, my : Int }
 gamepadsToArrows gamepads =
   case List.head gamepads of
-    Nothing -> {x=0, y=0}
+    Nothing -> {x=0, y=0, mx=0, my=0}
     Just gamepad ->
-      case List.head gamepad.axes of
-        Nothing -> Debug.crash "No x axis"
-        Just x ->
-          case List.tail gamepad.axes of
-            Nothing -> Debug.crash "No y axis"
-            Just rest ->
-              case List.head rest of
-                Nothing -> Debug.crash "No y axis2"
-                -- I would prefer to keep the floats to be honest
-                Just y -> { x=(round x), y=(-1 * round y) }
+      case gamepad.axes of
+          (x1 :: y1 :: x2 :: y2 :: _) ->
+              { x= round x1, y= (-1 * round y1), mx= round x2, my= round y2 }
+
+          [x1,y1] ->
+              { x =  round x1, y = (-1 * round y1), mx = 0, my = 0 }
+
+          _ ->
+              {x = 0, y = 0, mx = 0, my = 0 }
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
-    let {x,y} = gamepadsToArrows gamepads
-    in  { noInput | x = x, y = y, dt = dt }
+    let {x,y,mx,my} = gamepadsToArrows gamepads
+    in  { noInput | x = x, y = y, mx=mx, my=my, dt = dt }
 
 -- Set up 3D world
 kbMouseInputs : Signal Model.Inputs
