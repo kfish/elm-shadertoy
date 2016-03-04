@@ -57,7 +57,12 @@ port exitPointerLock =
     always True <~ keepIf (any (\x -> x == 27)) [] Keyboard.keysDown
 -}
 
--- I'm sure there is a better way to this staircase from hell
+-- TODO: make a Signal Input based off gamepad controls, emulating both
+-- keyboard arrows and mouse movement.
+-- ... THEN, rename those constructors so they are not "Keyboard" and "Mouse"
+-- ... THEN, allow float types for the movement controls
+-- ... THEN, ... use other buttons for acceleration, braking etc.
+
 gamepadsToArrows : List Gamepad.Gamepad -> { x : Int, y : Int }
 gamepadsToArrows gamepads =
   case List.head gamepads of
@@ -74,14 +79,24 @@ gamepadsToArrows gamepads =
                 -- I would prefer to keep the floats to be honest
                 Just y -> { x=(round x), y=(-1 * round y) }
 
+gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
+gamepadsToInputs gamepads dt = Model.TimeDelta False (gamepadsToArrows gamepads) dt
+
 -- Set up 3D world
-inputs : Signal Model.Inputs
-inputs =
+kbMouseInputs : Signal Model.Inputs
+kbMouseInputs =
   let dt = map (\t -> t/500) (fps 60)
-      gamepadArrows = Signal.map gamepadsToArrows Gamepad.gamepads
-      dirKeys = merge gamepadArrows (merge Keyboard.arrows Keyboard.wasd)
+      dirKeys = merge Keyboard.arrows Keyboard.wasd
   in  merge (sampleOn dt <| map3 Model.TimeDelta Keyboard.space dirKeys dt)
             (map Model.Mouse movement)
+
+gamepadInputs : Signal Model.Inputs
+gamepadInputs =
+  let dt = map (\t -> t/500) (fps 60)
+  in  sampleOn dt <| map2 gamepadsToInputs Gamepad.gamepads dt
+
+inputs : Signal Model.Inputs
+inputs = merge kbMouseInputs gamepadInputs
 
 person : Array2D Float -> Signal Model.Person
 person terrain = foldp (Update.step terrain) Model.defaultPerson inputs
