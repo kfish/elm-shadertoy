@@ -4,10 +4,10 @@ import Math.Vector3 exposing (Vec3, vec3)
 
 type alias Inputs =
     { isJumping: Bool
-    , x: Int
-    , y: Int
-    , mx: Int
-    , my: Int
+    , x: Float
+    , y: Float
+    , mx: Float
+    , my: Float
     , dt: Float
     }
 

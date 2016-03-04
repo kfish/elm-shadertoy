@@ -30,36 +30,35 @@ flatten v =
     let r = toRecord v
     in  normalize (vec3 r.x 0 r.z)
 
-turn : Int -> Int -> Model.Person -> Model.Person
+turn : Float -> Float -> Model.Person -> Model.Person
 turn dx dy person =
-    -- let yo x = toFloat (clamp -30 30 x) / 500
-    let yo x = toFloat x / 500
-        h' = person.horizontalAngle + yo dx
-        v' = person.verticalAngle   - yo dy
+    let
+        h' = person.horizontalAngle + dx
+        v' = person.verticalAngle   - dy
     in
         { person | horizontalAngle = h'
                  -- , verticalAngle = clamp (degrees -90) (degrees 90) v'
                  , verticalAngle = v'
         }
 
-fly : { a | x:Int, y:Int } -> Model.Person -> Model.Person
+fly : { a | x:Float, y:Float } -> Model.Person -> Model.Person
 fly directions person =
     let moveDir = normalize (Model.direction person)
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
 
-        move = V3.scale (8.0 * toFloat directions.y) moveDir
-        strafe = V3.scale (8.0 * toFloat directions.x) strafeDir
+        move = V3.scale (8.0 * directions.y) moveDir
+        strafe = V3.scale (8.0 * directions.x) strafeDir
     in
         { person | velocity = adjustVelocity (move `add` strafe) }
 
-walk : EyeLevel -> { a | x:Int, y:Int } -> Model.Person -> Model.Person
+walk : EyeLevel -> { a | x:Float, y:Float } -> Model.Person -> Model.Person
 walk eyeLevel directions person =
   -- if getY person.pos > eyeLevel person.pos then person else
     let moveDir = normalize (flatten (Model.direction person))
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
 
-        move = V3.scale (8.0 * toFloat directions.y) moveDir
-        strafe = V3.scale (8.0 * toFloat directions.x) strafeDir
+        move = V3.scale (8.0 * directions.y) moveDir
+        strafe = V3.scale (8.0 * directions.x) strafeDir
     in
         { person | velocity = adjustVelocity (move `add` strafe) }
 

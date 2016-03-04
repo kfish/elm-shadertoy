@@ -52,20 +52,25 @@ port exitPointerLock =
 -- ... THEN, allow float types for the movement controls
 -- ... THEN, ... use other buttons for acceleration, braking etc.
 
-gamepadsToArrows : List Gamepad.Gamepad -> { x : Int, y : Int, mx : Int, my : Int }
+gamepadsToArrows : List Gamepad.Gamepad -> { x : Float, y : Float, mx : Float, my : Float }
 gamepadsToArrows gamepads =
-  case List.head gamepads of
-    Nothing -> {x=0, y=0, mx=0, my=0}
-    Just gamepad ->
-      case gamepad.axes of
-          (x1 :: y1 :: x2 :: y2 :: _) ->
-              { x= round x1, y= (-1 * round y1), mx= round x2, my= round y2 }
+    let
+        u l x = if abs x < l then 0.0 else (x - l) / (1.0 - l)
+        use = u 0.2
+        sens {x,y,mx,my} = {x=(use x)/10, y=(use y)/10, mx=(use mx)/20, my=(use my)/20}
+    in
+        case List.head gamepads of
+            Nothing -> {x=0, y=0, mx=0, my=0}
+            Just gamepad ->
+              case gamepad.axes of
+                  (x1 :: y1 :: x2 :: y2 :: _) ->
+                      sens { x= x1, y= (-1.0 * y1), mx= x2, my= (-1.0 * y2) }
 
-          [x1,y1] ->
-              { x =  round x1, y = (-1 * round y1), mx = 0, my = 0 }
+                  [x1,y1] ->
+                      sens { x = x1, y = (-1.0 * y1), mx = 0, my = 0 }
 
-          _ ->
-              {x = 0, y = 0, mx = 0, my = 0 }
+                  _ ->
+                      {x = 0, y = 0, mx = 0, my = 0 }
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
@@ -77,8 +82,9 @@ kbMouseInputs : Signal Model.Inputs
 kbMouseInputs =
   let dt = map (\t -> t/500) (fps 60)
       dirKeys = merge Keyboard.arrows Keyboard.wasd
-  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | x=x, y=y, dt=kdt }) Keyboard.space dirKeys dt)
-            (map (\(mdt, (mx,my)) -> { noInput | mx=mx, my=my, dt=mdt }) (Time.timestamp movement))
+      yo x = toFloat x / 500
+  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | x = toFloat x, y = toFloat y, dt=kdt }) Keyboard.space dirKeys dt)
+            (map (\(mdt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, dt=mdt }) (Time.timestamp movement))
 
 gamepadInputs : Signal Model.Inputs
 gamepadInputs =
