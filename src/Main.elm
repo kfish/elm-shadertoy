@@ -47,15 +47,6 @@ port requestPointerLock =
 port exitPointerLock : Signal ()
 port exitPointerLock =
     map (always ()) (filter (Set.member 27) Set.empty Keyboard.keysDown)
-{-
-port requestPointerLock : Signal Bool
-port requestPointerLock =
-    always True <~ dropWhen (lift2 (&&) Keyboard.shift isLocked) () Mouse.clicks
-
-port exitPointerLock : Signal Bool
-port exitPointerLock =
-    always True <~ keepIf (any (\x -> x == 27)) [] Keyboard.keysDown
--}
 
 -- TODO: make a Signal Input based off gamepad controls, emulating both
 -- keyboard arrows and mouse movement.
@@ -116,13 +107,6 @@ world thingsOnTerrain =
   in 
       Signal.map3 lockMessage wh isLocked
             (Signal.map4 scene entities wh t (person terrain))
-{-
-world : ((Int,Int) -> Time -> Mat4 -> List Renderable) -> Signal Element
-world entities =
-  let t = foldp (+) 0 (fps 60)
-  -- in  map5 Display.scene (constant entities) Window.dimensions t isLocked person
-  in  map5 Display.scene (constant entities) Window.dimensions t (constant True) person
--}
 
 lockMessage : (Int,Int) -> Bool -> Element -> Element
 lockMessage (w,h) isLocked e =
@@ -130,7 +114,6 @@ lockMessage (w,h) isLocked e =
            , container w 140 (midLeftAt (absolute 40) (relative 0.5))
                  (if isLocked then exitMsg else enterMsg)
            ]
-
 
 enterMsg : Element
 enterMsg = message "Click to go full screen and move your head with the mouse."
