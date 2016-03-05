@@ -21,7 +21,7 @@ step terrain inputs person =
 -}
           person |> turn inputs.mx inputs.my
                  |> walk eyeLevel inputs
-                 |> jump eyeLevel inputs.isJumping
+                 -- |> jump eyeLevel inputs.isJumping
                  |> gravity eyeLevel inputs.dt
                  |> physics eyeLevel inputs.dt
 
@@ -41,7 +41,7 @@ turn dx dy person =
                  , verticalAngle = v'
         }
 
-fly : { a | x:Float, y:Float } -> Model.Person -> Model.Person
+fly : { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
 fly directions person =
     let moveDir = normalize (Model.direction person)
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
@@ -49,9 +49,9 @@ fly directions person =
         move = V3.scale (8.0 * directions.y) moveDir
         strafe = V3.scale (8.0 * directions.x) strafeDir
     in
-        { person | velocity = adjustVelocity (move `add` strafe) }
+        { person | velocity = adjustVelocity (move `add` strafe) directions.dt person.velocity }
 
-walk : EyeLevel -> { a | x:Float, y:Float } -> Model.Person -> Model.Person
+walk : EyeLevel -> { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
 walk eyeLevel directions person =
   -- if getY person.pos > eyeLevel person.pos then person else
     let moveDir = normalize (flatten (Model.direction person))
@@ -60,14 +60,15 @@ walk eyeLevel directions person =
         move = V3.scale (8.0 * directions.y) moveDir
         strafe = V3.scale (8.0 * directions.x) strafeDir
     in
-        { person | velocity = adjustVelocity (move `add` strafe) }
+        { person | velocity = adjustVelocity (move `add` strafe) directions.dt person.velocity }
 
-adjustVelocity : Vec3 -> Vec3
-adjustVelocity v =
-    case toTuple v of
-      (0,0,0) -> v
-      _       -> V3.scale 20 (normalize v)
+v3_clamp : Float -> Vec3 -> Vec3
+v3_clamp len v = if V3.length v <= len then v else V3.scale len (V3.normalize v)
 
+adjustVelocity : Vec3 -> Float -> Vec3 -> Vec3
+adjustVelocity dv dt v = v3_clamp 20 <| add (V3.scale dt dv) (V3.scale (1.0-(0.1*dt)) v)
+
+{-
 jump : EyeLevel -> Bool -> Model.Person -> Model.Person
 jump eyeLevel isJumping person =
   -- if not isJumping || getY person.pos > eyeLevel person.pos then person else
@@ -75,6 +76,7 @@ jump eyeLevel isJumping person =
     let v = toRecord person.velocity
     in
         { person | velocity = vec3 v.x (1.0*80) v.z }
+-}
 
 physics : EyeLevel -> Float -> Model.Person -> Model.Person
 physics eyeLevel dt person =
@@ -82,15 +84,18 @@ physics eyeLevel dt person =
         p = toRecord pos
         e = eyeLevel pos
 
-        pos' = if p.y < e
-                    then vec3 p.x e p.z
-                    else pos
+        (pos', dv) = if p.y < e then
+                         let vy = if e - p.y > (7*dt) then
+                             V3.length person.velocity * (e-p.y)*dt*10 else 0
+                         in (vec3 p.x e p.z, vec3 0 vy 0)
+                     else
+                         (pos, vec3 0 0 0)
     in
-        { person | pos = pos' }
+        { person | pos = pos', velocity = person.velocity `add` dv }
 
 gravity : EyeLevel -> Float -> Model.Person -> Model.Person
 gravity eyeLevel dt person =
   if getY person.pos <= eyeLevel person.pos then person else
     let v = toRecord person.velocity
     in
-        { person | velocity = vec3 v.x (v.y - (0.5*80) * dt) v.z }
+        { person | velocity = vec3 v.x (v.y - 9.8 * dt) v.z }

@@ -16,7 +16,8 @@
         "circuithub/elm-list-extra": "3.9.0 <= v < 4.0.0",
         "circuithub/elm-maybe-extra": "1.6.0 <= v < 2.0.0",
         "elm-community/elm-webgl": "1.0.0 <= v < 2.0.0",
-        "elm-community/elm-linear-algebra": "1.0.0 <= v < 2.0.0"
+        "elm-community/elm-linear-algebra": "1.0.0 <= v < 2.0.0",
+        "evancz/automaton": "1.1.0 <= v < 2.0.0"
     },
     "elm-version": "0.15.0 <= v < 0.17.0"
 }

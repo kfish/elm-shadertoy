@@ -6,6 +6,7 @@ module Main (main) where
 @docs main
 -}
 
+import Automaton
 import Graphics.Element exposing (..)
 import Random
 import Set
@@ -87,18 +88,25 @@ gamepadsToInputs gamepads dt =
     let {x,y,mx,my} = gamepadsToArrows gamepads
     in  { noInput | x = x, y = y, mx=mx, my=my, dt = dt }
 
+mouseDeltas : Signal (Time, (Float, Float))
+mouseDeltas =
+    let step (t,(mx,my)) pt = ((Time.inSeconds t - pt, (toFloat mx, toFloat my)), t)
+        a = Automaton.hiddenState 0 step
+    in Automaton.run a (0, (0,0)) (Time.timestamp movement)
+
 -- Set up 3D world
 kbMouseInputs : Signal Model.Inputs
 kbMouseInputs =
-  let dt = map (\t -> t/500) (fps 60)
+  let dt = map Time.inSeconds (fps 60)
       dirKeys = merge Keyboard.arrows Keyboard.wasd
-      yo x = toFloat x / 500
+      yo x = x / 500
   in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | isJumping = s, x = toFloat x, y = toFloat y, dt=kdt }) Keyboard.space dirKeys dt)
-            (map (\(mdt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, dt=mdt }) (Time.timestamp movement))
+            -- (map (\(mt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, mt = Time.inSeconds mt }) (Time.timestamp movement))
+            (map (\(mt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, mt = mt }) mouseDeltas)
 
 gamepadInputs : Signal Model.Inputs
 gamepadInputs =
-  let dt = map (\t -> t/500) (fps 60)
+  let dt = map Time.inSeconds (fps 60)
   in  sampleOn dt <| map2 gamepadsToInputs Gamepad.gamepads dt
 
 inputs : Signal Model.Inputs

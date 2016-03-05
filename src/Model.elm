@@ -6,13 +6,14 @@ type alias Inputs =
     { isJumping: Bool
     , x: Float
     , y: Float
+    , dt: Float
     , mx: Float
     , my: Float
-    , dt: Float
+    , mt: Float
     }
 
 noInput : Inputs
-noInput = { isJumping = False, x=0, y=0, mx=0, my=0, dt=0 }
+noInput = { isJumping = False, x=0, y=0, dt=0, mx=0, my=0, mt=0 }
 
 -- TODO: Make a new model type with both Person and Things
 -- but the Things are passed in and can be added/subtracted
