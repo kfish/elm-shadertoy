@@ -70,10 +70,11 @@ adjustVelocity v =
 
 jump : EyeLevel -> Bool -> Model.Person -> Model.Person
 jump eyeLevel isJumping person =
-  if not isJumping || getY person.pos > eyeLevel person.pos then person else
+  -- if not isJumping || getY person.pos > eyeLevel person.pos then person else
+  if not isJumping then person else
     let v = toRecord person.velocity
     in
-        { person | velocity = vec3 v.x 2 v.z }
+        { person | velocity = vec3 v.x (1.0*80) v.z }
 
 physics : EyeLevel -> Float -> Model.Person -> Model.Person
 physics eyeLevel dt person =
@@ -92,4 +93,4 @@ gravity eyeLevel dt person =
   if getY person.pos <= eyeLevel person.pos then person else
     let v = toRecord person.velocity
     in
-        { person | velocity = vec3 v.x (v.y - (2*80) * dt) v.z }
+        { person | velocity = vec3 v.x (v.y - (0.5*80) * dt) v.z }

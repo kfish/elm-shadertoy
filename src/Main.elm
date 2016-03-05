@@ -93,7 +93,7 @@ kbMouseInputs =
   let dt = map (\t -> t/500) (fps 60)
       dirKeys = merge Keyboard.arrows Keyboard.wasd
       yo x = toFloat x / 500
-  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | x = toFloat x, y = toFloat y, dt=kdt }) Keyboard.space dirKeys dt)
+  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | isJumping = s, x = toFloat x, y = toFloat y, dt=kdt }) Keyboard.space dirKeys dt)
             (map (\(mdt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, dt=mdt }) (Time.timestamp movement))
 
 gamepadInputs : Signal Model.Inputs
