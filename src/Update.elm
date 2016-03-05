@@ -19,7 +19,7 @@ step terrain inputs person =
           person |> fly directions
                  |> physics eyeLevel dt
 -}
-          person |> turn inputs.mx inputs.my
+          person |> turn eyeLevel inputs.mx inputs.my
                  |> walk eyeLevel inputs
                  -- |> jump eyeLevel inputs.isJumping
                  |> gravity eyeLevel inputs.dt
@@ -30,15 +30,16 @@ flatten v =
     let r = toRecord v
     in  normalize (vec3 r.x 0 r.z)
 
-turn : Float -> Float -> Model.Person -> Model.Person
-turn dx dy person =
+turn : EyeLevel -> Float -> Float -> Model.Person -> Model.Person
+turn eyeLevel dx dy person =
     let
-        h' = person.horizontalAngle + dx
+        mx = if getY person.pos > (eyeLevel person.pos) + 5 then 10.0 else 1.0
+        h' = person.horizontalAngle + (dx * mx)
         v' = person.verticalAngle   - dy
     in
         { person | horizontalAngle = h'
-                 -- , verticalAngle = clamp (degrees -90) (degrees 90) v'
-                 , verticalAngle = v'
+                 , verticalAngle = clamp (degrees -90) (degrees 90) v'
+                 -- , verticalAngle = v'
         }
 
 fly : { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
