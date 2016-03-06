@@ -46,7 +46,6 @@ bounds pos =
 
 -- Elevation of terrain at a given coordinate
 -- Linearly interpolated on the mesh triangle
--- TODO: move this to the Terrain module
 elevation : Array2D Float -> Vec3 -> Float
 elevation terrain pos =
     let
