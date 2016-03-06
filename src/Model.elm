@@ -1,6 +1,7 @@
 module Model where
 
 import Math.Vector3 exposing (Vec3, vec3)
+import Math.Vector3 as V3 -- JUST FOR j
 
 type alias Inputs =
     { isJumping: Bool
@@ -30,8 +31,9 @@ type World =
 type alias Person =
     { pos : Vec3
     , velocity : Vec3
-    , horizontalAngle : Float
-    , verticalAngle   : Float
+    , pitch : Float
+    , roll : Float
+    , yaw : Float
     }
 
 eyeLevel : Float
@@ -41,13 +43,21 @@ defaultPerson : Person
 defaultPerson =
     { pos = vec3 0 eyeLevel 0
     , velocity = vec3 0 0 0
-    , horizontalAngle = degrees 90
-    , verticalAngle = 0
+    , yaw = degrees 90
+    , pitch = degrees 0
+    , roll = degrees 0
     }
 
 direction : Person -> Vec3
 direction person =
-    let h = person.horizontalAngle
-        v = person.verticalAngle
+    let h = person.yaw
+        v = person.pitch
     in
         vec3 (cos h) (sin v) (sin h)
+
+cameraUp : Person -> Vec3
+cameraUp person =
+    let
+        r = person.roll
+    in 
+        vec3 (sin r) (cos r) 0

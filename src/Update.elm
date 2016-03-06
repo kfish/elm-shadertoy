@@ -15,15 +15,16 @@ step terrain inputs person =
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
         in
+          person |> flyTurn eyeLevel inputs
+                 |> fly inputs
+                 |> flyPhysics eyeLevel inputs.dt
 {-
-          person |> fly directions
-                 |> physics eyeLevel dt
--}
           person |> turn eyeLevel inputs.mx inputs.my
                  |> walk eyeLevel inputs
                  -- |> jump eyeLevel inputs.isJumping
                  |> gravity eyeLevel inputs.dt
                  |> physics eyeLevel inputs.dt
+-}
 
 flatten : Vec3 -> Vec3
 flatten v =
@@ -34,12 +35,30 @@ turn : EyeLevel -> Float -> Float -> Model.Person -> Model.Person
 turn eyeLevel dx dy person =
     let
         mx = if getY person.pos > (eyeLevel person.pos) + 5 then 10.0 else 1.0
-        h' = person.horizontalAngle + (dx * mx)
-        v' = person.verticalAngle   - dy
+        h' = person.yaw + (dx * mx)
+        v' = person.pitch - dy
     in
-        { person | horizontalAngle = h'
-                 , verticalAngle = clamp (degrees -90) (degrees 90) v'
-                 -- , verticalAngle = v'
+        { person | yaw = h'
+                 , pitch = clamp (degrees -90) (degrees 90) v'
+                 -- , pitch = v'
+        }
+
+flyTurn : EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
+flyTurn eyeLevel inputs person =
+    let
+        r' = if abs inputs.mx < 0.01 && abs inputs.my < 0.01 then
+                 person.roll * (1.0 - (0.1*inputs.dt))
+             else
+                 person.roll - inputs.mx
+
+        thrust = inputs.my
+
+        h' = person.yaw + thrust * sin r'
+        v' = person.pitch - (thrust/2) * cos r'
+    in
+        { person | yaw = h'
+                 , pitch = v'
+                 , roll = r'
         }
 
 fly : { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
@@ -48,9 +67,9 @@ fly directions person =
         strafeDir = transform (makeRotate (degrees -90) j) moveDir
 
         move = V3.scale (8.0 * directions.y) moveDir
-        strafe = V3.scale (8.0 * directions.x) strafeDir
+        strafe = V3.scale (directions.x) strafeDir
     in
-        { person | velocity = adjustVelocity 50 0.01 (move `add` strafe) directions.dt person.velocity }
+        { person | velocity = adjustVelocity 50 0.5 (move `add` strafe) directions.dt person.velocity }
 
 walk : EyeLevel -> { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
 walk eyeLevel directions person =
@@ -82,7 +101,6 @@ v3_clamp len v = if V3.length v <= len then v else V3.scale len (V3.normalize v)
 
 adjustVelocity : Float -> Float -> Vec3 -> Float -> Vec3 -> Vec3
 adjustVelocity maxSpeed friction dv dt v =
-    -- v3_clamp 20 <| add (V3.scale (1.0-(friction*dt)) dv) (V3.scale (1.0-((1.0-friction)*dt)) v)
     v3_clamp maxSpeed <| add (V3.scale dt dv) (V3.scale (1.0-(friction*dt)) v)
 
 {-
@@ -94,6 +112,19 @@ jump eyeLevel isJumping person =
     in
         { person | velocity = vec3 v.x (1.0*80) v.z }
 -}
+
+flyPhysics : EyeLevel -> Float -> Model.Person -> Model.Person
+flyPhysics eyeLevel dt person =
+    let pos = Terrain.bounds <| person.pos `add` V3.scale dt person.velocity
+        p = toRecord pos
+        e = eyeLevel pos
+
+        (pos', dv) = if p.y < e then
+                         (vec3 p.x e p.z, vec3 0 0 0)
+                     else
+                         (pos, vec3 0 0 0)
+    in
+        { person | pos = pos', velocity = person.velocity `add` dv }
 
 physics : EyeLevel -> Float -> Model.Person -> Model.Person
 physics eyeLevel dt person =
