@@ -2,6 +2,8 @@ module Model where
 
 import Math.Vector3 exposing (Vec3, vec3)
 import Math.Vector3 as V3 -- JUST FOR j
+import Math.Matrix4 exposing (makeRotate, transform)
+import Math.Quaternion as Qn
 
 type alias Inputs =
     { isJumping: Bool
@@ -43,21 +45,18 @@ defaultPerson : Person
 defaultPerson =
     { pos = vec3 0 eyeLevel 0
     , velocity = vec3 0 0 0
-    , yaw = degrees 90
+    , yaw = degrees 0
     , pitch = degrees 0
     , roll = degrees 0
     }
 
+orient : Person -> Vec3 -> Vec3
+-- orient person = Qn.vrotate (Qn.fromEuler person.roll person.pitch person.yaw)
+-- orient person = Qn.vrotate (Qn.fromEuler 0 0 person.roll)
+orient person = Qn.vrotate (Qn.fromEuler person.pitch person.yaw person.roll)
+
 direction : Person -> Vec3
-direction person =
-    let h = person.yaw
-        v = person.pitch
-    in
-        vec3 (cos h) (sin v) (sin h)
+direction person = orient person V3.k
 
 cameraUp : Person -> Vec3
-cameraUp person =
-    let
-        r = person.roll
-    in 
-        vec3 (sin r) (cos r) 0
+cameraUp person = orient person V3.j

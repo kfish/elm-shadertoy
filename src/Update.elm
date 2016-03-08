@@ -3,6 +3,7 @@ module Update (step) where
 import Math.Vector3 exposing (..)
 import Math.Vector3 as V3
 import Math.Matrix4 exposing (..)
+import Math.Quaternion as Qn
 
 import Array2D exposing (Array2D)
 import Model
@@ -15,8 +16,8 @@ step terrain inputs person =
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
         in
-          person |> flyTurn eyeLevel inputs
-                 |> fly inputs
+          person |> fly eyeLevel inputs
+                 |> gravity eyeLevel inputs.dt
                  |> flyPhysics eyeLevel inputs.dt
 {-
           person |> turn eyeLevel inputs.mx inputs.my
@@ -43,33 +44,29 @@ turn eyeLevel dx dy person =
                  -- , pitch = v'
         }
 
-flyTurn : EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
-flyTurn eyeLevel inputs person =
+fly : EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
+fly eyeLevel inputs person =
     let
-        r' = if abs inputs.mx < 0.01 && abs inputs.my < 0.01 then
-                 person.roll * (1.0 - (0.1*inputs.dt))
-             else
-                 person.roll - inputs.mx
+        thrust = inputs.y
 
-        thrust = inputs.my
+        yaw'   = person.yaw   - inputs.x  * inputs.dt
+        pitch' = person.pitch + 4 * inputs.my * inputs.dt
+        roll'  = person.roll  + 4 * inputs.mx * inputs.dt
 
-        h' = person.yaw + thrust * sin r'
-        v' = person.pitch - (thrust/2) * cos r'
+        -- orient = Qn.vrotate (Qn.fromEuler roll' pitch' yaw')
+        orient = Qn.vrotate (Qn.fromEuler pitch' yaw' roll')
+        dv = V3.scale (50 * thrust * inputs.dt) <| orient V3.k
+        du = V3.scale (50 * thrust * inputs.dt) <| orient V3.j
+        dv' = dv `add` du
+
+        vel = (V3.scale 0.5 dv') `add` (V3.scale 0.9 person.velocity)
+        
     in
-        { person | yaw = h'
-                 , pitch = v'
-                 , roll = r'
+        { person | yaw = yaw'
+                 , pitch = pitch'
+                 , roll = roll'
+                 , velocity = vel
         }
-
-fly : { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
-fly directions person =
-    let moveDir = normalize (Model.direction person)
-        strafeDir = transform (makeRotate (degrees -90) j) moveDir
-
-        move = V3.scale (8.0 * directions.y) moveDir
-        strafe = V3.scale (directions.x) strafeDir
-    in
-        { person | velocity = adjustVelocity 50 0.5 (move `add` strafe) directions.dt person.velocity }
 
 walk : EyeLevel -> { a | x:Float, y:Float, dt:Float } -> Model.Person -> Model.Person
 walk eyeLevel directions person =
