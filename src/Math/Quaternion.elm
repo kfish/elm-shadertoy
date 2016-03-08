@@ -164,6 +164,21 @@ fromEuler phi tau psi =
         pitch = quaternion (cos (tau/2)) (sin (tau/2)) 0 0
         yaw   = quaternion (cos (psi/2)) 0 (sin (psi/2)) 0
     in yaw `hamilton` pitch `hamilton` roll
+{-
+    let
+        sphi = sin (phi/2)
+        cphi = cos (phi/2)
+        stau = sin (tau/2)
+        ctau = cos (tau/2)
+        spsi = sin (psi/2)
+        cpsi = cos (psi/2)
+
+        s = cphi * ctau * cpsi + sphi * stau * spsi
+        i = sphi * ctau * cpsi - cphi * stau * spsi
+        j = cphi * stau * cpsi + sphi * ctau * spsi
+        k = cphi * ctau * spsi - sphi * stau * cpsi
+    in quaternion s j k i
+-}
         
 {-| Convert to Euler angles representing (roll, pitch, yaw),
 often denoted (phi, tau, psi) -}

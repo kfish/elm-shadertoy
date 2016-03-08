@@ -50,16 +50,16 @@ fly eyeLevel inputs person =
     let
         thrust = inputs.y
 
-        yaw'   = person.yaw   - inputs.x  * inputs.dt
+        yaw'   = person.yaw   - 5 * inputs.x  * inputs.dt
         pitch' = person.pitch + 4 * inputs.my * inputs.dt
-        roll'  = person.roll  + 4 * inputs.mx * inputs.dt
+        roll'  = person.roll  + 6 * inputs.mx * inputs.dt
 
         orient = Qn.vrotate (Qn.fromEuler roll' pitch' yaw')
-        dv = V3.scale (50 * thrust * inputs.dt) <| orient V3.k
-        du = V3.scale (50 * thrust * inputs.dt) <| orient V3.j
+        dv = V3.scale (30 * thrust * inputs.dt) <| orient V3.k
+        du = V3.scale (20 * thrust * inputs.dt) <| orient V3.j
         dv' = dv `add` du
 
-        vel = (V3.scale 0.5 dv') `add` (V3.scale 0.9 person.velocity)
+        vel = (V3.scale 0.8 dv') `add` (V3.scale 0.95 person.velocity)
         
     in
         { person | yaw = yaw'
