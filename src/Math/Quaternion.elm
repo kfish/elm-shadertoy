@@ -159,12 +159,11 @@ vrotate q v = toVec3 <| hamilton q (vmult v (conjugate q))
 often denoted phi, tau, psi -}
 fromEuler : Float -> Float -> Float -> Quaternion
 fromEuler phi tau psi =
-    let roll  = quaternion (cos (phi/2)) (sin (phi/2)) 0 0
-        pitch = quaternion (cos (tau/2)) 0 (sin (tau/2)) 0
-        yaw   = quaternion (cos (psi/2)) 0 0 (sin (psi/2))
-    -- in hamilton (hamilton yaw pitch) roll
-    -- in yaw `hamilton` pitch `hamilton` roll
-    in pitch `hamilton` yaw `hamilton` roll
+    let
+        roll  = quaternion (cos (phi/2)) 0 0 (sin (phi/2))
+        pitch = quaternion (cos (tau/2)) (sin (tau/2)) 0 0
+        yaw   = quaternion (cos (psi/2)) 0 (sin (psi/2)) 0
+    in yaw `hamilton` pitch `hamilton` roll
         
 {-| Convert to Euler angles representing (roll, pitch, yaw),
 often denoted (phi, tau, psi) -}

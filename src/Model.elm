@@ -51,9 +51,7 @@ defaultPerson =
     }
 
 orient : Person -> Vec3 -> Vec3
--- orient person = Qn.vrotate (Qn.fromEuler person.roll person.pitch person.yaw)
--- orient person = Qn.vrotate (Qn.fromEuler 0 0 person.roll)
-orient person = Qn.vrotate (Qn.fromEuler person.pitch person.yaw person.roll)
+orient person = Qn.vrotate (Qn.fromEuler person.roll person.pitch person.yaw)
 
 direction : Person -> Vec3
 direction person = orient person V3.k

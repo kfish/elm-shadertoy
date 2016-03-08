@@ -44,6 +44,7 @@ turn eyeLevel dx dy person =
                  -- , pitch = v'
         }
 
+-- http://www.dtic.mil/dtic/tr/fulltext/u2/a152616.pdf
 fly : EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
 fly eyeLevel inputs person =
     let
@@ -53,8 +54,7 @@ fly eyeLevel inputs person =
         pitch' = person.pitch + 4 * inputs.my * inputs.dt
         roll'  = person.roll  + 4 * inputs.mx * inputs.dt
 
-        -- orient = Qn.vrotate (Qn.fromEuler roll' pitch' yaw')
-        orient = Qn.vrotate (Qn.fromEuler pitch' yaw' roll')
+        orient = Qn.vrotate (Qn.fromEuler roll' pitch' yaw')
         dv = V3.scale (50 * thrust * inputs.dt) <| orient V3.k
         du = V3.scale (50 * thrust * inputs.dt) <| orient V3.j
         dv' = dv `add` du
