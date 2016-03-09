@@ -7,6 +7,7 @@ module Main (main) where
 -}
 
 import Automaton
+import Char exposing (toCode)
 import Graphics.Element exposing (..)
 import Random
 import Set
@@ -28,6 +29,8 @@ import Engine exposing (..)
 import Update
 
 import Demo
+
+import Debug
 
 -- Pointer Lock information
 port movement : Signal (Int,Int)
@@ -58,10 +61,10 @@ gamepadsToArrows gamepads =
     let
         u l x = if abs x < l then 0.0 else (x - l) / (1.0 - l)
         use = u 0.2
-        sens {x,y,mx,my} = {x=(use x)/10, y=(use y)/10, mx=(use mx)/20, my=(use my)/20}
+        sens {x,y,mx,my} = {x=(use x)/10, y=(use y)/10, mx=(use mx)/20, my=(use my)/20 }
 
         axs = case List.head gamepads of
-            Nothing -> {x=0, y=0, mx=0, my=0}
+            Nothing -> {x=0, y=0, mx=0, my=0 }
             Just gamepad ->
               case gamepad.axes of
                   (x1 :: y1 :: x2 :: y2 :: _) ->
@@ -73,20 +76,41 @@ gamepadsToArrows gamepads =
                   _ ->
                       {x = 0, y = 0, mx = 0, my = 0 }
 
-        btns = case List.head gamepads of
+        -- Interpret brake, accelerator as y input
+        btns_y = case List.head gamepads of
             Nothing -> 0
             Just gamepad ->
                 case gamepad.buttons of
-                    (_::_::_::_::_::_::l::r::_) -> r.value - l.value
+                    (a::b::x::y::lt::rt::l::r::_) -> r.value - l.value
                     _ -> 0
 
     in
-        { axs | y = btns + axs.y }
+        { axs | y = btns_y + axs.y }
+
+{- a b x y ltop rtop l r 
+l tiny (back), r tiny (start)
+stick l down, stick r down
+4way: u d l r
+Xbox-logo
+-}
+gamepadsToButtons : List Gamepad.Gamepad -> { bA : Bool, bB : Bool, bX : Bool, bY : Bool }
+gamepadsToButtons gamepads =
+    let none = { bA = False, bB = False, bX = False, bY = False }
+    in
+        case List.head gamepads of
+            Nothing -> none
+            Just gamepad ->
+                case gamepad.buttons of
+                    (a::b::x::y::lt::rt::l::r::_) ->
+                        { bA = a.pressed, bB = b.pressed, bX = x.pressed, bY = y.pressed }
+                   
+                    _ -> none
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
     let {x,y,mx,my} = gamepadsToArrows gamepads
-    in  { noInput | x = x, y = y, mx=mx, my=my, dt = dt }
+        {bA, bB, bX, bY} = gamepadsToButtons gamepads
+    in  { noInput | x = x, y = y, mx=mx, my=my, button_X = bX, dt = dt }
 
 mouseDeltas : Signal (Time, (Float, Float))
 mouseDeltas =
@@ -100,9 +124,13 @@ kbMouseInputs =
   let dt = map Time.inSeconds (fps 60)
       dirKeys = merge Keyboard.arrows Keyboard.wasd
       yo x = x / 500
-  in  merge (sampleOn dt <| map3 (\s {x,y} kdt -> { noInput | isJumping = s, x = toFloat x, y = toFloat y, dt=kdt }) Keyboard.space dirKeys dt)
-            -- (map (\(mt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, mt = Time.inSeconds mt }) (Time.timestamp movement))
-            (map (\(mt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, mt = mt }) mouseDeltas)
+      handleKeys s bx {x,y} kdt = dbg_X
+          { noInput | isJumping = s, button_X = bx, x = toFloat x, y = toFloat y, dt=kdt }
+      dbg_X i = if i.button_X then Debug.log "Button X pressed" i else i
+      x_key = Keyboard.isDown 88
+  in  merge
+          (sampleOn dt <| map4 handleKeys Keyboard.space x_key dirKeys dt)
+          (map (\(mt, (mx,my)) -> { noInput | mx= yo mx, my= yo my, mt = mt }) mouseDeltas)
 
 gamepadInputs : Signal Model.Inputs
 gamepadInputs =
@@ -110,7 +138,7 @@ gamepadInputs =
   in  sampleOn dt <| map2 gamepadsToInputs Gamepad.gamepads dt
 
 inputs : Signal Model.Inputs
-inputs = merge kbMouseInputs gamepadInputs
+inputs = merge (dropRepeats kbMouseInputs) (dropRepeats gamepadInputs)
 
 person : Array2D Float -> Signal Model.Person
 person terrain = foldp (Update.step terrain) Model.defaultPerson inputs

@@ -9,23 +9,45 @@ import Array2D exposing (Array2D)
 import Model
 import Things.Terrain as Terrain
 
+import Debug
+
 type alias EyeLevel = Vec3 -> Float
 
+
 step : Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
-step terrain inputs person =
+step terrain inputs person0 =
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
+            person = selectVehicle inputs person0
         in
-          person |> fly eyeLevel inputs
-                 |> gravity eyeLevel inputs.dt
-                 |> flyPhysics eyeLevel inputs.dt
-{-
-          person |> turn eyeLevel inputs.mx inputs.my
-                 |> walk eyeLevel inputs
-                 -- |> jump eyeLevel inputs.isJumping
-                 |> gravity eyeLevel inputs.dt
-                 |> physics eyeLevel inputs.dt
--}
+            if person.flying then
+                  person |> fly eyeLevel inputs
+                         |> gravity eyeLevel inputs.dt
+                         |> flyPhysics eyeLevel inputs.dt
+            else
+                  person |> turn eyeLevel inputs.mx inputs.my
+                         |> walk eyeLevel inputs
+                         -- |> jump eyeLevel inputs.isJumping
+                         |> gravity eyeLevel inputs.dt
+                         |> physics eyeLevel inputs.dt
+
+selectVehicle : Model.Inputs -> Model.Person -> Model.Person
+selectVehicle inputs person =
+    let
+        switch = inputs.button_X
+        flying = switch `xor` person.flying
+    in
+        if not switch then
+            person
+        else if flying then
+          Debug.log "Switch to flying!" <|
+            { person | flying = True }
+        else
+          Debug.log "Switch to buggy!" <|
+            { person | flying = False
+                     , roll = 0
+                     , pitch = clamp (degrees -90) (degrees 90) (person.pitch/2)
+                     }
 
 flatten : Vec3 -> Vec3
 flatten v =
@@ -36,8 +58,8 @@ turn : EyeLevel -> Float -> Float -> Model.Person -> Model.Person
 turn eyeLevel dx dy person =
     let
         mx = if getY person.pos > (eyeLevel person.pos) + 5 then 10.0 else 1.0
-        h' = person.yaw + (dx * mx)
-        v' = person.pitch - dy
+        h' = person.yaw - (dx * mx)
+        v' = person.pitch + dy
     in
         { person | yaw = h'
                  , pitch = clamp (degrees -90) (degrees 90) v'
