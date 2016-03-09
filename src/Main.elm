@@ -93,24 +93,27 @@ stick l down, stick r down
 4way: u d l r
 Xbox-logo
 -}
-gamepadsToButtons : List Gamepad.Gamepad -> { bA : Bool, bB : Bool, bX : Bool, bY : Bool }
+-- TODO: We really want a collection of signals on each button, each with dropRepeats ...
+gamepadsToButtons : List Gamepad.Gamepad
+    -> { bA : Bool, bB : Bool, bX : Bool, bY : Bool, bBack : Bool, bStart : Bool }
 gamepadsToButtons gamepads =
-    let none = { bA = False, bB = False, bX = False, bY = False }
+    let none = { bA = False, bB = False, bX = False, bY = False, bBack = False, bStart = False }
     in
         case List.head gamepads of
             Nothing -> none
             Just gamepad ->
                 case gamepad.buttons of
-                    (a::b::x::y::lt::rt::l::r::_) ->
-                        { bA = a.pressed, bB = b.pressed, bX = x.pressed, bY = y.pressed }
+                    (a::b::x::y::lt::rt::l::r::back::start::_) ->
+                        { bA = a.pressed, bB = b.pressed, bX = x.pressed, bY = y.pressed,
+                          bBack = back.pressed, bStart = start.pressed }
                    
                     _ -> none
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
     let {x,y,mx,my} = gamepadsToArrows gamepads
-        {bA, bB, bX, bY} = gamepadsToButtons gamepads
-    in  { noInput | x = x, y = y, mx=mx, my=my, button_X = bX, dt = dt }
+        {bA, bB, bX, bY, bBack, bStart} = gamepadsToButtons gamepads
+    in  { noInput | reset = bStart, x = x, y = y, mx=mx, my=my, button_X = bX, dt = dt }
 
 mouseDeltas : Signal (Time, (Float, Float))
 mouseDeltas =

@@ -6,7 +6,8 @@ import Math.Matrix4 exposing (makeRotate, transform)
 import Math.Quaternion as Qn
 
 type alias Inputs =
-    { isJumping: Bool
+    { reset : Bool
+    , isJumping: Bool
     , button_X: Bool
     , x: Float
     , y: Float
@@ -17,7 +18,7 @@ type alias Inputs =
     }
 
 noInput : Inputs
-noInput = { isJumping = False, button_X = False, x=0, y=0, dt=0, mx=0, my=0, mt=0 }
+noInput = { reset = False, isJumping = False, button_X = False, x=0, y=0, dt=0, mx=0, my=0, mt=0 }
 
 -- TODO: Make a new model type with both Person and Things
 -- but the Things are passed in and can be added/subtracted

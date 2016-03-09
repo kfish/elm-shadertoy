@@ -15,7 +15,7 @@ type alias EyeLevel = Vec3 -> Float
 
 
 step : Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
-step terrain inputs person0 =
+step terrain inputs person0 = if inputs.reset then Model.defaultPerson else
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
             person = selectVehicle inputs person0
