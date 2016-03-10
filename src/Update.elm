@@ -46,7 +46,7 @@ selectVehicle inputs person =
           Debug.log "Switch to buggy!" <|
             { person | flying = False
                      , roll = 0
-                     , pitch = clamp (degrees -90) (degrees 90) (person.pitch/2)
+                     , pitch = clamp (degrees -60) (degrees 60) (person.pitch/2)
                      }
 
 flatten : Vec3 -> Vec3
@@ -62,7 +62,7 @@ turn eyeLevel dx dy person =
         v' = person.pitch + dy
     in
         { person | yaw = h'
-                 , pitch = clamp (degrees -90) (degrees 90) v'
+                 , pitch = clamp (degrees -60) (degrees 60) v'
                  -- , pitch = v'
         }
 
