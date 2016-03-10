@@ -154,7 +154,7 @@ physics eyeLevel dt person =
 
         (pos', dv) = if p.y < e then
                          let vy = if ((e < (0.8*80) && vy0 > -30) || vy0 > -9.8) && e - p.y > (10*dt) then
-                             clamp 0 40 (V3.length person.velocity * (e-p.y)*dt*10) else 0
+                             clamp 0 40 (V3.length person.velocity * (e-p.y)*dt*5) else 0
                          in (vec3 p.x e p.z, vec3 0 vy 0)
                      else
                          (pos, vec3 0 0 0)
