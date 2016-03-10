@@ -51,8 +51,9 @@ selectVehicle inputs person =
 clampBuggy : Qn.Quaternion -> Qn.Quaternion
 clampBuggy q =
     let (roll, pitch, yaw) = Qn.toEuler q
+        roll' = clamp (degrees -30) (degrees 30) (roll/2)
         pitch' = clamp (degrees -60) (degrees 60) (pitch/2)
-    in Qn.fromEuler (0, pitch', yaw)
+    in Qn.fromEuler (roll', pitch', yaw)
 
 flatten : Vec3 -> Vec3
 flatten v =
@@ -62,15 +63,20 @@ flatten v =
 turn : EyeLevel -> Float -> Float -> Model.Person -> Model.Person
 turn eyeLevel dx dy person =
     let
-        mx = if getY person.pos > (eyeLevel person.pos) + 5 then 10.0 else 1.0
-       
-        yaw   = -(dx * mx)
-        pitch = dy
-        roll  = 0
+        (roll0, pitch0, yaw0) = Qn.toEuler person.orientQn
+        personY = getY person.pos
+        frontTireY = eyeLevel (person.pos `add` (Qn.vrotate person.orientQn (vec3 0 0 0.1)))
+        rightTireY = eyeLevel (person.pos `add` (Qn.vrotate person.orientQn (vec3 0.1 0 0)))
+        leftTireY = eyeLevel (person.pos `add` (Qn.vrotate person.orientQn (vec3 -0.1 0 0)))
+        tirePitch = atan ((frontTireY - personY)/0.1)
+        tireRoll  = atan (-(rightTireY - leftTireY)/0.1)
+        (yaw, pitch, roll) =
+            if getY person.pos > (eyeLevel person.pos) + 5 then
+                (yaw0-(dx * 5), pitch0*0.9 + dy*0.1, 0)
+            else
+                (yaw0-dx, pitch0*0.95 + (tirePitch+dy)*0.05, roll0*0.95 + (tireRoll*0.05))
 
-        orientQn = clampBuggy
-            <| Qn.hamilton person.orientQn
-            <| Qn.fromEuler (roll, pitch, yaw)
+        orientQn = clampBuggy (Qn.fromEuler (roll, pitch, yaw))
     in
         { person | orientQn = orientQn }
 
