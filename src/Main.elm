@@ -50,11 +50,8 @@ port exitPointerLock : Signal ()
 port exitPointerLock =
     map (always ()) (filter (Set.member 27) Set.empty Keyboard.keysDown)
 
--- TODO: make a Signal Input based off gamepad controls, emulating both
--- keyboard arrows and mouse movement.
--- ... THEN, rename those constructors so they are not "Keyboard" and "Mouse"
--- ... THEN, allow float types for the movement controls
--- ... THEN, ... use other buttons for acceleration, braking etc.
+----------------------------------------------------------------------
+-- Gamepad
 
 gamepadsToArrows : List Gamepad.Gamepad -> { x : Float, y : Float, mx : Float, my : Float }
 gamepadsToArrows gamepads =
@@ -87,27 +84,54 @@ gamepadsToArrows gamepads =
     in
         { axs | y = btns_y + axs.y }
 
+gamepadNothing : Gamepad.Gamepad
+gamepadNothing = { id = "", axes = [], buttons = [], mapping = "" }
+
+-- Only set each button .pressed on a rising edge, ie. when .pressed transitions from False to True.
+-- Preserves button .value
+gamepadEdge : Gamepad.Gamepad -> Gamepad.Gamepad -> Gamepad.Gamepad
+gamepadEdge prev now =
+    let d p n = if (n.pressed && not p.pressed) then n else { n | pressed = False }
+        newlyPressed = List.map2 d prev.buttons now.buttons
+    in { now | buttons = newlyPressed }
+
+gamepadsPressed : Signal (List Gamepad.Gamepad)
+gamepadsPressed =
+    let
+        -- Like List.map2, but ensures that there are always as many
+        -- elements in the result as in the right list
+        map2Now f now prev =
+            case (prev, now) of
+                (_      , []     ) -> []
+                ([]     , _      ) -> now
+                ((p::ps), (n::ns)) -> (f p n :: map2Now f ps ns)
+    in
+        foldp (map2Now gamepadEdge) [] Gamepad.gamepads
+
 {- a b x y ltop rtop l r 
 l tiny (back), r tiny (start)
 stick l down, stick r down
 4way: u d l r
 Xbox-logo
 -}
--- TODO: We really want a collection of signals on each button, each with dropRepeats ...
-gamepadsToButtons : List Gamepad.Gamepad
-    -> { bA : Bool, bB : Bool, bX : Bool, bY : Bool, bBack : Bool, bStart : Bool }
+
+type alias GamepadButtons = { bA : Bool, bB : Bool, bX : Bool, bY : Bool, bBack : Bool, bStart : Bool }
+
+gamepadButtonsNone = { bA = False, bB = False, bX = False, bY = False, bBack = False, bStart = False }
+
+gamepadsToButtons : List Gamepad.Gamepad -> GamepadButtons
 gamepadsToButtons gamepads =
-    let none = { bA = False, bB = False, bX = False, bY = False, bBack = False, bStart = False }
-    in
-        case List.head gamepads of
-            Nothing -> none
-            Just gamepad ->
-                case gamepad.buttons of
-                    (a::b::x::y::lt::rt::l::r::back::start::_) ->
-                        { bA = a.pressed, bB = b.pressed, bX = x.pressed, bY = y.pressed,
-                          bBack = back.pressed, bStart = start.pressed }
-                   
-                    _ -> none
+    case List.head gamepads of
+        Nothing -> gamepadButtonsNone
+        Just gamepad ->
+            case gamepad.buttons of
+                (a::b::x::y::lt::rt::l::r::back::start::_) ->
+                    { bA = a.pressed, bB = b.pressed, bX = x.pressed, bY = y.pressed,
+                      bBack = back.pressed, bStart = start.pressed }
+
+                _ -> gamepadButtonsNone
+
+----------------------------------------------------------------------
 
 gamepadsToInputs : List Gamepad.Gamepad -> Time -> Model.Inputs
 gamepadsToInputs gamepads dt =
@@ -138,7 +162,7 @@ kbMouseInputs =
 gamepadInputs : Signal Model.Inputs
 gamepadInputs =
   let dt = map Time.inSeconds (fps 60)
-  in  sampleOn dt <| map2 gamepadsToInputs Gamepad.gamepads dt
+  in  sampleOn dt <| map2 gamepadsToInputs gamepadsPressed dt
 
 inputs : Signal Model.Inputs
 inputs = merge (dropRepeats kbMouseInputs) (dropRepeats gamepadInputs)
