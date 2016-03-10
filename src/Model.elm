@@ -35,9 +35,10 @@ type World =
 type alias Person =
     { pos : Vec3
     , velocity : Vec3
-    , pitch : Float
-    , roll : Float
-    , yaw : Float
+    , orientQn: Qn.Quaternion
+    -- , pitch : Float
+    -- , roll : Float
+    -- , yaw : Float
     , flying : Bool
     }
 
@@ -48,14 +49,16 @@ defaultPerson : Person
 defaultPerson =
     { pos = vec3 0 eyeLevel 0
     , velocity = vec3 0 0 0
-    , yaw = degrees 0
-    , pitch = degrees 0
-    , roll = degrees 0
+    , orientQn = Qn.unit
+    -- , yaw = degrees 0
+    -- , pitch = degrees 0
+    -- , roll = degrees 0
     , flying = False
     }
 
 orient : Person -> Vec3 -> Vec3
-orient person = Qn.vrotate (Qn.fromEuler person.roll person.pitch person.yaw)
+-- orient person = Qn.vrotate (Qn.fromEuler person.roll person.pitch person.yaw)
+orient person = Qn.vrotate person.orientQn
 
 direction : Person -> Vec3
 direction person = orient person V3.k

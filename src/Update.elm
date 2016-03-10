@@ -45,9 +45,14 @@ selectVehicle inputs person =
         else
           Debug.log "Switch to buggy!" <|
             { person | flying = False
-                     , roll = 0
-                     , pitch = clamp (degrees -60) (degrees 60) (person.pitch/2)
+                     , orientQn = clampBuggy person.orientQn
                      }
+
+clampBuggy : Qn.Quaternion -> Qn.Quaternion
+clampBuggy q =
+    let (roll, pitch, yaw) = Qn.toEuler q
+        pitch' = clamp (degrees -60) (degrees 60) (pitch/2)
+    in Qn.fromEuler (0, pitch', yaw)
 
 flatten : Vec3 -> Vec3
 flatten v =
@@ -58,13 +63,16 @@ turn : EyeLevel -> Float -> Float -> Model.Person -> Model.Person
 turn eyeLevel dx dy person =
     let
         mx = if getY person.pos > (eyeLevel person.pos) + 5 then 10.0 else 1.0
-        h' = person.yaw - (dx * mx)
-        v' = person.pitch + dy
+       
+        yaw   = -(dx * mx)
+        pitch = dy
+        roll  = 0
+
+        orientQn = clampBuggy
+            <| Qn.hamilton person.orientQn
+            <| Qn.fromEuler (roll, pitch, yaw)
     in
-        { person | yaw = h'
-                 , pitch = clamp (degrees -60) (degrees 60) v'
-                 -- , pitch = v'
-        }
+        { person | orientQn = orientQn }
 
 -- http://www.dtic.mil/dtic/tr/fulltext/u2/a152616.pdf
 fly : EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
@@ -72,11 +80,12 @@ fly eyeLevel inputs person =
     let
         thrust = inputs.y
 
-        yaw'   = person.yaw   - 5 * inputs.x  * inputs.dt
-        pitch' = person.pitch + 4 * inputs.my * inputs.dt
-        roll'  = person.roll  + 6 * inputs.mx * inputs.dt
+        yaw   = -5 * inputs.x  * inputs.dt
+        pitch =  4 * inputs.my * inputs.dt
+        roll  =  6 * inputs.mx * inputs.dt
 
-        orient = Qn.vrotate (Qn.fromEuler roll' pitch' yaw')
+        orientQn = Qn.hamilton person.orientQn (Qn.fromEuler (roll, pitch, yaw))
+        orient = Qn.vrotate orientQn
         dv = V3.scale (30 * thrust * inputs.dt) <| orient V3.k
         du = V3.scale (20 * thrust * inputs.dt) <| orient V3.j
         dv' = dv `add` du
@@ -84,9 +93,7 @@ fly eyeLevel inputs person =
         vel = (V3.scale 0.8 dv') `add` (V3.scale 0.95 person.velocity)
         
     in
-        { person | yaw = yaw'
-                 , pitch = pitch'
-                 , roll = roll'
+        { person | orientQn = orientQn
                  , velocity = vel
         }
 

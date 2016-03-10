@@ -12,6 +12,10 @@ type alias Quaternion = Vec4
 quaternion : Float -> Float -> Float -> Float -> Quaternion
 quaternion = V4.vec4
 
+{-| Construction of a unit quaternion -}
+unit : Quaternion
+unit = vec4 1 0 0 0
+
 {-| Construction of a scalar quaternion -}
 fromScalar : Float -> Quaternion
 fromScalar s = vec4 s 0 0 0
@@ -155,10 +159,10 @@ vrotate : Quaternion -> Vec3 -> Vec3
 -- vrotate q v = toVec3 <| hamilton (multv q v) (conjugate q)
 vrotate q v = toVec3 <| hamilton q (vmult v (conjugate q))
 
-{-| Construction from Euler angles representing roll, pitch, yaw.
+{-| Construction from Euler angles representing (roll, pitch, yaw),
 often denoted phi, tau, psi -}
-fromEuler : Float -> Float -> Float -> Quaternion
-fromEuler phi tau psi =
+fromEuler : (Float, Float, Float) -> Quaternion
+fromEuler (phi, tau, psi) =
     let
         roll  = quaternion (cos (phi/2)) 0 0 (sin (phi/2))
         pitch = quaternion (cos (tau/2)) (sin (tau/2)) 0 0
@@ -187,21 +191,21 @@ toEuler q =
     let
         {s,i,j,k} = toRecord q
         q00 = s * s
-        q11 = i * i
-        q22 = j * j
-        q33 = k * k
+        q11 = k * k
+        q22 = i * i
+        q33 = j * j
         r11 = q00 + q11 - q22 - q33
-        r21 = 2 * (i*j + s*k)
-        r31 = 2 * (i*k - s*j)
-        r32 = 2 * (j*k + s*i)
+        r21 = 2 * (k*i + s*j)
+        r31 = 2 * (k*j - s*i)
+        r32 = 2 * (i*j + s*k)
         r33 = q00 - q11 - q22 + q33
 
         tmp = abs r31
     in
         if (tmp > 0.999999) then
             let    
-                r12 = 2 * (i*j - s*k)
-                r13 = 2 * (i*k + s*j)
+                r12 = 2 * (k*i - s*j)
+                r13 = 2 * (k*j + s*i)
                 roll = 0
                 pitch = -(pi/2) * r31/tmp
                 yaw = atan2 -r12 (-r31*r13)
