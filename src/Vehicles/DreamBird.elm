@@ -1,4 +1,4 @@
-module Vehicles.DreamBird (fly, flyPhysics) where
+module Vehicles.DreamBird (move, welcome) where
 
 import Math.Vector3 exposing (..)
 import Math.Vector3 as V3
@@ -14,6 +14,15 @@ import Debug
 
 ----------------------------------------------------------------------
 -- DreamBird
+
+move : Model.EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
+move eyeLevel inputs person = 
+    person |> fly eyeLevel inputs
+           |> flyPhysics eyeLevel inputs.dt
+
+-- | Welcome a new driver to the DreamBird
+welcome : Model.Person -> Model.Person
+welcome person = person
 
 -- http://www.dtic.mil/dtic/tr/fulltext/u2/a152616.pdf
 fly : Model.EyeLevel -> Model.Inputs -> Model.Person -> Model.Person

@@ -1,4 +1,4 @@
-module Vehicles.DreamBuggy (turn, walk, physics, clampBuggy) where
+module Vehicles.DreamBuggy (move, welcome) where
 
 import Math.Vector3 exposing (..)
 import Math.Vector3 as V3
@@ -14,6 +14,17 @@ import Debug
 
 ----------------------------------------------------------------------
 -- DreamBuggy
+
+move : Model.EyeLevel -> Model.Inputs -> Model.Person -> Model.Person
+move eyeLevel inputs person =
+    person |> turn eyeLevel inputs.mx inputs.my
+           |> walk eyeLevel inputs
+           -- |> jump eyeLevel inputs.isJumping
+           |> physics eyeLevel inputs.dt
+
+-- | Welcome a new driver to the DreamBuggy
+welcome : Model.Person -> Model.Person
+welcome person = { person | orientQn = clampBuggy person.orientQn }
 
 clampBuggy : Qn.Quaternion -> Qn.Quaternion
 clampBuggy q =

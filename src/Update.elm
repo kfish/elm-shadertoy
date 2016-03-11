@@ -9,8 +9,8 @@ import Util exposing (v3_clamp)
 import Array2D exposing (Array2D)
 import Model
 import Things.Terrain as Terrain
-import Vehicles.DreamBird exposing (..)
-import Vehicles.DreamBuggy exposing (..)
+import Vehicles.DreamBird as DreamBird
+import Vehicles.DreamBuggy as DreamBuggy
 
 import Debug
 
@@ -18,18 +18,14 @@ step : Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
 step terrain inputs person0 = if inputs.reset then Model.defaultPerson else
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
-            person = selectVehicle inputs person0
+            person = person0
+                         |> gravity eyeLevel inputs.dt
+                         |> selectVehicle inputs
         in
             if person.flying then
-                  person |> fly eyeLevel inputs
-                         |> gravity eyeLevel inputs.dt
-                         |> flyPhysics eyeLevel inputs.dt
+                  person |> DreamBird.move eyeLevel inputs
             else
-                  person |> turn eyeLevel inputs.mx inputs.my
-                         |> walk eyeLevel inputs
-                         -- |> jump eyeLevel inputs.isJumping
-                         |> gravity eyeLevel inputs.dt
-                         |> physics eyeLevel inputs.dt
+                  person |> DreamBuggy.move eyeLevel inputs
 
 selectVehicle : Model.Inputs -> Model.Person -> Model.Person
 selectVehicle inputs person =
@@ -41,12 +37,10 @@ selectVehicle inputs person =
             person
         else if flying then
           Debug.log "Switch to flying!" <|
-            { person | flying = True }
+            DreamBird.welcome { person | flying = True }
         else
           Debug.log "Switch to buggy!" <|
-            { person | flying = False
-                     , orientQn = clampBuggy person.orientQn
-                     }
+            DreamBuggy.welcome { person | flying = False }
 
 gravity : Model.EyeLevel -> Float -> Model.Person -> Model.Person
 gravity eyeLevel dt person =
