@@ -202,5 +202,4 @@ exitMsg = message "Press <escape> to exit full screen."
 message : String -> Element
 message msg =
    leftAligned <| Text.monospace <| Text.fromString <|
-    "This uses stuff that is only available in Chrome and Firefox!\n" ++
-    "\nPress arrows or WASD keys to move, space bar to jump.\n\n" ++ msg
+    "Use gamepad, arrows or WASD keys to move.\n\n" ++ msg
