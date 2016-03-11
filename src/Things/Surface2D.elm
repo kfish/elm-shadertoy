@@ -8,6 +8,7 @@ import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Vector4 exposing (Vec4)
 import Math.Matrix4 exposing (..)
+import Maybe.Extra exposing (isJust)
 import Time exposing (Time, inSeconds)
 import WebGL exposing (..)
 
@@ -24,7 +25,7 @@ toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
 surface2D = surface noiseVertex noiseColorFragment
     << fromListsDefaults
-    << List.map (List.map toNSV)
+    << List.map (List.map (Maybe.map toNSV))
 
 noiseSurface2D = surface noiseVertex noiseColorFragment << fromListsDefaults
 
@@ -44,19 +45,27 @@ fromListsDefaults = surfaceMesh -256 2 2 0 80 -256 2
 
 ----------------------------------------------------------------------
 
-mkStrip : List v -> List v -> List (v, v, v)
-mkStrip vs1 vs2 = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
+mkStrip : List (Maybe v) -> List (Maybe v) -> List (v, v, v)
+mkStrip vs1 vs2 =
+    let
+        mkMaybe triangle = case triangle of
+            (Just v1, Just v2, Just v3) -> Just (v1, v2, v3)
+            _                           -> Nothing
+        strip = map3 (,,) vs1 vs2 (drop 1 vs1) ++ map3 (,,) vs2 (drop 1 vs1) (drop 1 vs2)
+    in
+        List.filterMap mkMaybe strip
 
-matRow : Float -> Float -> Float -> Float -> Float -> Float -> List NoiseSurfaceVertex -> List NoiseVertex
+matRow : Float -> Float -> Float -> Float -> Float -> Float -> List (Maybe NoiseSurfaceVertex) -> List (Maybe NoiseVertex)
 matRow x pos_dx coord_dx y0 ymul z =
   let m posOffset coordOffset ys0 = case ys0 of
-          ((y,rgb,tex,tim,smoo)::ys) -> { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim, smoothing = smoo } :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          ((Just (y,rgb,tex,tim,smoo))::ys) -> (Just { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim, smoothing = smoo }) :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          (Nothing::ys) -> Nothing :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           _       -> []
   in
       m 0.0 0.0
 
 surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> Float
-    -> List (List NoiseSurfaceVertex)
+    -> List (List (Maybe NoiseSurfaceVertex))
     -> Drawable NoiseVertex
 surfaceMesh x dx_pos dx_coord y0 ymul z dz m =
     let

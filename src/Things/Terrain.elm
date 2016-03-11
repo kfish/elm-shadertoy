@@ -1,4 +1,4 @@
-module Things.Terrain (bounds, elevation, paint, mountains) where
+module Things.Terrain (bounds, elevation, paint, mountains, sea) where
 
 import List.Extra exposing (splitAt)
 import Math.Matrix4 as M4
@@ -18,23 +18,32 @@ import Engine exposing (..)
 
 ----------------------------------------------------------------------
 
-mountains : Float -> NoiseSurfaceVertex
+mountains : Float -> Maybe NoiseSurfaceVertex
 mountains h =
   let green = hslToVec3
           (degrees (70 + toFloat (round ((h+0.34)*500) % 70)))
           (0.3 + h/4)
           (0.2 + (1-h)/3)
-      blue = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
       sand = hslToVec3 (degrees 50) 0.8 ((h+0.1)*4)
-      sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
+      seafloor = hslToVec3 (degrees 50) 0.3 ((h+0.1)*4)
       snow = hslToVec3 (degrees 178) 0.8 h
       alpha1 v0 = let v = V3.toRecord v0 in V4.fromTuple (v.x, v.y, v.z, 1.0)
   in
-      if h > 0.8 then (h, alpha1 snow, 0.8, 0.0, 0.3)
-      else if h < 0.0 then (0.1, alpha1 sea, 1.0, 0.7, 0.5)
-      else if h < 0.1 then (0.1, alpha1 blue, 1.0, 0.7, 0.5)
-      else if h < 0.15 then (h, alpha1 sand, 80.0, 0.0, 0.7)
-      else (h, alpha1 green, 0.8, 0.001, 0.3)
+      if h > 0.8 then Just (h, alpha1 snow, 0.8, 0.0, 0.3)
+      else if h < 0.0 then Just (h, alpha1 seafloor, 20.0, 0.0, 0.7)
+      else if h < 0.15 then Just (h, alpha1 sand, 80.0, 0.0, 0.7)
+      else Just (h, alpha1 green, 0.8, 0.001, 0.3)
+
+sea : Float -> Maybe NoiseSurfaceVertex
+sea h =
+  let
+      sea = hslToVec3 (degrees 190) 0.8 ((abs (h/10) + 0.1)*3)
+      blue = hslToVec3 (degrees 196) 0.8 ((h+0.1)*4)
+      alpha1 v0 = let v = V3.toRecord v0 in V4.fromTuple (v.x, v.y, v.z, 1.0)
+  in
+      if h < 0.0 then Just (0.1, alpha1 sea, 1.0, 0.7, 0.5)
+      else if h < 0.2 then Just (0.1, alpha1 blue, 1.0, 0.7, 0.5)
+      else Nothing
 
 ----------------------------------------------------------------------
 
@@ -88,7 +97,7 @@ approxElevation terrain pos =
             
 ----------------------------------------------------------------------
 
-paint : (Float -> NoiseSurfaceVertex) -> Array2D Float -> List Thing
+paint : (Float -> Maybe NoiseSurfaceVertex) -> Array2D Float -> List Thing
 paint how terrain =
     let paintedTerrain = Array2D.map how terrain
     in visibleTerrain terrain (terrainGrid paintedTerrain)
@@ -122,14 +131,15 @@ nearby terrain pos sees =
 
 terrainGrid = placeTerrain << tileTerrain 8
 
-tileTerrain : Int -> Array2D NoiseSurfaceVertex
-    -> List (List ((List (List NoiseSurfaceVertex), (Int, Int))))
+tileTerrain : Int -> Array2D (Maybe NoiseSurfaceVertex)
+    -> List (List ((List (List (Maybe NoiseSurfaceVertex)), (Int, Int))))
 tileTerrain smallSide arr0 = case arr0 of
   Array2D.Array2D bigSide _ ->
     let coords = subSquares smallSide bigSide
     in List.map (List.map (mkTile smallSide arr0)) coords
 
-mkTile : Int -> Array2D NoiseSurfaceVertex -> (Int, Int) -> (List (List NoiseSurfaceVertex), (Int, Int))
+mkTile : Int -> Array2D (Maybe NoiseSurfaceVertex) -> (Int, Int)
+    -> (List (List (Maybe NoiseSurfaceVertex)), (Int, Int))
 mkTile smallSide arr0 (x0, y0) = case arr0 of
   Array2D.Array2D bigSide arr ->
     let extent x = min (x+smallSide+1) (bigSide - 1)

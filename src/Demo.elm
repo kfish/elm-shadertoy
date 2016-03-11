@@ -93,6 +93,7 @@ demoThings terrain0 =
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
         ground = Signal.constant <| Terrain.paint Terrain.mountains terrain0
+        water = Signal.constant <| Terrain.paint Terrain.sea terrain0
 
         individuals : Signal (List Thing)
         individuals = combine [
@@ -106,4 +107,4 @@ demoThings terrain0 =
             place  10 1.5 -10 <~ (extractThing <~ fogMountainsCube)
             ]
     in
-        gather [ground, individuals, boids, balls]
+        gather [ground, water, individuals, boids, balls]
