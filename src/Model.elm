@@ -5,6 +5,8 @@ import Math.Vector3 as V3 -- JUST FOR j
 import Math.Matrix4 exposing (makeRotate, transform)
 import Math.Quaternion as Qn
 
+type alias EyeLevel = Vec3 -> Float
+
 type alias Inputs =
     { reset : Bool
     , isJumping: Bool
