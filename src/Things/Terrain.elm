@@ -97,10 +97,10 @@ approxElevation terrain pos =
             
 ----------------------------------------------------------------------
 
-paint : (Float -> Maybe NoiseSurfaceVertex) -> Array2D Float -> List Thing
-paint how terrain =
+paint : (Float -> Maybe NoiseSurfaceVertex) -> Float -> Array2D Float -> List Thing
+paint how ripple terrain =
     let paintedTerrain = Array2D.map how terrain
-    in visibleTerrain terrain (terrainGrid paintedTerrain)
+    in visibleTerrain terrain (terrainGrid ripple paintedTerrain)
 
 visibleTerrain : Array2D Float -> Array2D Thing -> List Thing
 visibleTerrain terrain arr =
@@ -129,7 +129,7 @@ nearby terrain pos sees =
     in
         List.map (\(x,y) -> getXZ (ix0+x) (iz0+y)) ir
 
-terrainGrid = placeTerrain << tileTerrain 8
+terrainGrid ripple = placeTerrain ripple << tileTerrain 8
 
 tileTerrain : Int -> Array2D (Maybe NoiseSurfaceVertex)
     -> List (List ((List (List (Maybe NoiseSurfaceVertex)), (Int, Int))))
@@ -149,9 +149,9 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
     in (out, (x0, y0))
 
 -- placeTerrain : List (List ((List (List NoiseSurfaceVertex)), (Int, Int))) -> Array2D Thing
-placeTerrain terrainsCoords =
+placeTerrain ripple terrainsCoords =
     let
-        terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (noiseSurface2D t, xy))) terrainsCoords
+        terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (noiseSurface2D ripple t, xy))) terrainsCoords
         terrainz = Array2D.fromLists terrainSurfacesCoords
     in
         Array2D.map (\(s,(x,z)) -> extractThing { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz

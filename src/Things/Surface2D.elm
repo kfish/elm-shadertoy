@@ -23,23 +23,23 @@ type alias NoiseSurfaceVertex = (Float, Vec4, Float, Float, Float)
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
-surface2D = surface noiseVertex noiseColorFragment
+surface2D = surface noiseVertex noiseColorFragment 0.0
     << fromListsDefaults
     << List.map (List.map (Maybe.map toNSV))
 
-noiseSurface2D = surface noiseVertex noiseColorFragment << fromListsDefaults
+noiseSurface2D ripple = surface noiseVertex noiseColorFragment ripple << fromListsDefaults
 
-surface vertexShader fragmentShader mesh =
-    let see = seeSurface vertexShader fragmentShader mesh
+surface vertexShader fragmentShader ripple mesh =
+    let see = seeSurface vertexShader fragmentShader ripple mesh
     in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
 
-seeSurface vertexShader fragmentShader mesh p =
+seeSurface vertexShader fragmentShader ripple mesh p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = inSeconds p.globalTime
     in
         [render vertexShader fragmentShader mesh
-            { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
+            { iResolution=resolution, iGlobalTime=s, iGlobalTimeV=s, view=p.viewMatrix, iRipple=ripple }]
 
 fromListsDefaults = surfaceMesh -256 2 2 0 80 -256 2
 
