@@ -151,7 +151,7 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
 -- placeTerrain : List (List ((List (List NoiseSurfaceVertex)), (Int, Int))) -> Array2D Thing
 placeTerrain ripple terrainsCoords =
     let
-        terrainSurfacesCoords = List.map (List.map (\(t,xy) -> (noiseSurface2D ripple t, xy))) terrainsCoords
+        terrainSurfacesCoords = List.map (List.map (\(t,(x,z)) -> (noiseSurface2D ripple (toFloat x*2, toFloat z*2) t, (x,z)))) terrainsCoords
         terrainz = Array2D.fromLists terrainSurfacesCoords
     in
         Array2D.map (\(s,(x,z)) -> extractThing { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz

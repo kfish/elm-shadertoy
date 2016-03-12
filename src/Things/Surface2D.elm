@@ -18,16 +18,17 @@ import Shaders.NoiseVertex exposing (..)
 import Model
 
 type alias SurfaceVertex = (Float, Vec3)
+
+-- (height, color, textureScale, timeScale, smoothing)
 type alias NoiseSurfaceVertex = (Float, Vec4, Float, Float, Float)
-{- default texture scale: 8.0; default timeScale: 0.7, default smoothing = 0.5 -}
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
-surface2D = surface noiseVertex noiseColorFragment 0.0
-    << fromListsDefaults
+surface2D (x,z) = surface noiseVertex noiseColorFragment 0.0
+    << fromListsDefaults (x,z)
     << List.map (List.map (Maybe.map toNSV))
 
-noiseSurface2D ripple = surface noiseVertex noiseColorFragment ripple << fromListsDefaults
+noiseSurface2D ripple (x,z) = surface noiseVertex noiseColorFragment ripple << fromListsDefaults (x,z)
 
 surface vertexShader fragmentShader ripple mesh =
     let see = seeSurface vertexShader fragmentShader ripple mesh
@@ -41,7 +42,7 @@ seeSurface vertexShader fragmentShader ripple mesh p =
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, iGlobalTimeV=s, view=p.viewMatrix, iRipple=ripple }]
 
-fromListsDefaults = surfaceMesh -256 2 2 0 80 -256 2
+fromListsDefaults xz = surfaceMesh xz -256 2 2 0 80 -256 2
 
 ----------------------------------------------------------------------
 
@@ -55,21 +56,21 @@ mkStrip vs1 vs2 =
     in
         List.filterMap mkMaybe strip
 
-matRow : Float -> Float -> Float -> Float -> Float -> Float -> List (Maybe NoiseSurfaceVertex) -> List (Maybe NoiseVertex)
-matRow x pos_dx coord_dx y0 ymul z =
+matRow : (Float,Float) -> Float -> Float -> Float -> Float -> Float -> Float -> List (Maybe NoiseSurfaceVertex) -> List (Maybe NoiseVertex)
+matRow (rx,rz) x pos_dx coord_dx y0 ymul z =
   let m posOffset coordOffset ys0 = case ys0 of
-          ((Just (y,rgb,tex,tim,smoo))::ys) -> (Just { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset z 0, textureScale = tex, timeScale = tim, smoothing = smoo }) :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
+          ((Just (y,rgb,tex,tim,smoo))::ys) -> (Just { pos = vec3 (x+posOffset) (y0+y*ymul) z, color = rgb, coord = vec3 coordOffset (rz+z) 0, textureScale = tex, timeScale = tim, smoothing = smoo }) :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           (Nothing::ys) -> Nothing :: (m (posOffset + pos_dx) (coordOffset + coord_dx) ys)
           _       -> []
   in
-      m 0.0 0.0
+      m 0.0 rx
 
-surfaceMesh : Float -> Float -> Float -> Float -> Float -> Float -> Float
+surfaceMesh : (Float,Float) -> Float -> Float -> Float -> Float -> Float -> Float -> Float
     -> List (List (Maybe NoiseSurfaceVertex))
     -> Drawable NoiseVertex
-surfaceMesh x dx_pos dx_coord y0 ymul z dz m =
+surfaceMesh (rx,rz) x dx_pos dx_coord y0 ymul z dz m =
     let
         zs = indexedMap (\ix _ -> z + dz * toFloat ix) m
-        rows = List.map2 (matRow x dx_pos dx_coord y0 ymul) zs m
+        rows = List.map2 (matRow (rx,rz) x dx_pos dx_coord y0 ymul) zs m
     in
         Triangle <| List.concat <| List.map2 mkStrip rows (drop 1 rows)

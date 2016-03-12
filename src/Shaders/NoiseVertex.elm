@@ -26,7 +26,7 @@ varying float iTextureScale;
 varying float iTimeScale;
 varying float iSmoothing;
 void main () {
-  float y = pos.y + iRipple*sin(pos.x*pos.z + iGlobalTimeV);
+  float y = pos.y + iRipple*sin(coord.x*coord.y + iGlobalTimeV);
   vec3 newPos = vec3(pos.x, y, pos.z);
   gl_Position = view * vec4(newPos, 1.0);
   elm_FragColor = color;
