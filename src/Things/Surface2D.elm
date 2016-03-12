@@ -1,4 +1,8 @@
-module Things.Surface2D (SurfaceVertex, NoiseSurfaceVertex, surface2D, noiseSurface2D) where
+module Things.Surface2D
+    ( SurfaceVertex, surface2D
+    , NoiseSurfaceVertex, noiseSurface2D
+    , Placement, defaultPlacement
+    ) where
 
 import Array
 import Array2D exposing (Array2D)
@@ -24,6 +28,7 @@ type alias Placement =
     , yMult   : Float
     , zOffset : Float
     , zDelta  : Float
+    , tileSize : Int -- Length of side of a square tile
     }
 
 type alias SurfaceVertex = (Float, Vec3)
@@ -39,16 +44,17 @@ defaultPlacement =
     , yMult   = 80
     , zOffset = -256
     , zDelta  = 2
+    , tileSize = 8
     }
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
-surface2D xz = surface noiseVertex noiseColorFragment 0.0
-    << surfaceMesh xz defaultPlacement
+surface2D placement xz = surface noiseVertex noiseColorFragment 0.0
+    << surfaceMesh xz placement
     << List.map (List.map (Maybe.map toNSV))
 
-noiseSurface2D ripple xz = surface noiseVertex noiseColorFragment ripple
-    << surfaceMesh xz defaultPlacement
+noiseSurface2D ripple placement xz = surface noiseVertex noiseColorFragment ripple
+    << surfaceMesh xz placement
 
 surface vertexShader fragmentShader ripple mesh =
     let see = seeSurface vertexShader fragmentShader ripple mesh

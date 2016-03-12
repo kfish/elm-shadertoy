@@ -97,30 +97,30 @@ approxElevation terrain pos =
             
 ----------------------------------------------------------------------
 
-paint : (Float -> Maybe NoiseSurfaceVertex) -> Float -> Array2D Float -> List Thing
-paint how ripple terrain =
+paint : (Float -> Maybe NoiseSurfaceVertex) -> Float -> Placement -> Array2D Float -> List Thing
+paint how ripple placement terrain =
     let paintedTerrain = Array2D.map how terrain
-    in visibleTerrain terrain (terrainGrid ripple paintedTerrain)
+    in visibleTerrain placement terrain (terrainGrid ripple placement paintedTerrain)
 
-visibleTerrain : Array2D Float -> Array2D Thing -> List Thing
-visibleTerrain terrain arr =
+visibleTerrain : Placement -> Array2D Float -> Array2D Thing -> List Thing
+visibleTerrain placement terrain arr =
     let
         sees = Array2D.map (\(Thing pos _ see) -> (tview (M4.translate pos) see)) arr
     in
         List.map extractThing
-            [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain terrain sees }]
+            [{ pos = vec3 0 0 0, orientation = vec3 1 0 1, see = seeTerrain placement terrain sees }]
 
-seeTerrain : Array2D Float -> Array2D See -> See
-seeTerrain terrain sees p =
+seeTerrain : Placement -> Array2D Float -> Array2D See -> See
+seeTerrain placement terrain sees p =
        List.concat
     <| List.map (\see -> see p)
-    <| nearby terrain p.cameraPos sees
+    <| nearby placement terrain p.cameraPos sees
 
-nearby : Array2D Float -> Vec3 -> Array2D See -> List See
-nearby terrain pos sees =
+nearby : Placement -> Array2D Float -> Vec3 -> Array2D See -> List See
+nearby placement terrain pos sees =
     let
-        ix0 = floor ((getX pos + 256) / (2*8))
-        iz0 = floor ((getZ pos + 256) / (2*8))
+        ix0 = floor ((getX pos - placement.xOffset) / (placement.xDelta * toFloat placement.tileSize))
+        iz0 = floor ((getZ pos - placement.zOffset) / (placement.zDelta * toFloat placement.tileSize))
         getXZ x z = Array2D.getXY z x (\_ -> []) sees
 
         -- The visible radius of tiles depends on the height of the camera
@@ -129,7 +129,7 @@ nearby terrain pos sees =
     in
         List.map (\(x,y) -> getXZ (ix0+x) (iz0+y)) ir
 
-terrainGrid ripple = placeTerrain ripple << tileTerrain 8
+terrainGrid ripple placement = placeTerrain ripple placement << tileTerrain placement.tileSize
 
 tileTerrain : Int -> Array2D (Maybe NoiseSurfaceVertex)
     -> List (List ((List (List (Maybe NoiseSurfaceVertex)), (Int, Int))))
@@ -149,12 +149,9 @@ mkTile smallSide arr0 (x0, y0) = case arr0 of
     in (out, (x0, y0))
 
 -- placeTerrain : List (List ((List (List NoiseSurfaceVertex)), (Int, Int))) -> Array2D Thing
-placeTerrain ripple terrainsCoords =
+placeTerrain ripple placement terrainsCoords =
     let
-        terrainSurfacesCoords = List.map (List.map (\(t,(x,z)) -> (noiseSurface2D ripple (toFloat x*2, toFloat z*2) t, (x,z)))) terrainsCoords
+        terrainSurfacesCoords = List.map (List.map (\(t,(x,z)) -> (noiseSurface2D ripple placement (toFloat x*placement.xDelta, toFloat z*placement.zDelta) t, (x,z)))) terrainsCoords
         terrainz = Array2D.fromLists terrainSurfacesCoords
     in
-        Array2D.map (\(s,(x,z)) -> extractThing { s | pos = vec3 (toFloat x*2) 0 (toFloat z*2)}) terrainz
-
--- The x*2, z*2 numbers above must match the arguments to surfaceMesh. Put these
--- into a record and pass it to both functions, and also to visibleTerrain
+        Array2D.map (\(s,(x,z)) -> extractThing { s | pos = vec3 (toFloat x*placement.xDelta) 0 (toFloat z*placement.zDelta)}) terrainz
