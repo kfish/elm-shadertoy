@@ -57,19 +57,37 @@ port exitPointerLock =
 gamepadsToArrows : List Gamepad.Gamepad -> { x : Float, y : Float, mx : Float, my : Float }
 gamepadsToArrows gamepads =
     let
-        u l x = if abs x < l then 0.0 else (x - l) / (1.0 - l)
-        use = u 0.2
-        sens {x,y,mx,my} = {x=(use x)/10, y=(use y)/10, mx=(use mx)/20, my=(use my)/20 }
+        sgn x = if x < 0 then -1 else 1
+        -- Apply a deadzone of size l around an axis centered at 0
+        u l x = if abs x < l then 0.0 else sgn x * (abs x - l) / (1.0 - l)
+        deadzone = u 0.2
+
+        -- Map a trigger to a standard range [0..1], applying a deadzone
+        dc l x = let xm = (x+1.0)/2.0 in u l xm
+        toTrigger = dc 0.2
 
         axs = case List.head gamepads of
             Nothing -> {x=0, y=0, mx=0, my=0 }
             Just gamepad ->
               case gamepad.axes of
-                  (x1 :: y1 :: x2 :: y2 :: _) ->
-                      sens { x= x1, y= (-1.0 * y1), mx= x2, my= (-1.0 * y2) }
+                  -- Performance Designed Products Rock Candy Gamepad for Xbox 360 (Vendor: 0e6f Product: 011f)
+                  [x1, y1, b1, x2, y2, b2, x3, y3] ->
+                      { x = deadzone x1 / 10
+                      , y = deadzone (-1.0 * y1) / 10 - toTrigger b1 + toTrigger b2
+                      , mx = deadzone x2 /20
+                      , my = deadzone (-1.0 * y2) / 20
+                      }
+
+                  -- ©Microsoft Corporation Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)
+                  [x1, y1, x2, y2] ->
+                      { x = deadzone x1 / 10
+                      , y = deadzone (-1.0 * y1) / 10
+                      , mx= deadzone x2 / 20
+                      , my= deadzone (-1.0 * y2) / 20
+                      }
 
                   [x1,y1] ->
-                      sens { x = x1, y = (-1.0 * y1), mx = 0, my = 0 }
+                      { x = x1/10, y = (-1.0 * y1)/10, mx = 0, my = 0 }
 
                   _ ->
                       {x = 0, y = 0, mx = 0, my = 0 }
@@ -79,7 +97,12 @@ gamepadsToArrows gamepads =
             Nothing -> 0
             Just gamepad ->
                 case gamepad.buttons of
-                    (a::b::x::y::lt::rt::l::r::_) -> r.value - l.value
+                    -- ©Microsoft Corporation Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)
+                    [a, b, x, y, lt, rt, l, r, back, start, lstick, rstick, padU, padD, padL, padR, logo] -> r.value - l.value
+
+                    -- Performance Designed Products Rock Candy Gamepad for Xbox 360 (Vendor: 0e6f Product: 011f)
+                    [a, b, x, y, lt, rt, back, start, logo, lstick, rstick] -> 0
+
                     _ -> 0
 
     in
