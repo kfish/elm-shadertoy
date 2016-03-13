@@ -27,6 +27,7 @@ import Math.Procedural exposing (..)
 import Model exposing (noInput)
 import Engine exposing (..)
 import Update
+import Things.Surface2D exposing (Placement, defaultPlacement)
 
 import Demo
 
@@ -167,8 +168,8 @@ gamepadInputs =
 inputs : Signal Model.Inputs
 inputs = merge (dropRepeats kbMouseInputs) (dropRepeats gamepadInputs)
 
-person : Array2D Float -> Signal Model.Person
-person terrain = foldp (Update.step terrain) Model.defaultPerson inputs
+person : Placement -> Array2D Float -> Signal Model.Person
+person placement terrain = foldp (Update.step placement terrain) Model.defaultPerson inputs
 
 {-| The main function -}
 main : Signal Element
@@ -179,12 +180,14 @@ world thingsOnTerrain =
   let t = foldp (+) 0 (fps 30)
       wh = Window.dimensions
 
+      placement = defaultPlacement
+
       seed0 = Random.initialSeed 7777
-      (terrain, seed1) = Random.generate (randTerrain2D 1025) seed0
+      (terrain, seed1) = Random.generate (randTerrain2D (placement.bigSide+1)) seed0
       entities = thingsOnTerrain terrain
   in 
       Signal.map3 lockMessage wh isLocked
-            (Signal.map4 scene entities wh t (person terrain))
+            (Signal.map4 scene entities wh t (person placement terrain))
 
 lockMessage : (Int,Int) -> Bool -> Element -> Element
 lockMessage (w,h) isLocked e =

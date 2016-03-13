@@ -8,24 +8,29 @@ import Util exposing (v3_clamp)
 
 import Array2D exposing (Array2D)
 import Model
+import Things.Surface2D exposing (Placement)
 import Things.Terrain as Terrain
 import Vehicles.DreamBird as DreamBird
 import Vehicles.DreamBuggy as DreamBuggy
 
 import Debug
 
-step : Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
-step terrain inputs person0 = if inputs.reset then Model.defaultPerson else
+step : Placement -> Array2D Float -> Model.Inputs -> Model.Person -> Model.Person
+step placement terrain inputs person0 = if inputs.reset then Model.defaultPerson else
         let 
             eyeLevel pos = Model.eyeLevel + Terrain.elevation terrain pos
-            person = person0
-                         |> gravity eyeLevel inputs.dt
-                         |> selectVehicle inputs
+            move person =
+                if person.flying then
+                      DreamBird.move eyeLevel inputs person
+                else
+                      DreamBuggy.move eyeLevel inputs person
+            bounds person = { person | pos = Terrain.bounds placement person.pos }
         in
-            if person.flying then
-                  person |> DreamBird.move eyeLevel inputs
-            else
-                  person |> DreamBuggy.move eyeLevel inputs
+            person0
+                |> gravity eyeLevel inputs.dt
+                |> selectVehicle inputs
+                |> move
+                |> bounds
 
 selectVehicle : Model.Inputs -> Model.Person -> Model.Person
 selectVehicle inputs person =

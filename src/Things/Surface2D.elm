@@ -29,6 +29,7 @@ type alias Placement =
     , zOffset : Float
     , zDelta  : Float
     , tileSize : Int -- Length of side of a square tile
+    , bigSide : Int
     }
 
 type alias SurfaceVertex = (Float, Vec3)
@@ -45,6 +46,7 @@ defaultPlacement =
     , zOffset = -256
     , zDelta  = 2
     , tileSize = 8
+    , bigSide = 1024
     }
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)

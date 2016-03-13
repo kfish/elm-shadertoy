@@ -47,11 +47,15 @@ sea h =
 
 ----------------------------------------------------------------------
 
-bounds : Vec3 -> Vec3
-bounds pos =
+bounds : Placement -> Vec3 -> Vec3
+bounds placement pos =
     let bound x low high = if (x < low) then low else (if x > high then high else x)
         (x,y,z) = V3.toTuple pos
-    in vec3 (bound x -246 1782) (bound y 0 1000) (bound z -246 1782)
+    -- in vec3 (bound x -246 1782) (bound y 0 1000) (bound z -246 1782)
+    in vec3
+       (bound x (placement.xOffset + 10) (placement.xOffset + toFloat placement.bigSide * placement.xDelta - 10))
+       (bound y 0 1000)
+       (bound z (placement.zOffset + 10) (placement.zOffset + toFloat placement.bigSide * placement.zDelta - 10))
 
 -- Elevation of terrain at a given coordinate
 -- Linearly interpolated on the mesh triangle

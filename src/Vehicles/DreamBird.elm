@@ -8,7 +8,6 @@ import Util exposing (v3_clamp)
 
 import Array2D exposing (Array2D)
 import Model
-import Things.Terrain as Terrain
 
 import Debug
 
@@ -49,7 +48,7 @@ fly eyeLevel inputs person =
 
 flyPhysics : Model.EyeLevel -> Float -> Model.Person -> Model.Person
 flyPhysics eyeLevel dt person =
-    let pos = Terrain.bounds <| person.pos `add` V3.scale dt person.velocity
+    let pos = person.pos `add` V3.scale dt person.velocity
         p = toRecord pos
         e = eyeLevel pos
 
