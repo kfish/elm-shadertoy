@@ -168,7 +168,7 @@ persistentGamepads =
                        else extract (g::acc) i gs
 
         reorder is0 gs0 = case is0 of
-            []        -> List.map Just gs0
+            []        -> List.map Just (List.sortBy getId gs0)
             (i::is) -> let (gm,gs) = extract [] i gs0 in gm :: reorder is gs
 
         getId g = g.id
