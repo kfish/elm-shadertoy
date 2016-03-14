@@ -9,6 +9,7 @@ module Main (main) where
 import Automaton
 import Char exposing (toCode)
 import Graphics.Element exposing (..)
+import Maybe.Extra exposing (mapDefault)
 import Random
 import Set
 import Signal exposing (dropRepeats, sampleOn, merge)
@@ -158,6 +159,31 @@ toStandardGamepad gamepad =
 standardGamepads : Signal (List Gamepad.Gamepad)
 standardGamepads = Signal.map (List.map toStandardGamepad) Gamepad.gamepads
 
+persistentGamepads : Signal (List (Maybe Gamepad.Gamepad))
+persistentGamepads =
+    let
+        extract acc i gs0 = case gs0 of
+            []      -> (Nothing, List.reverse acc ++ gs0)
+            (g::gs) -> if g.id == i then (Just g, List.reverse acc ++ gs)
+                       else extract (g::acc) i gs
+
+        reorder is0 gs0 = case is0 of
+            []        -> List.map Just gs0
+            (i::is) -> let (gm,gs) = extract [] i gs0 in gm :: reorder is gs
+
+        getId g = g.id
+        catMaybes = List.filterMap Basics.identity
+
+        remap : List String -> List (Maybe Gamepad.Gamepad) -> List String
+        remap ids0 gs0 = case (ids0, gs0) of
+            ([], _)            -> catMaybes (List.map (Maybe.map getId) gs0)
+            (is, [])           -> is
+            ((i::is), (g::gs)) -> Maybe.withDefault i (Maybe.map getId g) :: remap is gs
+
+        step gs0 is0 = let gs = reorder is0 gs0 in (gs, remap is0 gs)
+        a = Automaton.hiddenState [] step
+    in Automaton.run a [] standardGamepads
+
 {- a b x y ltop rtop l r 
 l tiny (back), r tiny (start)
 stick l down, stick r down
@@ -183,14 +209,14 @@ gamepadsToButtons = List.map gamepadToButtons
 
 ----------------------------------------------------------------------
 
-gamepadToInputs : Gamepad.Gamepad -> Time -> Model.Inputs
-gamepadToInputs gamepad dt =
+gamepadToInputs : Time -> Gamepad.Gamepad -> Model.Inputs
+gamepadToInputs dt gamepad =
     let {x,y,mx,my} = gamepadToArrows gamepad
         {bA, bB, bX, bY, bBack, bStart} = gamepadToButtons gamepad
     in  { noInput | reset = bStart, x = x, y = y, mx=mx, my=my, button_X = bX, dt = dt }
 
-gamepadsToInputs : List Gamepad.Gamepad -> Time -> List Model.Inputs
-gamepadsToInputs gamepads dt = List.map (\g -> gamepadToInputs g dt) gamepads
+gamepadsToInputs : List (Maybe Gamepad.Gamepad) -> Time -> List Model.Inputs
+gamepadsToInputs gamepads dt = List.map (mapDefault noInput (gamepadToInputs dt)) gamepads
 
 mouseDeltas : Signal (Time, (Float, Float))
 mouseDeltas =
@@ -215,7 +241,7 @@ kbMouseInputs =
 gamepadInputs : Signal (List Model.Inputs)
 gamepadInputs =
   let dt = Signal.map Time.inSeconds (fps 60)
-  in  sampleOn dt <| Signal.map2 gamepadsToInputs standardGamepads dt
+  in  sampleOn dt <| Signal.map2 gamepadsToInputs persistentGamepads dt
 
 atWithDefault : a -> Int -> List a -> a
 atWithDefault def n list = Maybe.withDefault def (List.head (List.drop n list))
@@ -269,7 +295,7 @@ world thingsOnTerrain =
 
       ifElse : (a -> Bool) -> b -> b -> a -> b
       ifElse p ifBranch elseBranch x = if p x then ifBranch else elseBranch
-      chooseScene = Signal.map3 (ifElse (\l -> List.length l > 1)) dualScene oneScene Gamepad.gamepads
+      chooseScene = Signal.map3 (ifElse (\l -> List.length l > 1)) dualScene oneScene persistentGamepads
   in 
       -- Signal.map3 lockMessage wh isLocked
       Signal.map2 debugLayer
