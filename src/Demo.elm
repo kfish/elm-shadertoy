@@ -92,8 +92,8 @@ demoThings terrain0 =
 
         balls = List.map extractThing <~ foldTCont ballsTCont balls0 (fps 60)
 
-        ground = Signal.constant <| Terrain.paint Terrain.mountains 0.0 defaultPlacement terrain0
-        water = Signal.constant <| Terrain.paint Terrain.sea 0.3 defaultPlacement terrain0
+        ground = Signal.constant <| Terrain.paint Terrain.mountains defaultPlacement terrain0
+        water = Signal.constant <| Terrain.ripplePaint Terrain.sea 0.3 defaultPlacement terrain0
 
         individuals : Signal (List Thing)
         individuals = combine [
