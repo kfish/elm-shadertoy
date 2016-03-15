@@ -1,7 +1,7 @@
 module Things.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
 
 import List exposing (map2, repeat)
-import Time exposing (Time, inSeconds)
+import Time exposing (Time)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
@@ -38,7 +38,7 @@ diamond vertexShader fragmentShader =
 seeDiamond vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = p.globalTime
     in
         [render vertexShader fragmentShader diamondMesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
@@ -57,7 +57,7 @@ fogMountainsDiamond = diamond worldVertex fogMountains
 --    -> (Int,Int) -> Time -> Mat4 -> Renderable
 diamond vertexShader fragmentShader (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds t
+        s = t
     in
         render vertexShader fragmentShader diamondMesh
             { iResolution=resolution, iGlobalTime=s, view=view }

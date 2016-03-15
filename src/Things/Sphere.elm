@@ -5,7 +5,6 @@ import List exposing (drop, concat, map, map2)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
-import Time exposing (inSeconds)
 import WebGL exposing (..)
 
 import Signal.Extra exposing ((<~))
@@ -44,7 +43,7 @@ type alias ShadertoyUniforms a = { a | iResolution : Vec3, iGlobalTime : Float, 
 seeSphere vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = p.globalTime
     in
         [render vertexShader fragmentShader sphereMesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]

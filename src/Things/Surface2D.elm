@@ -13,7 +13,7 @@ import Math.Vector3 exposing (..)
 import Math.Vector4 exposing (Vec4)
 import Math.Matrix4 exposing (..)
 import Maybe.Extra exposing (isJust)
-import Time exposing (Time, inSeconds)
+import Time exposing (Time)
 import WebGL exposing (..)
 
 import Shaders.ColorFragment exposing (..)
@@ -65,10 +65,11 @@ surface vertexShader fragmentShader ripple mesh =
 seeSurface vertexShader fragmentShader ripple mesh p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = p.globalTime
+        detail = p.measuredFPS / 3.0
     in
         [render vertexShader fragmentShader mesh
-            { iResolution=resolution, iGlobalTime=s, iGlobalTimeV=s, view=p.viewMatrix, iRipple=ripple }]
+            { iResolution=resolution, iDetail=detail, iGlobalTime=s, iGlobalTimeV=s, view=p.viewMatrix, iRipple=ripple }]
 
 ----------------------------------------------------------------------
 

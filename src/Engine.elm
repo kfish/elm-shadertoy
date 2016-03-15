@@ -18,7 +18,8 @@ type alias Perception = {
     cameraPos  : Vec3,
     resolution : (Int, Int),
     globalTime : Time,
-    viewMatrix : Mat4
+    viewMatrix : Mat4,
+    measuredFPS : Float
 }
 
 type alias See = Perception -> List Renderable
@@ -218,11 +219,16 @@ look (w,h) person =
     M4.mul (M4.makePerspective 45 (toFloat w / toFloat h) 0.01 100)
            (M4.makeLookAt person.pos (person.pos `add` Model.direction person) (Model.cameraUp person))
 
-scene : List Thing -> (Int,Int) -> Time -> Model.Person -> Element
-scene things (w,h) t person =
+scene : List Thing -> (Int,Int) -> Time -> Float -> Model.Person -> Element
+scene things (w,h) t measuredFPS person =
   let
     see = mapApply (List.map orient things)
-    p = { cameraPos = person.pos, viewMatrix = look (w,h) person, globalTime = t, resolution = (w,h) }
+    p = { cameraPos = person.pos
+        , viewMatrix = look (w,h) person
+        , globalTime = t
+        , resolution = (w,h)
+        , measuredFPS = measuredFPS
+        }
   in
     layers [ color (rgb 135 206 235) (spacer w h)
            , webgl (w,h) (see p)

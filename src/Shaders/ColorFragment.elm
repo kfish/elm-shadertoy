@@ -26,12 +26,13 @@ void main () {
 
 -- TODO: make surface2D tile seamlessly
 
-noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float } { elm_FragColor:Vec4, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float, iSmoothing:Float }
+noiseColorFragment : Shader {} { u | iResolution:Vec3, iGlobalTime:Float, iDetail:Float } { elm_FragColor:Vec4, elm_FragCoord:Vec2, iTextureScale:Float, iTimeScale:Float, iSmoothing:Float }
 noiseColorFragment = [glsl|
 
 precision mediump float;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
+uniform float iDetail;
 
 varying vec4 elm_FragColor;
 varying vec2 elm_FragCoord;
@@ -53,7 +54,9 @@ float noise(vec2 n) {
 
 float fbm(vec2 n) {
 	float total = 0.0, amplitude = 1.0;
+        int detail = int(iDetail);
 	for (int i = 0; i < 7; i++) {
+                if (i > detail) break;
 		total += noise(n) * amplitude;
 		n += n;
 		amplitude *= 0.5;
@@ -61,7 +64,8 @@ float fbm(vec2 n) {
 	return total;
 }
 
-void main() {
+
+void texture() {
 	vec3 c1 = vec3(elm_FragColor);
 	vec3 c2 = c1 * vec3(0.7, 0.7, 0.7);
 	vec3 c3 = c1 * vec3(0.6, 0.6, 0.6);
@@ -72,13 +76,37 @@ void main() {
 	vec2 p = elm_FragCoord.xy * iTextureScale;
 
         float scaledTime = iGlobalTime * iTimeScale;
-	float q = fbm(p - scaledTime * 0.1);
-	vec2 r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
-	vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
+        float q;
+        vec2 r;
+        vec3 c;
+
+        int detail = int(iDetail);
+         
+        if (detail > 5) {
+		q = fbm(p - scaledTime * 0.1);
+		r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
+		c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);
+	} else if (detail > 2) {
+		q = fbm(p - scaledTime * 0.1);
+		r = vec2(fbm(p + q + scaledTime * 0.7 - p.x - p.y), fbm(p + q - scaledTime * 0.4));
+		c = mix(c1, c2, fbm(p + r));
+        } else {
+		q = fbm(p);
+		c = mix(c1, c2, q);
+        }
 
 	vec4 fractalTexture = vec4(c * cos(1.57 * gl_FragCoord.y / iResolution.y), elm_FragColor.a);
         vec4 flatTexture = elm_FragColor;
         gl_FragColor = mix(fractalTexture, flatTexture, iSmoothing);
+}
+
+void main() {
+        texture();
+//	if (int(iDetail) == 0) {
+//		gl_FragColor = elm_FragColor;
+//	} else {
+//		texture();
+//	}
 }
 
 |]

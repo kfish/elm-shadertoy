@@ -3,7 +3,7 @@ module Things.Portal (cloudsPortal, firePortal, fogMountainsPortal, plasmaPortal
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
-import Time exposing (Time, inSeconds)
+import Time exposing (Time)
 import WebGL exposing (..)
 
 import Shaders.Clouds exposing (clouds)
@@ -45,7 +45,7 @@ portal vertexShader fragmentShader =
 seePortal vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = p.globalTime
     in
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]

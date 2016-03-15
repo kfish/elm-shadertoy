@@ -277,7 +277,12 @@ main = world Demo.demoThings
 
 world : (Array2D Float -> Signal (List Thing)) -> Signal Element
 world thingsOnTerrain =
-  let t = Signal.foldp (+) 0 (fps 30)
+  let fs = Signal.map Time.inSeconds (fps 60)
+      t = Signal.foldp (+) 0 fs
+      ma alpha new old = alpha * old + (1-alpha)*new
+      measuredFPS = sampleOn (fps 3)
+          <| Signal.map (\dt -> 1.0/dt)
+          <| Signal.foldp (ma 0.9) (Time.inSeconds (1.0/15)) fs
       wh  = Window.dimensions
       wh2 = Signal.map (\(w,h) -> (w//2, h)) wh
 
@@ -287,19 +292,19 @@ world thingsOnTerrain =
       (terrain, seed1) = Random.generate (randTerrain2D (placement.bigSide+1)) seed0
       entities = thingsOnTerrain terrain
 
-      oneScene = Signal.map4 scene entities wh t (person1 placement terrain)
+      oneScene = Signal.map5 scene entities wh t measuredFPS (person1 placement terrain)
       dualScene =
             (Signal.map2 beside
-                (Signal.map4 scene entities wh2 t (person1 placement terrain))
-                (Signal.map4 scene entities wh2 t (person2 placement terrain)))
+                (Signal.map5 scene entities wh2 t measuredFPS (person1 placement terrain))
+                (Signal.map5 scene entities wh2 t measuredFPS (person2 placement terrain)))
 
       ifElse : (a -> Bool) -> b -> b -> a -> b
       ifElse p ifBranch elseBranch x = if p x then ifBranch else elseBranch
       chooseScene = Signal.map3 (ifElse (\l -> List.length l > 1)) dualScene oneScene persistentGamepads
   in 
       -- Signal.map3 lockMessage wh isLocked
-      Signal.map2 debugLayer
-          (combine [Signal.map show Gamepad.gamepads, Signal.map show gamepadInputs])
+      -- Signal.map2 debugLayer
+          --(combine [Signal.map show Gamepad.gamepads, Signal.map show gamepadInputs])
             chooseScene
 
 debugLayer : List Element -> Element -> Element

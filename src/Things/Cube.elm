@@ -1,7 +1,7 @@
 module Things.Cube (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, xvCube, cube) where
 
 import List exposing (concatMap, map)
-import Time exposing (Time, inSeconds)
+import Time exposing (Time)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
@@ -53,7 +53,7 @@ cube vertexShader fragmentShader =
 seeCube vertexShader fragmentShader p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds p.globalTime
+        s = p.globalTime
     in
         [render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=p.viewMatrix }]
@@ -78,7 +78,7 @@ voronoiCube = cube worldVertex voronoiDistances
 --    -> (Int,Int) -> Time -> Mat4 -> Renderable
 cube vertexShader fragmentShader (w,h) t view =
     let resolution = vec3 (toFloat w) (toFloat h) 0
-        s = inSeconds t
+        s = t
     in
         render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=view }
