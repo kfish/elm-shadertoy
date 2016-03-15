@@ -1,6 +1,6 @@
 module Things.Surface2D
     ( SurfaceVertex, surface2D
-    , NoiseSurfaceVertex, noiseSurface2D
+    , NoiseSurfaceVertex, noiseSurface2D, rippleNoiseSurface2D
     , Placement, defaultPlacement
     ) where
 
@@ -51,18 +51,35 @@ defaultPlacement =
 
 toNSV (y,rgb) = (y, rgb, 0.0, 0.0, 0.0)
 
-surface2D placement xz = surface noiseVertex noiseColorFragment 0.0
+surface2D placement xz = surface noiseVertex noiseColorFragment
     << surfaceMesh xz placement
     << List.map (List.map (Maybe.map toNSV))
 
-noiseSurface2D ripple placement xz = surface noiseVertex noiseColorFragment ripple
+noiseSurface2D placement xz = surface noiseVertex noiseColorFragment
     << surfaceMesh xz placement
 
-surface vertexShader fragmentShader ripple mesh =
-    let see = seeSurface vertexShader fragmentShader ripple mesh
+surface vertexShader fragmentShader mesh =
+    let see = seeSurface vertexShader fragmentShader mesh
     in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
 
-seeSurface vertexShader fragmentShader ripple mesh p =
+seeSurface vertexShader fragmentShader mesh p =
+    let (w,h) = p.resolution
+        resolution = vec3 (toFloat w) (toFloat h) 0
+        s = p.globalTime
+        detail = p.measuredFPS / 3.0
+    in
+        [render vertexShader fragmentShader mesh
+            { iResolution=resolution, iDetail=detail, iGlobalTime=s, iGlobalTimeV=s, view=p.viewMatrix }]
+
+
+rippleNoiseSurface2D ripple placement xz = rippleSurface noiseVertex noiseColorFragment ripple
+    << surfaceMesh xz placement
+
+rippleSurface vertexShader fragmentShader ripple mesh =
+    let see = rippleSeeSurface vertexShader fragmentShader ripple mesh
+    in { pos = vec3 0 0 0, orientation = vec3 1 0 1, see = see }
+
+rippleSeeSurface vertexShader fragmentShader ripple mesh p =
     let (w,h) = p.resolution
         resolution = vec3 (toFloat w) (toFloat h) 0
         s = p.globalTime
