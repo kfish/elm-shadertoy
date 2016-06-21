@@ -1,4 +1,4 @@
-module Shaders.WorldVertex (Vertex, worldVertex) where
+module Shaders.WorldVertex exposing (Vertex, worldVertex)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)

@@ -1,4 +1,4 @@
-module Display.World (ground) where
+module View.Ground exposing (renderGround)
 
 import Color exposing (hsl, toRgb)
 
@@ -9,12 +9,12 @@ import WebGL exposing (..)
 
 type alias Vertex = { pos:Vec3, color:Vec3 }
 
-ground : Mat4 -> Renderable
-ground view =
-    render vertexShader fragmentShader groundMesh { view=view }
+renderGround : Mat4 -> Renderable
+renderGround perspective =
+    render vertexShader fragmentShader groundMesh { view=perspective }
 
-
--- Help create colors as Vectors
+{-| Help create colors as Vectors
+-}
 color : Float -> Float -> Float -> Vec3
 color hue saturation lightness =
     let c = toRgb (hsl hue saturation lightness)

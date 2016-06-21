@@ -1,4 +1,4 @@
-module Shaders.FogMountains (fogMountains) where
+module Shaders.FogMountains exposing (fogMountains)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)

@@ -1,20 +1,28 @@
-module Display.Crate (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube) where
+module View.Crate exposing (renderCrate)
+
+{-
+module View.Crate exposing (cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube)
 
 import List exposing (concatMap, map)
 import Time exposing (Time, inSeconds)
+-}
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
 import WebGL exposing (..)
 
+{-
 import Shaders.Clouds exposing (clouds)
 import Shaders.Fire exposing (fire)
 import Shaders.FogMountains exposing (fogMountains)
 import Shaders.SimplePlasma exposing (simplePlasma)
 import Shaders.VoronoiDistances exposing (voronoiDistances)
+-}
+import Shaders.TextureFragment exposing (textureFragment)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
+{-
 import Model
 
 cloudsCube : (Int,Int) -> Time -> Mat4 -> Renderable
@@ -40,10 +48,17 @@ cube vertexShader fragmentShader (w,h) t view =
     in
         render vertexShader fragmentShader mesh
             { iResolution=resolution, iGlobalTime=s, view=view }
+-}
 
--- The mesh for a crate
+{-| Render the visible renderCrate
+-}
+renderCrate : WebGL.Texture -> Mat4 -> WebGL.Renderable
+renderCrate texture perspective =
+    WebGL.render worldVertex textureFragment mesh { iTexture = texture, view = perspective }
+
+{-| The mesh for a cube -}
 mesh : Drawable { pos:Vec3, coord:Vec3 }
-mesh = Triangle <| concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
+mesh = Triangle <| List.concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
 rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
 rotatedFace (angleX,angleY) =

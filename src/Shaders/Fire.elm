@@ -1,4 +1,4 @@
-module Shaders.Fire (fire) where
+module Shaders.Fire exposing (fire)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)

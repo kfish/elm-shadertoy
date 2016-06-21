@@ -1,4 +1,4 @@
-module Shaders.SimplePlasma (simplePlasma) where
+module Shaders.SimplePlasma exposing (simplePlasma)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)

@@ -1,4 +1,4 @@
-module Shaders.VoronoiDistances (voronoiDistances) where
+module Shaders.VoronoiDistances exposing (voronoiDistances)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)

@@ -1,10 +1,57 @@
-module Update (step) where
+module Update exposing (update)
 
 import Math.Vector3 exposing (..)
 import Math.Vector3 as V3
-import Math.Matrix4 exposing (..)
-import Model
+import Math.Matrix4 exposing (makeRotate, transform)
 
+import Model
+import Ports
+
+{-| Take a Msg and a Model and return an updated Model
+-}
+update : Model.Msg -> Model.Model -> (Model.Model, Cmd Model.Msg)
+update msg model =
+    case msg of
+        Model.TextureError err ->
+            ( { model | message = "Error loading texture" }, Cmd.none )
+        Model.TextureLoaded texture ->
+            ( { model | maybeTexture = Just texture }, Cmd.none )
+        Model.KeyChange keyfunc ->
+            ( { model | keys = keyfunc model.keys }, Cmd.none )
+        Model.Resize windowSize ->
+            ( { model | maybeWindowSize = Just windowSize }, Cmd.none )
+        Model.MouseMove movement ->
+            ( { model | person = turn movement model.person }, Cmd.none )
+        Model.LockRequest wantToBeLocked ->
+            ( { model | wantToBeLocked = wantToBeLocked }
+            , if model.wantToBeLocked == model.isLocked then
+                Cmd.none
+              else if model.wantToBeLocked then
+                Ports.requestPointerLock ()
+              else
+                Ports.exitPointerLock ()
+            ) 
+        Model.LockUpdate isLocked ->
+            ( { model | isLocked = isLocked }, Cmd.none )
+        Model.Animate dt ->
+            ( { model | person =
+                  model.person
+                      |> walk (directions model.keys)
+                      |> jump model.keys.space
+                      |> gravity (dt / 500)
+                      |> physics (dt / 500)
+              }
+            , Cmd.none )
+
+directions : Model.Keys -> { x : Int, y : Int }
+directions { left, right, up, down } =
+    let dir a b = case (a,b) of
+            (True, False) -> -1
+            (False, True) -> 1
+            _             -> 0
+    in { x = dir left right, y = dir down up }
+
+{-
 step : Model.Inputs -> Model.Person -> Model.Person
 step inputs person =
     case inputs of
@@ -14,13 +61,14 @@ step inputs person =
                  |> jump isJumping
                  |> gravity dt
                  |> physics dt
+-}
 
 flatten : Vec3 -> Vec3
 flatten v =
     let r = toRecord v
     in  normalize (vec3 r.x 0 r.z)
 
-turn : (Int,Int) -> Model.Person -> Model.Person
+turn : Model.MouseMovement -> Model.Person -> Model.Person
 turn (dx,dy) person =
     let yo x = toFloat (clamp -10 10 x) / 500
         h' = person.horizontalAngle + yo dx

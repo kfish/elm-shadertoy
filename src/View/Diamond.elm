@@ -1,4 +1,4 @@
-module Display.Diamond (cloudsDiamond, fogMountainsDiamond, diamond) where
+module Display.Diamond exposing (cloudsDiamond, fogMountainsDiamond, diamond)
 
 import List exposing (map2, repeat)
 import Time exposing (Time, inSeconds)

@@ -1,4 +1,4 @@
-module Shaders.Clouds (clouds) where
+module Shaders.Clouds exposing (clouds)
 
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
