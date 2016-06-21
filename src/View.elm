@@ -3,6 +3,7 @@ module View exposing (view)
 import Html
 import Math.Matrix4 exposing (..)
 import Math.Vector3 exposing (..)
+import Time exposing (Time)
 
 import Model
 import View.Crate
@@ -16,15 +17,15 @@ import Window
 {-| Generate a View from a Model
 -}
 view : Model -> Html Msg
-view { person, maybeWindowSize, maybeTexture, isLocked } =
+view { person, lifetime, maybeWindowSize, maybeTexture, isLocked } =
     case (maybeWindowSize, maybeTexture) of
         (Nothing, _) -> text ""
         (_, Nothing) -> text ""
         (Just windowSize, Just texture) ->
-            layoutScene windowSize isLocked texture person
+            layoutScene windowSize lifetime isLocked texture person
 
-layoutScene : Window.Size -> Bool -> WebGL.Texture -> Model.Person -> Html Msg
-layoutScene windowSize isLocked texture person =
+layoutScene : Window.Size -> Time -> Bool -> WebGL.Texture -> Model.Person -> Html Msg
+layoutScene windowSize t isLocked texture person =
     div
         [ style
             [ ( "width", toString width ++ "px" )
@@ -38,7 +39,7 @@ layoutScene windowSize isLocked texture person =
             , height windowSize.height
             , style [ ( "display", "block" ) ]
             ]
-            (renderWorld texture (perspective windowSize person))
+            (renderWorld windowSize t texture (perspective windowSize person))
         , div
             [ style
                 [ ( "position", "absolute" )
@@ -58,13 +59,13 @@ layoutScene windowSize isLocked texture person =
 
 {-| Set up 3D world
 -}
-renderWorld : WebGL.Texture -> Mat4 -> List WebGL.Renderable
-renderWorld texture perspective =
+renderWorld : Window.Size -> Time -> WebGL.Texture -> Mat4 -> List WebGL.Renderable
+renderWorld windowSize t texture perspective =
     let
         renderCrates =
-            [ View.Crate.renderCrate texture perspective
-            , View.Crate.renderCrate texture (translate3 10 0 10 perspective)
-            , View.Crate.renderCrate texture (translate3 -10 0 -10 perspective)
+            [ View.Crate.textureCube texture perspective
+            , View.Crate.fireCube windowSize t (translate3 10 0 10 perspective)
+            , View.Crate.fogMountainsCube windowSize t (translate3 -10 0 -10 perspective)
             ]
     in
         (View.Ground.renderGround perspective) :: renderCrates

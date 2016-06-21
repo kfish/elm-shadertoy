@@ -34,12 +34,12 @@ update msg model =
         Model.LockUpdate isLocked ->
             ( { model | isLocked = isLocked }, Cmd.none )
         Model.Animate dt ->
-            ( { model | person =
-                  model.person
-                      |> walk (directions model.keys)
-                      |> jump model.keys.space
-                      |> gravity (dt / 500)
-                      |> physics (dt / 500)
+            ( { model | lifetime = model.lifetime + dt
+                      , person = model.person
+                          |> walk (directions model.keys)
+                          |> jump model.keys.space
+                          |> gravity (dt / 500)
+                          |> physics (dt / 500)
               }
             , Cmd.none )
 

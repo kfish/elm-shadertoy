@@ -51,6 +51,7 @@ type alias MouseMovement = (Int, Int)
 {-| This is the application's Model data structure -}
 type alias Model =
     { person : Person
+    , lifetime : Time
     , maybeTexture : Maybe Texture
     , maybeWindowSize : Maybe Window.Size
     , keys : Keys
@@ -79,6 +80,7 @@ init { movement, isLocked } =
             , horizontalAngle = degrees 90
             , verticalAngle = 0
             }
+      , lifetime = 0
       , maybeTexture = Nothing
       , maybeWindowSize = Nothing
       , keys = Keys False False False False False
