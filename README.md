@@ -110,6 +110,7 @@ And then open [http://localhost:8000](http://localhost:8000) to see it in action
 
 The Elm code here is forked from 
 Evan Czaplicki's [first-person-elm](https://github.com/evancz/first-person-elm) demo.
+The update for Elm-0.17 is based on Günther Enthaler's fork.
 
 Although the broader purpose of this project is to make it easy to use any shader from Shadertoy,
 this demo in particular includes the following shaders:
