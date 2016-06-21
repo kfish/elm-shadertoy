@@ -7,6 +7,7 @@ import Time exposing (Time)
 
 import Model
 import View.Crate
+import View.Diamond
 import View.Ground
 import WebGL
 import Html exposing (Html, text, div, p)
@@ -63,9 +64,12 @@ renderWorld : Window.Size -> Time -> WebGL.Texture -> Mat4 -> List WebGL.Rendera
 renderWorld windowSize t texture perspective =
     let
         renderCrates =
-            [ View.Crate.textureCube texture perspective
-            , View.Crate.fireCube windowSize t (translate3 10 0 10 perspective)
-            , View.Crate.fogMountainsCube windowSize t (translate3 -10 0 -10 perspective)
+            [ View.Diamond.fogMountainsDiamond windowSize t (translate3 0 1.5 0 perspective)
+            , View.Diamond.cloudsDiamond windowSize t (translate3 5 1.5 1 perspective)
+            , View.Crate.voronoiCube windowSize t (translate3 10 0 10 perspective)
+            , View.Crate.fireCube windowSize t (translate3 -10 0 -10 perspective)
+            , View.Crate.fogMountainsCube windowSize t (translate3 10 1.5 -10 perspective)
+            , View.Crate.textureCube texture (translate3 -2 0 -17 perspective)
             ]
     in
         (View.Ground.renderGround perspective) :: renderCrates

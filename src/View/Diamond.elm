@@ -1,4 +1,4 @@
-module Display.Diamond exposing (cloudsDiamond, fogMountainsDiamond, diamond)
+module View.Diamond exposing (cloudsDiamond, fogMountainsDiamond, diamond)
 
 import List exposing (map2, repeat)
 import Time exposing (Time, inSeconds)
@@ -7,6 +7,7 @@ import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
 import WebGL exposing (..)
+import Window
 
 import Shaders.Clouds exposing (clouds)
 import Shaders.Fire exposing (fire)
@@ -15,21 +16,21 @@ import Shaders.FogMountains exposing (fogMountains)
 --import Shaders.VoronoiDistances exposing (voronoiDistances)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
-import Model
+-- import Model
 
 type alias Triangle a = (a,a,a)
 type alias Vertex = { pos:Vec3, coord:Vec3 }
 
-cloudsDiamond : (Int,Int) -> Time -> Mat4 -> Renderable
+cloudsDiamond : Window.Size -> Time -> Mat4 -> Renderable
 cloudsDiamond = diamond worldVertex clouds
 
-fogMountainsDiamond : (Int,Int) -> Time -> Mat4 -> Renderable
+fogMountainsDiamond : Window.Size -> Time -> Mat4 -> Renderable
 fogMountainsDiamond = diamond worldVertex fogMountains
 
 -- diamond : Shader attributes uniforms varying -> Shader {} uniforms varyings
 --    -> (Int,Int) -> Time -> Mat4 -> Renderable
-diamond vertexShader fragmentShader (w,h) t view =
-    let resolution = vec3 (toFloat w) (toFloat h) 0
+diamond vertexShader fragmentShader windowSize t view =
+    let resolution = vec3 (toFloat windowSize.width) (toFloat windowSize.height) 0
         s = inSeconds t
     in
         render vertexShader fragmentShader diamondMesh
