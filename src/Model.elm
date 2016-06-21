@@ -89,7 +89,7 @@ init { movement, isLocked } =
       , message = "No texture yet"
       }
     , Cmd.batch
-        [ loadTexture "/resources/woodCrate.jpg"
+        [ loadTexture "resources/woodCrate.jpg"
             |> Task.perform TextureError TextureLoaded
         , Window.size |> Task.perform (always Resize (0, 0)) Resize
         ]
