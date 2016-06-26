@@ -51,18 +51,6 @@ directions { left, right, up, down } =
             _             -> 0
     in { x = dir left right, y = dir down up }
 
-{-
-step : Model.Inputs -> Model.Person -> Model.Person
-step inputs person =
-    case inputs of
-      Model.Mouse movement -> turn movement person
-      Model.TimeDelta isJumping directions dt ->
-          person |> walk directions
-                 |> jump isJumping
-                 |> gravity dt
-                 |> physics dt
--}
-
 flatten : Vec3 -> Vec3
 flatten v =
     let r = toRecord v

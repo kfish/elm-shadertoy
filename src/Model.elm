@@ -23,12 +23,6 @@ type Msg
     | Animate Time
     | Resize Window.Size
 
-{-
-type Inputs
-    = TimeDelta Bool {x:Int, y:Int} Float
-    | Mouse (Int,Int)
--}
-
 type alias Person =
     { position : Vec3
     , velocity : Vec3
@@ -105,12 +99,3 @@ direction person =
 eyeLevel : Float
 eyeLevel = 2
 
-{-
-defaultPerson : Person
-defaultPerson =
-    { position = vec3 0 eyeLevel -8
-    , velocity = vec3 0 0 0
-    , horizontalAngle = degrees 90
-    , verticalAngle = 0
-    }
--}

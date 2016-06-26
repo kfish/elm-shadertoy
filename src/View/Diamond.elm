@@ -16,8 +16,6 @@ import Shaders.FogMountains exposing (fogMountains)
 --import Shaders.VoronoiDistances exposing (voronoiDistances)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
 
--- import Model
-
 type alias Triangle a = (a,a,a)
 type alias Vertex = { pos:Vec3, coord:Vec3 }
 

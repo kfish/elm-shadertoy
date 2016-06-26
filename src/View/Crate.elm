@@ -1,6 +1,5 @@
 module View.Crate exposing (textureCube, cloudsCube, fireCube, fogMountainsCube, plasmaCube, voronoiCube, cube)
 
--- import List exposing (concatMap, map)
 import Time exposing (Time, inSeconds)
 
 import Math.Vector2 exposing (Vec2)
@@ -16,8 +15,6 @@ import Shaders.SimplePlasma exposing (simplePlasma)
 import Shaders.VoronoiDistances exposing (voronoiDistances)
 import Shaders.TextureFragment exposing (textureFragment)
 import Shaders.WorldVertex exposing (Vertex, worldVertex)
-
--- import Model
 
 cloudsCube : Window.Size -> Time -> Mat4 -> Renderable
 cloudsCube = cube worldVertex clouds
