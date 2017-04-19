@@ -60,7 +60,7 @@ layoutScene windowSize t isLocked texture person =
 
 {-| Set up 3D world
 -}
-renderWorld : Window.Size -> Time -> WebGL.Texture -> Mat4 -> List WebGL.Renderable
+renderWorld : Window.Size -> Time -> WebGL.Texture -> Mat4 -> List WebGL.Entity
 renderWorld windowSize t texture perspective =
     let
         renderCrates =
@@ -79,7 +79,7 @@ renderWorld windowSize t texture perspective =
 perspective : Window.Size -> Model.Person -> Mat4
 perspective { width, height } person =
     mul (makePerspective 45 (toFloat width / toFloat height) 0.01 100)
-        (makeLookAt person.position (person.position `add` Model.direction person) j)
+        (makeLookAt person.position (add person.position (Model.direction person)) j)
 
 enterMsg : List (Html Msg)
 enterMsg = message "Click to go full screen and move your head with the mouse."

@@ -12,10 +12,8 @@ import Ports
 update : Model.Msg -> Model.Model -> (Model.Model, Cmd Model.Msg)
 update msg model =
     case msg of
-        Model.TextureError err ->
-            ( { model | message = "Error loading texture" }, Cmd.none )
-        Model.TextureLoaded texture ->
-            ( { model | maybeTexture = Just texture }, Cmd.none )
+        Model.TextureLoaded textureResult ->
+            ( { model | maybeTexture = Result.toMaybe textureResult }, Cmd.none )
         Model.KeyChange keyfunc ->
             ( { model | keys = keyfunc model.keys }, Cmd.none )
         Model.Resize windowSize ->
@@ -59,11 +57,11 @@ flatten v =
 turn : Model.MouseMovement -> Model.Person -> Model.Person
 turn (dx,dy) person =
     let yo x = toFloat (clamp -10 10 x) / 500
-        h' = person.horizontalAngle + yo dx
-        v' = person.verticalAngle   - yo dy
+        h = person.horizontalAngle + yo dx
+        v = person.verticalAngle   - yo dy
     in
-        { person | horizontalAngle = h'
-                 , verticalAngle = clamp (degrees -45) (degrees 45) v'
+        { person | horizontalAngle = h
+                 , verticalAngle = clamp (degrees -45) (degrees 45) v
         }
 
 walk : { x:Int, y:Int } -> Model.Person -> Model.Person
@@ -75,7 +73,7 @@ walk directions person =
         move = V3.scale (toFloat directions.y) moveDir
         strafe = V3.scale (toFloat directions.x) strafeDir
     in
-        { person | velocity = adjustVelocity (move `add` strafe) }
+        { person | velocity = adjustVelocity (add move strafe) }
 
 adjustVelocity : Vec3 -> Vec3
 adjustVelocity v =
@@ -92,14 +90,14 @@ jump isJumping person =
 
 physics : Float -> Model.Person -> Model.Person
 physics dt person =
-    let position = person.position `add` V3.scale dt person.velocity
-        p = toRecord position
+    let position0 = add person.position (V3.scale dt person.velocity)
+        p = toRecord position0
 
-        position' = if p.y < Model.eyeLevel
+        position1 = if p.y < Model.eyeLevel
                     then vec3 p.x Model.eyeLevel p.z
-                    else position
+                    else position0
     in
-        { person | position = position' }
+        { person | position = position1 }
 
 gravity : Float -> Model.Person -> Model.Person
 gravity dt person =

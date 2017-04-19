@@ -1,7 +1,8 @@
 module Model exposing (..)
 
 import Math.Vector3 exposing (Vec3, vec3)
-import WebGL exposing (..)
+import WebGL exposing (Mesh, Shader, Entity)
+import WebGL.Texture as Texture exposing (Texture, Error)
 import Window
 import Time exposing (..)
 import Task exposing (Task)
@@ -14,8 +15,7 @@ arrow keys, or the window is being resized.
 -}
 
 type Msg
-    = TextureError Error
-    | TextureLoaded Texture
+    = TextureLoaded (Result Error Texture)
     | KeyChange (Keys -> Keys)
     | MouseMove MouseMovement
     | LockRequest Bool
@@ -83,9 +83,8 @@ init { movement, isLocked } =
       , message = "No texture yet"
       }
     , Cmd.batch
-        [ loadTexture "resources/woodCrate.jpg"
-            |> Task.perform TextureError TextureLoaded
-        , Window.size |> Task.perform (always Resize (0, 0)) Resize
+        [ Task.attempt TextureLoaded (Texture.load "resources/woodCrate.jpg")
+        , Task.perform Resize Window.size
         ]
     )
 

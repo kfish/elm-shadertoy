@@ -9,9 +9,9 @@ import WebGL exposing (..)
 
 type alias Vertex = { pos:Vec3, color:Vec3 }
 
-renderGround : Mat4 -> Renderable
+renderGround : Mat4 -> Entity
 renderGround perspective =
-    render vertexShader fragmentShader groundMesh { view=perspective }
+    entity vertexShader fragmentShader groundMesh { view=perspective }
 
 {-| Help create colors as Vectors
 -}
@@ -22,7 +22,7 @@ color hue saturation lightness =
 
 
 -- The mesh for the ground
-groundMesh : Drawable Vertex
+groundMesh : Mesh Vertex
 groundMesh =
   let green = color (degrees 110) 0.48
 
@@ -31,7 +31,7 @@ groundMesh =
       bottomLeft  = Vertex (vec3 -20 -1 -20) (green 0.5)
       bottomRight = Vertex (vec3  20 -1 -20) (green 0.6)
   in
-      Triangle [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
+      triangles [ (topLeft,topRight,bottomLeft), (bottomLeft,topRight,bottomRight) ]
 
 
 -- Shaders

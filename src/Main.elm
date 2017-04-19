@@ -7,7 +7,7 @@ module Main exposing (main)
 -}
 
 import AnimationFrame
-import Html.App as Html
+import Html
 import Keyboard
 import Mouse
 import Window
@@ -19,13 +19,13 @@ import Update
 import View
 
 {-| The main entrypoint -}
-main : Program Model.Args
+main : Program Model.Args Model.Model Model.Msg
 main =
     Html.programWithFlags
         { init = Model.init
-        , update = Update.update
-        , subscriptions = subscriptions
         , view = View.view
+        , subscriptions = subscriptions
+        , update = Update.update
         }
 
 {- Subscribe to keychange events.

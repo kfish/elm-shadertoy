@@ -19,19 +19,19 @@ import Shaders.WorldVertex exposing (Vertex, worldVertex)
 type alias Triangle a = (a,a,a)
 type alias Vertex = { pos:Vec3, coord:Vec3 }
 
-cloudsDiamond : Window.Size -> Time -> Mat4 -> Renderable
+cloudsDiamond : Window.Size -> Time -> Mat4 -> Entity
 cloudsDiamond = diamond worldVertex clouds
 
-fogMountainsDiamond : Window.Size -> Time -> Mat4 -> Renderable
+fogMountainsDiamond : Window.Size -> Time -> Mat4 -> Entity
 fogMountainsDiamond = diamond worldVertex fogMountains
 
 -- diamond : Shader attributes uniforms varying -> Shader {} uniforms varyings
---    -> (Int,Int) -> Time -> Mat4 -> Renderable
+--    -> (Int,Int) -> Time -> Mat4 -> Entity
 diamond vertexShader fragmentShader windowSize t view =
     let resolution = vec3 (toFloat windowSize.width) (toFloat windowSize.height) 0
         s = inSeconds t
     in
-        render vertexShader fragmentShader diamondMesh
+        entity vertexShader fragmentShader diamondMesh
             { iResolution=resolution, iGlobalTime=s, view=view }
 
 unfold : Int -> (a -> a) -> a -> List a
@@ -41,7 +41,7 @@ unfold n f x = if n==0 then [] else
 zip3 : List a -> List b -> List c -> List (a,b,c)
 zip3 xs ys zs =
   case (xs, ys, zs) of
-    (x::xs', y::ys', z::zs') -> (x,y,z) :: zip3 xs' ys' zs'
+    (x::xs1, y::ys1, z::zs1) -> (x,y,z) :: zip3 xs1 ys1 zs1
     _ -> []
 
 rotY n = makeRotate (2*pi/n) (vec3 0 1 0)
@@ -55,7 +55,7 @@ seven = unfold 7 (rotBoth 8)
 
 eights x = let x7 = seven x in (x::x7, x7++[x])
 
-diamondMesh : Drawable Vertex
+diamondMesh : Mesh Vertex
 diamondMesh =
   let
       yOffset = 1.21
@@ -100,7 +100,7 @@ diamondMesh =
       pavilionFacetL = zip3 pavilionVS0 girdleTS0 (repeat 8 cutlet)
       pavilionFacetR = zip3 girdleTS0 pavilionVS1 (repeat 8 cutlet)
       
-  in Triangle <|
+  in triangles <|
       table ++
       stars ++
       bezelL ++ bezelR ++

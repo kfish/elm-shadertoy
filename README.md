@@ -99,7 +99,7 @@ run the following sequence of commands:
 ```bash
 git clone https://github.com/kfish/elm-shadertoy.git
 cd elm-shadertoy
-elm-get install
+elm-package install
 elm-make src/Main.elm --output build/Main.js
 elm-reactor
 ```
